@@ -14,7 +14,9 @@
     "db:seed": "tsx db/seed.ts",
     "worker": "tsx worker/cli.ts",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "e2e": "playwright test",
+    "e2e:seed": "tsx e2e/seed.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.4",
@@ -27,6 +29,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@playwright/test": "1",
     "@tailwindcss/turbopack": "^4",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/react": "16",
