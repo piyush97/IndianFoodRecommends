@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Indian Food Recommends",
   description:
-    "Dish recommendations for Indian cities, sourced from food vloggers and reviewed before publishing.",
+    "Where Delhi food vloggers say to eat: places ranked by how many creators picked them, with the video moment.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

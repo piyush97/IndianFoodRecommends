@@ -54,3 +54,13 @@ jobs:
       # and rely on the recommendation dedupe index.
       - run: pnpm db:migrate
       - run: pnpm test
+      # E2E on a freshly seeded DB (tests above truncate it).
+      - run: pnpm e2e:seed
+      - run: pnpm build
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-traces
+          path: test-results

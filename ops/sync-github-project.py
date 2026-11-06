@@ -22,6 +22,7 @@ PROJECT_TITLE = "Indian Food Recommends"
 DONE = {
     "S0-1", "S0-2", "S0-3", "S0-4", "S0-5", "S0-6", "S0-7",
     "S1-1", "S1-2", "S1-3", "S1-4", "S1-5", "S1-6", "S1-7", "S1-8", "S1-9", "S1-10", "S1-11",
+    "S2-1", "S2-2", "S2-3", "S2-4", "S2-5", "S2-6", "S2-7", "S2-8", "S2-9", "S2-10",
 }
 NOTES = {
     "S0-7": "Done with Neon via Vercel Marketplace. No Google Cloud key: YouTube RSS replaced the Data API.",
@@ -29,6 +30,9 @@ NOTES = {
     "S1-3": "Replaced: eval harness exists (`pnpm worker eval`); the human 50-video gate was replaced by automatic Jev review at owner's request.",
     "S1-9": "Done without the E2E test; admin E2E needs a test-auth strategy (Plan 2).",
     "S1-11": "Replaced by automatic Jev review (lib/auto-review.ts); no human queue.",
+    "S2-4": "Done with MapLibre + OpenFreeMap tiles (no API key); list is the default view.",
+    "S2-9": "Done via tag `public` + POST /api/revalidate called by the worker after approvals.",
+    "S2-10": "Done: Playwright search→dish→place→watch and 360px overflow, in the CI db job.",
 }
 
 
