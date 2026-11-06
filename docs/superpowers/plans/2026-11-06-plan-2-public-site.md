@@ -70,6 +70,7 @@ e2e/public.spec.ts, playwright.config.ts, e2e/seed.ts
 **Files:** Create `lib/public/rank.ts`, `lib/public/rank.test.ts`, `lib/public/queries.ts`, `lib/public/queries.test.ts`, `lib/public/links.ts`, `lib/public/links.test.ts`
 
 **Interfaces — Produces:**
+
 ```ts
 // rank.ts
 export function recencyBonus(newest: Date, now: Date): 0 | 1 | 3 | 5;
@@ -80,21 +81,71 @@ export function youtubeEmbedUrl(videoId: string, ts: number | null): string;
 export function sourceUrl(platform: "youtube" | "instagram", id: string, ts: number | null): string;
 export function formatTs(seconds: number | null): string | null; // 252 → "4:12", 3725 → "1:02:05"
 // queries.ts
-export type PickCard = { placeSlug: string; placeName: string; locality: string | null; lat: number | null;
-  lng: number | null; approx: boolean; creators: { slug: string; name: string }[]; dishes: string[];
-  proof: { platform: "youtube" | "instagram"; externalId: string; tsSeconds: number | null; creator: string }; score: number };
-export function getHome(db: Db, citySlug: string, now?: Date): Promise<{ city: {slug: string; name: string};
-  dishes: { slug: string; name: string; picks: number }[]; creators: { slug: string; name: string; picks: number }[];
-  recent: PickCard[] } | null>;
-export function getDishInCity(db: Db, citySlug: string, dishSlug: string, now?: Date):
-  Promise<{ city; dish: {slug; name}; places: PickCard[]; creatorCount: number } | null>;
-export function getCity(db: Db, citySlug: string, now?: Date): Promise<{ city; dishes; places: PickCard[] } | null>;
-export function getPlace(db: Db, citySlug: string, placeSlug: string): Promise<{ place: {slug; name; locality; lat; lng; approx; lastVerified: string | null};
+export type PickCard = {
+  placeSlug: string;
+  placeName: string;
+  locality: string | null;
+  lat: number | null;
+  lng: number | null;
+  approx: boolean;
+  creators: { slug: string; name: string }[];
+  dishes: string[];
+  proof: {
+    platform: "youtube" | "instagram";
+    externalId: string;
+    tsSeconds: number | null;
+    creator: string;
+  };
+  score: number;
+};
+export function getHome(
+  db: Db,
+  citySlug: string,
+  now?: Date,
+): Promise<{
+  city: { slug: string; name: string };
+  dishes: { slug: string; name: string; picks: number }[];
+  creators: { slug: string; name: string; picks: number }[];
+  recent: PickCard[];
+} | null>;
+export function getDishInCity(
+  db: Db,
+  citySlug: string,
+  dishSlug: string,
+  now?: Date,
+): Promise<{ city; dish: { slug; name }; places: PickCard[]; creatorCount: number } | null>;
+export function getCity(
+  db: Db,
+  citySlug: string,
+  now?: Date,
+): Promise<{ city; dishes; places: PickCard[] } | null>;
+export function getPlace(
+  db: Db,
+  citySlug: string,
+  placeSlug: string,
+): Promise<{
+  place: { slug; name; locality; lat; lng; approx; lastVerified: string | null };
   dishes: { name: string; slug: string; creators: number }[];
-  proofs: { platform; externalId; tsSeconds; note: string | null; creator: {slug; name}; dish: string }[] } | null>;
-export function getCreator(db: Db, slug: string, dishSlug?: string): Promise<{ creator: {slug; name; ytChannelId; igHandle};
-  dishes: {slug; name}[]; picks: PickCard[] } | null>; // null when not found OR opted out
+  proofs: {
+    platform;
+    externalId;
+    tsSeconds;
+    note: string | null;
+    creator: { slug; name };
+    dish: string;
+  }[];
+} | null>;
+export function getCreator(
+  db: Db,
+  slug: string,
+  dishSlug?: string,
+): Promise<{
+  creator: { slug; name; ytChannelId; igHandle };
+  dishes: { slug; name }[];
+  picks: PickCard[];
+} | null>; // null when not found OR opted out
 ```
+
 `approx` = `osm_id` starts with `approx:`. `PickCard.proof` = that place's earliest approved pick with a timestamp, else earliest. Places sorted by `score` desc, then name.
 
 - [ ] **Step 1: Failing tests.** `rank.test.ts`: `recencyBonus` at 10/60/200/400 days → 5/3/1/0; `rankScore(3, …10 days)` → 35. `links.test.ts`: `directionsUrl(null, 77)` → null; `directionsUrl(28.6, 77.2)` → `"https://www.google.com/maps/dir/?api=1&destination=28.6,77.2"`; `youtubeEmbedUrl("abc", 252)` → `"https://www.youtube-nocookie.com/embed/abc?start=252"`; `youtubeEmbedUrl("abc", null)` has no `start`; `sourceUrl("youtube","abc",252)` → `"https://www.youtube.com/watch?v=abc&t=252s"`; `sourceUrl("instagram","C9x",null)` → `"https://www.instagram.com/reel/C9x/"`; `formatTs(252)` → `"4:12"`, `formatTs(3725)` → `"1:02:05"`, `formatTs(null)` → null. `queries.test.ts` (DB): seed Delhi, 3 creators (one `opted_out`), places A (2 creators, one creator twice via 2 videos), B (1 creator), C (only a pending pick), D (only an opted-out creator's pick):
