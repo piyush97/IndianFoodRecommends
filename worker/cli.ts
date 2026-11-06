@@ -1,12 +1,21 @@
 import { readFile } from "node:fs/promises";
 import { db } from "../db";
+import { classifyVideo, gatedExtract } from "../lib/jev";
 import { extractPicks } from "../lib/llm/extract";
 import { listUploads } from "../lib/youtube";
 import { runIngest } from "../lib/worker/ingest";
 import { runEval, type Labelled } from "../lib/worker/eval";
 
+// With a TypeSafe key, Jev screens each video before the LLM reads it.
+function extractor() {
+  const llm = (video: { title: string; description: string }) => extractPicks(video);
+  const apiKey = process.env.TYPESAFE_API_KEY;
+  if (!apiKey) return llm;
+  return gatedExtract((video) => classifyVideo(video, { apiKey }), llm);
+}
+
 async function ingest(): Promise<void> {
-  const summary = await runIngest({ db, listUploads, extract: extractPicks, now: () => new Date() });
+  const summary = await runIngest({ db, listUploads, extract: extractor(), now: () => new Date() });
   console.log(JSON.stringify(summary));
 }
 
@@ -17,7 +26,7 @@ async function evaluate(): Promise<void> {
   const result = await runEval(labelled, {
     channelId,
     listUploads: (id) => listUploads(id),
-    extract: extractPicks,
+    extract: extractor(),
   });
   console.log(`precision ${result.precision.toFixed(3)} recall ${result.recall.toFixed(3)}`);
   console.log(JSON.stringify(result.perVideo, null, 2));
