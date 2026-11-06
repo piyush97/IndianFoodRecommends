@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { EmbedFacade } from "../../../../../components/EmbedFacade";
 import { PlaceMapLazy } from "../../../../../components/PlaceMapLazy";
+import { ReportForm } from "../../../../../components/ReportForm";
 import { Skeleton } from "../../../../../components/Skeleton";
 import { directionsUrl, sourceUrl } from "../../../../../lib/public/links";
 import { cachedPlace } from "../../../data";
@@ -135,6 +136,8 @@ async function Place({ params }: { params: Params }) {
           />
         </section>
       )}
+
+      <ReportForm placeId={place.id} placeName={place.name} />
     </>
   );
 }

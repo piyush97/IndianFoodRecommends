@@ -21,6 +21,7 @@ type City = { slug: string; name: string };
 /** One visible pick: approved, from a creator who has not opted out. */
 type Row = {
   recId: number;
+  placeId: number;
   tsSeconds: number | null;
   note: string | null;
   reviewedAt: Date | null;
@@ -58,6 +59,7 @@ async function visibleRows(db: Db, ...filters: SQL[]): Promise<Row[]> {
   return db
     .select({
       recId: r.id,
+      placeId: p.id,
       tsSeconds: r.tsSeconds,
       note: r.note,
       reviewedAt: r.reviewedAt,
@@ -205,6 +207,7 @@ export async function getPlace(db: Db, citySlug: string, placeSlug: string) {
   return {
     city: { slug: city.slug, name: city.name },
     place: {
+      id: first.placeId,
       slug: first.placeSlug,
       name: first.placeName,
       locality: first.locality,
