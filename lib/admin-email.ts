@@ -1,8 +1,5 @@
 /** Case-insensitive whole-address match; an empty allowlist admits nobody. */
-export function isAdminEmail(
-  email: string | null | undefined,
-  allowlist: string,
-): boolean {
+export function isAdminEmail(email: string | null | undefined, allowlist: string): boolean {
   if (!email) return false;
   const wanted = email.trim().toLowerCase();
   if (!wanted) return false;

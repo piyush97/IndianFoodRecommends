@@ -56,7 +56,5 @@ export async function listUploads(
   if (!res.ok) throw new Error(`YouTube feed request failed with status ${res.status}`);
   const uploads = parseFeed(await res.text());
   const since = opts.since?.getTime();
-  return since === undefined
-    ? uploads
-    : uploads.filter((u) => u.publishedAt.getTime() >= since);
+  return since === undefined ? uploads : uploads.filter((u) => u.publishedAt.getTime() >= since);
 }

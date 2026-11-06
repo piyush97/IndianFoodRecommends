@@ -30,14 +30,13 @@ export function samePlace(a: string, b: string): boolean {
   return normalizeName(a) === normalizeName(b) || placeSimilarity(a, b) >= 0.6;
 }
 
-export function scoreExtraction(
-  expected: Labelled["expected"],
-  actual: ExtractedPick[],
-): Score {
+export function scoreExtraction(expected: Labelled["expected"], actual: ExtractedPick[]): Score {
   const used = new Set<number>();
   let tp = 0;
   for (const want of expected) {
-    const index = actual.findIndex((got, i) => !used.has(i) && samePlace(want.place, got.place_name));
+    const index = actual.findIndex(
+      (got, i) => !used.has(i) && samePlace(want.place, got.place_name),
+    );
     if (index >= 0) {
       used.add(index);
       tp++;

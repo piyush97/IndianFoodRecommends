@@ -51,10 +51,7 @@ describe("parseApproveForm", () => {
 
   it("rejects a new place without coordinates", () => {
     expect(() =>
-      parseApproveForm(
-        form({ id: "7", placeId: "new", placeName: "X", dishId: "5", note: "" }),
-        1,
-      ),
+      parseApproveForm(form({ id: "7", placeId: "new", placeName: "X", dishId: "5", note: "" }), 1),
     ).toThrow();
   });
 });

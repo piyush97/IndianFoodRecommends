@@ -2,7 +2,12 @@ import { describe, expect, it, vi } from "vitest";
 import type { ExtractedPick } from "./llm/extract";
 import { classifyVideo, gatedExtract, shouldExtract, type VideoVerdict } from "./jev";
 
-const delhi: VideoVerdict = { namesPlace: 0.9, city: "delhi", cityConfidence: 0.95, negative: 0.05 };
+const delhi: VideoVerdict = {
+  namesPlace: 0.9,
+  city: "delhi",
+  cityConfidence: 0.95,
+  negative: 0.05,
+};
 const pick: ExtractedPick = {
   place_name: "Chache Di Hatti",
   locality: null,
@@ -51,7 +56,10 @@ describe("shouldExtract", () => {
 describe("gatedExtract", () => {
   it("does not call the LLM when Jev skips the video", async () => {
     const extract = vi.fn(async () => [pick]);
-    const run = gatedExtract(async () => ({ ...delhi, city: "other", cityConfidence: 0.95 }), extract);
+    const run = gatedExtract(
+      async () => ({ ...delhi, city: "other", cityConfidence: 0.95 }),
+      extract,
+    );
     await expect(run(video)).resolves.toEqual([]);
     expect(extract).not.toHaveBeenCalled();
   });

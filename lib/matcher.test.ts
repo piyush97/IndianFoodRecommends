@@ -29,9 +29,7 @@ describeDb("matcher", () => {
       .insert(schema.places)
       .values({ slug: "chache-di-hatti", name: "Chache Di Hatti", cityId: delhiId })
       .returning();
-    await db
-      .insert(schema.placeAliases)
-      .values({ placeId: place.id, alias: "चाचे दी हट्टी" });
+    await db.insert(schema.placeAliases).values({ placeId: place.id, alias: "चाचे दी हट्टी" });
     await db
       .insert(schema.places)
       .values({ slug: "chache-di-hatti-mumbai", name: "Chache Di Hatti", cityId: mumbaiId });
@@ -64,7 +62,8 @@ describeDb("matcher", () => {
   it("does not match a same-named place in another city", async () => {
     const matches = await matchPlace(db, "Chache Di Hatti", mumbaiId);
     expect(matches.map((m) => m.id)).not.toContain(
-      (await db.select().from(schema.places).where(eq(schema.places.slug, "chache-di-hatti")))[0].id,
+      (await db.select().from(schema.places).where(eq(schema.places.slug, "chache-di-hatti")))[0]
+        .id,
     );
   });
 

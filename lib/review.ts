@@ -16,7 +16,10 @@ const PlaceNew = z.object({
 export const ApproveInput = z.object({
   id: z.number().int(),
   place: z.union([z.object({ existingId: z.number().int() }), PlaceNew]),
-  dish: z.union([z.object({ existingId: z.number().int() }), z.object({ name: z.string().min(1) })]),
+  dish: z.union([
+    z.object({ existingId: z.number().int() }),
+    z.object({ name: z.string().min(1) }),
+  ]),
   tsSeconds: z.number().int().min(0).nullable(),
   note: z.string().max(140),
 });

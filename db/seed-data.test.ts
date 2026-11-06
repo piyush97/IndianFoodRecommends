@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 import { cities, creators, dishes } from "./seed-data";
 
 const slugOf = (s: string) =>
-  s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 
 describe("seed data", () => {
   it("seeds 8 creators with unique YouTube channel ids", () => {
@@ -44,9 +47,7 @@ describe("seed data", () => {
     for (const d of dishes) {
       for (const alias of d.aliases ?? []) {
         const key = alias.toLowerCase();
-        expect(taken.has(key), `alias "${alias}" collides with a dish`).toBe(
-          false,
-        );
+        expect(taken.has(key), `alias "${alias}" collides with a dish`).toBe(false);
         expect(seenAliases.has(key), `alias "${alias}" used twice`).toBe(false);
         seenAliases.add(key);
       }

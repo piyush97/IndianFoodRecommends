@@ -30,10 +30,7 @@ describeDb("admin server actions", () => {
   });
 
   it("refuses approve without an admin session", async () => {
-    const [rec] = await db
-      .insert(schema.recommendations)
-      .values({ sourceId: 1 })
-      .returning();
+    const [rec] = await db.insert(schema.recommendations).values({ sourceId: 1 }).returning();
     await expect(
       approveAction({
         id: rec.id,
@@ -49,10 +46,7 @@ describeDb("admin server actions", () => {
   });
 
   it("refuses reject without an admin session", async () => {
-    const [rec] = await db
-      .insert(schema.recommendations)
-      .values({ sourceId: 1 })
-      .returning();
+    const [rec] = await db.insert(schema.recommendations).values({ sourceId: 1 }).returning();
     await expect(rejectAction(rec.id)).rejects.toThrow();
     const [after] = await db.select().from(schema.recommendations);
     expect(after.status).toBe("pending");

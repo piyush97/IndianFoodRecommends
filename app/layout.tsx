@@ -11,9 +11,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en-IN">
       <body className="min-h-dvh">
-        <div className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col px-4">
-          {children}
-        </div>
+        <div className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col px-4">{children}</div>
       </body>
     </html>
   );

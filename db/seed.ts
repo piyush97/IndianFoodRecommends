@@ -35,7 +35,12 @@ export async function seed(db: Db = defaultDb) {
     await db.insert(schema.dishAliases).values(aliases).onConflictDoNothing();
   }
 
-  return { cities: cityRows.length, creators: creatorRows.length, dishes: saved.length, aliases: aliases.length };
+  return {
+    cities: cityRows.length,
+    creators: creatorRows.length,
+    dishes: saved.length,
+    aliases: aliases.length,
+  };
 }
 
 async function main() {

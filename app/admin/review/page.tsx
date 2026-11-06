@@ -147,11 +147,21 @@ async function ReviewCard({ searchParams }: { searchParams: Search }) {
               <div className="grid grid-cols-2 gap-3">
                 <label className={label}>
                   Latitude
-                  <input name="lat" inputMode="decimal" defaultValue={one("lat")} className={field} />
+                  <input
+                    name="lat"
+                    inputMode="decimal"
+                    defaultValue={one("lat")}
+                    className={field}
+                  />
                 </label>
                 <label className={label}>
                   Longitude
-                  <input name="lng" inputMode="decimal" defaultValue={one("lng")} className={field} />
+                  <input
+                    name="lng"
+                    inputMode="decimal"
+                    defaultValue={one("lng")}
+                    className={field}
+                  />
                 </label>
               </div>
               {one("found") && <p className="text-sm text-muted">OpenStreetMap: {one("found")}</p>}
@@ -221,7 +231,10 @@ async function ReviewCard({ searchParams }: { searchParams: Search }) {
 
 function ErrorBanner({ message }: { message: string }) {
   return (
-    <p role="alert" className="rounded-[var(--radius-step)] border border-accent bg-accent-soft p-3 text-sm">
+    <p
+      role="alert"
+      className="rounded-[var(--radius-step)] border border-accent bg-accent-soft p-3 text-sm"
+    >
       <strong>Error: </strong>
       {message}
     </p>

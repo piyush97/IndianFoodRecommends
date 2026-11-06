@@ -45,7 +45,9 @@ describe("decidePick", () => {
   });
 
   it("rejects a dish name the LLM mistook for a place", () => {
-    expect(decidePick({ ...pick, place_name: "Kale ke Chole Kulche" }, { ...good, isVenue: 0.2 })).toEqual({
+    expect(
+      decidePick({ ...pick, place_name: "Kale ke Chole Kulche" }, { ...good, isVenue: 0.2 }),
+    ).toEqual({
       approve: false,
       reason: "not-a-venue",
     });

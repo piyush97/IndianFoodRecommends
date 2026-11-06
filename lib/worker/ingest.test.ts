@@ -39,7 +39,11 @@ describeDb("runIngest", () => {
     await db.insert(schema.cities).values({ slug: "mumbai", name: "Mumbai" });
     const [creator] = await db
       .insert(schema.creators)
-      .values({ slug: "ayush-sapra", name: "Aayush Sapra", ytChannelId: "UC2UWtuZR3kH-5C26HVMMB6A" })
+      .values({
+        slug: "ayush-sapra",
+        name: "Aayush Sapra",
+        ytChannelId: "UC2UWtuZR3kH-5C26HVMMB6A",
+      })
       .returning();
     creatorId = creator.id;
     const [place] = await db

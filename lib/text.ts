@@ -1,8 +1,6 @@
 /** Latin diacritics become ascii; Devanagari marks (>= U+0900) survive. */
 function foldDiacritics(s: string): string {
-  return s
-    .normalize("NFKD")
-    .replace(/[\u0300-\u08ff]/g, "");
+  return s.normalize("NFKD").replace(/[\u0300-\u08ff]/g, "");
 }
 
 /** Lowercase, ascii slug. Devanagari-only input yields "item". */

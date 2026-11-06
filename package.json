@@ -12,7 +12,9 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx db/seed.ts",
-    "worker": "tsx worker/cli.ts"
+    "worker": "tsx worker/cli.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "drizzle-orm": "^0.45.4",
@@ -31,6 +33,7 @@
     "drizzle-kit": "^0.31.11",
     "eslint": "^9",
     "eslint-config-next": "16.4.5",
+    "prettier": "3",
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
     "typescript": "^5",

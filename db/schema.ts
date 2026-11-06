@@ -16,18 +16,12 @@ import {
 } from "drizzle-orm/pg-core";
 
 export const placeStatus = pgEnum("place_status", ["open", "closed", "moved"]);
-export const recStatus = pgEnum("rec_status", [
-  "pending",
-  "approved",
-  "rejected",
-]);
+export const recStatus = pgEnum("rec_status", ["pending", "approved", "rejected"]);
 export const recOrigin = pgEnum("rec_origin", ["llm", "manual", "community"]);
 export const platform = pgEnum("platform", ["youtube", "instagram"]);
 export const runStatus = pgEnum("run_status", ["running", "ok", "failed"]);
 
-const createdAt = timestamp("created_at", { withTimezone: true })
-  .notNull()
-  .defaultNow();
+const createdAt = timestamp("created_at", { withTimezone: true }).notNull().defaultNow();
 
 export const cities = pgTable("cities", {
   id: serial("id").primaryKey(),
@@ -173,9 +167,7 @@ export const ingestRuns = pgTable(
     externalId: text("external_id").notNull(),
     status: runStatus("status").notNull().default("running"),
     error: text("error"),
-    startedAt: timestamp("started_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    startedAt: timestamp("started_at", { withTimezone: true }).notNull().defaultNow(),
     finishedAt: timestamp("finished_at", { withTimezone: true }),
   },
   (t) => [index("ingest_runs_ext_idx").on(t.platform, t.externalId)],

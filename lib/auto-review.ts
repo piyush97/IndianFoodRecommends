@@ -231,94 +231,98 @@ async function publish(
           .geocode([pick.place_name, pick.locality, "Delhi"].filter(Boolean).join(", "))
           .catch(() => null);
 
-  return deps.db.transaction(async (tx) => {
-    // Same-name place created earlier in this run is not in the stored suggestions.
-    const [sameName] = placeMatch
-      ? []
-      : await tx
-          .select({ id: schema.places.id })
-          .from(schema.places)
-          .where(
-            and(
-              eq(schema.places.cityId, cityId),
-              sql`lower(${schema.places.name}) = ${pick.place_name.trim().toLowerCase()}`,
-            ),
-          )
-          .limit(1);
-    const [sameDish] = dishMatch
-      ? []
-      : await tx
-          .select({ id: schema.dishes.id })
-          .from(schema.dishes)
-          .where(sql`lower(${schema.dishes.name}) = ${pick.dishes[0].trim().toLowerCase()}`)
-          .limit(1);
+  return deps.db
+    .transaction(async (tx) => {
+      // Same-name place created earlier in this run is not in the stored suggestions.
+      const [sameName] = placeMatch
+        ? []
+        : await tx
+            .select({ id: schema.places.id })
+            .from(schema.places)
+            .where(
+              and(
+                eq(schema.places.cityId, cityId),
+                sql`lower(${schema.places.name}) = ${pick.place_name.trim().toLowerCase()}`,
+              ),
+            )
+            .limit(1);
+      const [sameDish] = dishMatch
+        ? []
+        : await tx
+            .select({ id: schema.dishes.id })
+            .from(schema.dishes)
+            .where(sql`lower(${schema.dishes.name}) = ${pick.dishes[0].trim().toLowerCase()}`)
+            .limit(1);
 
-    const placeId =
-      placeMatch?.id ??
-      sameName?.id ??
-      (await insertWithSlug(
-        tx,
-        async (slug) => {
-          const [row] = await tx
-            .insert(schema.places)
-            .values({
-              slug,
-              name: pick.place_name.trim(),
-              cityId,
-              locality: pick.locality,
-              lat: location?.lat ?? null,
-              lng: location?.lng ?? null,
-              osmId: location?.osmId ?? null,
-            })
-            .onConflictDoNothing()
-            .returning();
-          return row;
-        },
-        slugify(pick.place_name),
-      ));
+      const placeId =
+        placeMatch?.id ??
+        sameName?.id ??
+        (await insertWithSlug(
+          tx,
+          async (slug) => {
+            const [row] = await tx
+              .insert(schema.places)
+              .values({
+                slug,
+                name: pick.place_name.trim(),
+                cityId,
+                locality: pick.locality,
+                lat: location?.lat ?? null,
+                lng: location?.lng ?? null,
+                osmId: location?.osmId ?? null,
+              })
+              .onConflictDoNothing()
+              .returning();
+            return row;
+          },
+          slugify(pick.place_name),
+        ));
 
-    const dishId =
-      dishMatch?.id ??
-      sameDish?.id ??
-      (await insertWithSlug(
-        tx,
-        async (slug) => {
-          const [row] = await tx
-            .insert(schema.dishes)
-            .values({ slug, name: pick.dishes[0].trim() })
-            .onConflictDoNothing()
-            .returning();
-          return row;
-        },
-        slugify(pick.dishes[0]),
-      ));
+      const dishId =
+        dishMatch?.id ??
+        sameDish?.id ??
+        (await insertWithSlug(
+          tx,
+          async (slug) => {
+            const [row] = await tx
+              .insert(schema.dishes)
+              .values({ slug, name: pick.dishes[0].trim() })
+              .onConflictDoNothing()
+              .returning();
+            return row;
+          },
+          slugify(pick.dishes[0]),
+        ));
 
-    if (placeMatch && normalizeName(placeMatch.name) !== normalizeName(pick.place_name)) {
+      if (placeMatch && normalizeName(placeMatch.name) !== normalizeName(pick.place_name)) {
+        await tx
+          .insert(schema.placeAliases)
+          .values({ placeId, alias: pick.place_name.trim() })
+          .onConflictDoNothing();
+      }
+
       await tx
-        .insert(schema.placeAliases)
-        .values({ placeId, alias: pick.place_name.trim() })
-        .onConflictDoNothing();
-    }
-
-    await tx
-      .update(schema.recommendations)
-      .set({
-        placeId,
-        dishId,
-        status: "approved",
-        reviewedAt: new Date(),
-        extracted: { ...pick, autoReview: { approve: true, check } },
-      })
-      .where(and(eq(schema.recommendations.id, id), eq(schema.recommendations.status, "pending")));
-    return true;
-  }).catch(async (error: unknown) => {
-    // recs_dedupe_uk: another pick from this video already holds place+dish.
-    if (isUniqueViolation(error)) {
-      await settle(deps.db, id, pick, { approve: false, reason: "duplicate" }, check);
-      return false;
-    }
-    throw error;
-  });
+        .update(schema.recommendations)
+        .set({
+          placeId,
+          dishId,
+          status: "approved",
+          reviewedAt: new Date(),
+          extracted: { ...pick, autoReview: { approve: true, check } },
+        })
+        .where(
+          and(eq(schema.recommendations.id, id), eq(schema.recommendations.status, "pending")),
+        );
+      return true;
+    })
+    .catch(async (error: unknown) => {
+      // recs_dedupe_uk: another pick from this video already holds place+dish.
+      if (isUniqueViolation(error)) {
+        await settle(deps.db, id, pick, { approve: false, reason: "duplicate" }, check);
+        return false;
+      }
+      throw error;
+    });
 }
 
 function isUniqueViolation(error: unknown): boolean {

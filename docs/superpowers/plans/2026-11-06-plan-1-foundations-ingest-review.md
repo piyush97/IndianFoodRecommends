@@ -75,9 +75,11 @@ tests/**                      # mirrors lib/ and worker/
 **Model:** Haiku 5.5 (S0-1, S0-2) · **Difficulty:** easy
 
 **Files:**
+
 - Create: Next.js app via `pnpm create next-app@latest . --ts --tailwind --eslint --app --no-src-dir --use-pnpm`, `vitest.config.ts`, `docker-compose.yml`, `.env.example`, `.gitignore` additions, `.github/workflows/ci.yml`, `tests/smoke.test.ts`
 
 **Interfaces:**
+
 - Produces: scripts `pnpm dev|build|lint|typecheck|test`, `pnpm db:up` (docker compose up -d), Postgres at `postgresql://ifr:ifr@localhost:5432/ifr` and `ifr_test`.
 
 - [ ] **Step 1:** Scaffold into the existing dir (keep `docs/`). Add scripts `typecheck: tsc --noEmit`, `test: vitest run`, `db:up: docker compose up -d`.
@@ -95,9 +97,11 @@ tests/**                      # mirrors lib/ and worker/
 **Model:** Sonnet 5.5 (S0-3, S0-4) · **Difficulty:** medium
 
 **Files:**
+
 - Create: `db/schema.ts`, `db/client.ts`, `drizzle.config.ts`, `db/seed.ts`, `lib/env.ts`, `tests/db/schema.test.ts`, `tests/helpers/db.ts`
 
 **Interfaces:**
+
 - Produces: `getDb(url?: string): NodePgDatabase<typeof schema>`; Drizzle tables `cities, creators, sources, places, placeAliases, dishes, dishAliases, recommendations, reports, ingestRuns` with columns exactly per `docs/05-tech-design.md §2` plus `ingest_runs(id, started_at, finished_at, videos int, picks int, errors int, error_log jsonb)`; `tests/helpers/db.ts` exports `resetTestDb(): Promise<NodePgDatabase>` (migrates `DATABASE_URL_TEST`, truncates all tables). `env: { DATABASE_URL, ... }` from `lib/env.ts` (zod, throws on missing in non-test).
 - Constraints: unique index `sources(platform, external_id)`; `places.slug`, `dishes.slug`, `cities.slug`, `creators.slug` unique; gin trigram indexes on `places.name`, `dishes.name`, `place_aliases.alias`, `dish_aliases.alias`; CHECKs for the status/origin enums and `lat between 6 and 37.5`, `lng between 68 and 97.5`; `recommendations.note` CHECK `char_length(note) <= 140`.
 
@@ -121,6 +125,7 @@ tests/**                      # mirrors lib/ and worker/
 **Files:** Create `lib/text.ts`, `tests/lib/text.test.ts`
 
 **Interfaces:**
+
 - Produces: `slugify(s: string): string` (lowercase ascii, hyphens, strips diacritics; Devanagari-only input falls back to `"item"`); `normalizeName(s: string): string` (lowercase, NFKD, strip combining marks except Devanagari, non-alphanumeric → single space, trim).
 
 - [ ] **Step 1: Write failing tests:** `slugify("Chache Di Hatti")` → `"chache-di-hatti"`; `slugify("  Sita Ram's  Diwan-Chand!! ")` → `"sita-rams-diwan-chand"`; `slugify("चाचे")` → `"item"`; `normalizeName("Chāche  Dī-Hatti")` → `"chache di hatti"`; `normalizeName("चाचे दी हट्टी")` unchanged apart from whitespace.
@@ -138,13 +143,16 @@ tests/**                      # mirrors lib/ and worker/
 **Files:** Create `lib/matcher.ts`, `tests/lib/matcher.test.ts`
 
 **Interfaces:**
+
 - Consumes: Task 2 `schema`, `resetTestDb`; Task 3 `normalizeName`.
 - Produces:
+
   ```ts
   export type Match = { id: number; name: string; score: number; via: "name" | "alias" };
   export function matchPlace(db: Db, name: string, cityId: number): Promise<Match[]>;
   export function matchDish(db: Db, name: string): Promise<Match[]>;
   ```
+
   Returns up to 5 matches with `similarity >= 0.6` sorted by score desc, checking both canonical name and aliases (best score per entity). `Db = NodePgDatabase<typeof schema>`.
 
 - [ ] **Step 1: Write failing tests** (seed a place "Chache Di Hatti" in Delhi with alias "चाचे दी हट्टी", a place of the same name in another city, dishes "Chole Bhature" with alias "chole bature"):
@@ -168,17 +176,30 @@ tests/**                      # mirrors lib/ and worker/
 **Files:** Create `lib/llm/extract.ts`, `tests/lib/llm-extract.test.ts`
 
 **Interfaces:**
+
 - Produces:
+
   ```ts
   export const ExtractedPickSchema: z.ZodObject<{
-    place_name: z.ZodString; locality: z.ZodNullable<z.ZodString>; city: z.ZodNullable<z.ZodString>;
-    dishes: z.ZodArray<z.ZodString>; timestamp_seconds: z.ZodNullable<z.ZodNumber>; confidence: z.ZodNumber }>;
+    place_name: z.ZodString;
+    locality: z.ZodNullable<z.ZodString>;
+    city: z.ZodNullable<z.ZodString>;
+    dishes: z.ZodArray<z.ZodString>;
+    timestamp_seconds: z.ZodNullable<z.ZodNumber>;
+    confidence: z.ZodNumber;
+  }>;
   export type ExtractedPick = z.infer<typeof ExtractedPickSchema>;
   export class ExtractionError extends Error {}
-  export type ChatFn = (messages: {role: "system"|"user"; content: string}[]) => Promise<string>;
-  export function extractPicks(input: { title: string; description: string }, chat?: ChatFn): Promise<ExtractedPick[]>;
+  export type ChatFn = (
+    messages: { role: "system" | "user"; content: string }[],
+  ) => Promise<string>;
+  export function extractPicks(
+    input: { title: string; description: string },
+    chat?: ChatFn,
+  ): Promise<ExtractedPick[]>;
   export function makeChat(): ChatFn; // openai SDK, baseURL=LLM_BASE_URL, model=LLM_MODEL
   ```
+
   Schema rules: `dishes` min 1 item, `timestamp_seconds` int >= 0 or null, `confidence` 0..1. Description truncated to 6000 chars before prompting. Response may be wrapped in a ```json fence; strip it. Root is `{ "items": [...] }`.
 
 - [ ] **Step 1: Write failing tests** with a fake `ChatFn`:
@@ -203,15 +224,20 @@ tests/**                      # mirrors lib/ and worker/
 **Files:** Create `lib/youtube.ts`, `lib/youtube.test.ts` (tests colocated; repo convention).
 
 **Interfaces:**
+
 - Produces:
+
   ```ts
   export type YtFetch = typeof fetch;
   export type Upload = { videoId: string; publishedAt: Date; title: string; description: string };
   export function feedUrl(channelId: string): string;
   export function parseFeed(xml: string): Upload[];
-  export function listUploads(channelId: string,
-    opts?: { since?: Date; fetchImpl?: YtFetch }): Promise<Upload[]>;
+  export function listUploads(
+    channelId: string,
+    opts?: { since?: Date; fetchImpl?: YtFetch },
+  ): Promise<Upload[]>;
   ```
+
   Uses the public channel feed `https://www.youtube.com/feeds/videos.xml?channel_id=<id>`: no key, no quota, latest 15 uploads with title and full description. `listUploads` drops videos older than `since`. Entries without a video id are skipped.
 
 - [x] **Step 1:** Failing tests with a fake fetch: feed URL has no key, parse reads id/date/title/description and decodes entities, entries without id skipped, `since` filter, non-2xx throws with status.
@@ -229,14 +255,21 @@ tests/**                      # mirrors lib/ and worker/
 **Files:** Create `lib/worker/ingest.ts`, `lib/worker/ingest.test.ts`, `worker/cli.ts`, `ops/ifr-ingest.service`, `ops/ifr-ingest.timer`, `ops/README.md`.
 
 **Interfaces:**
+
 - Consumes: `Db` from `db/index.ts`, `matchPlace/matchDish`, `listUploads` (RSS), `extractPicks`.
 - Produces:
+
   ```ts
-  export type IngestDeps = { db: Db; listUploads: typeof listUploads;
-    extract: (i: { title: string; description: string }) => Promise<ExtractedPick[]>; now: () => Date };
+  export type IngestDeps = {
+    db: Db;
+    listUploads: typeof listUploads;
+    extract: (i: { title: string; description: string }) => Promise<ExtractedPick[]>;
+    now: () => Date;
+  };
   export type IngestSummary = { videos: number; picks: number; errors: number };
   export function runIngest(deps: IngestDeps): Promise<IngestSummary>;
   ```
+
   Behavior: one Postgres advisory lock (`727001`) per run; a second concurrent run returns `{0,0,0}`. For each creator not opted out with a channel: `since` = latest `sources.published_on` or 90 days ago; skip video IDs already in `sources`. Per new video insert `sources`, extract, then one `recommendations` row per pick with `status='pending'`, `origin='llm'`, `confidence`, `ts_seconds`, `extracted` = pick + `suggestions{places,dishes}`; `place_id/dish_id` stay NULL. A failing channel feed or a failing extraction bumps `errors` and the run continues. Writes one `ingest_runs` row (`status` `ok`/`failed`, `finished_at`).
 
 - [x] **Step 1:** Failing tests with fakes: 2 videos → 2 sources + 2 pending rows; second run adds nothing; one bad extraction keeps the other video; one dead feed keeps the other channel; opted-out skipped; existing place suggested with `place_id` still NULL; non-Delhi city stored pending; concurrent run returns zeroed summary; no title/description text in any row.
@@ -255,13 +288,21 @@ tests/**                      # mirrors lib/ and worker/
 **Files:** Create `lib/worker/eval.ts`, `worker/eval/labelled.example.json`, `lib/worker/eval.test.ts`. (`worker/eval/labelled.json` is created by the human, 50 videos, committed; contains video IDs + expected picks only, no YouTube text. The runner fetches snippets live.)
 
 **Interfaces:**
+
 - Produces:
+
   ```ts
   export type Labelled = { videoId: string; expected: { place: string; dishes: string[] }[] };
-  export function scoreExtraction(expected: Labelled["expected"], actual: ExtractedPick[]):
-    { tp: number; fp: number; fn: number; precision: number; recall: number };
-  export function runEval(labelled: Labelled[], deps: { channelId: string; listUploads; extract }): Promise<{ precision: number; recall: number; perVideo: unknown[] }>;
+  export function scoreExtraction(
+    expected: Labelled["expected"],
+    actual: ExtractedPick[],
+  ): { tp: number; fp: number; fn: number; precision: number; recall: number };
+  export function runEval(
+    labelled: Labelled[],
+    deps: { channelId: string; listUploads; extract },
+  ): Promise<{ precision: number; recall: number; perVideo: unknown[] }>;
   ```
+
   A pick is a true positive when `normalizeName(place)` of expected and actual are equal or their word-set Jaccard similarity is >= 0.6 (pure function, no DB). Gate: precision >= 0.85 before enabling the timer.
 
 - [x] **Step 1: Write failing tests:** perfect match → precision 1, recall 1; extra hallucinated place → precision 0.5; missed place → recall 0.5; spelling variant `Chachey di Hatti` vs `Chache Di Hatti` counts as TP; empty actual and empty expected → precision 1, recall 1.
@@ -282,12 +323,15 @@ Note on the spelling-variant test: word-set Jaccard on `chachey`/`chache` is 0.5
 **Files:** Create `lib/auth.ts`, `middleware.ts`, `app/api/auth/[...nextauth]/route.ts`, `app/admin/layout.tsx`, `tests/lib/auth.test.ts`
 
 **Interfaces:**
+
 - Produces:
+
   ```ts
   export function isAdminEmail(email: string | null | undefined, allowlist: string): boolean; // case-insensitive, trims, empty allowlist → false
   export function requireAdmin(): Promise<{ email: string }>; // throws AuthError("forbidden") if no session or not allowlisted
   export class AuthError extends Error {}
   ```
+
   Auth.js GitHub provider; `signIn` callback rejects emails failing `isAdminEmail`. Middleware redirects unauthenticated `/admin/*` to sign-in. Layout also calls `requireAdmin()` (defense in depth).
 
 - [x] **Step 1: Write failing tests:** `isAdminEmail("A@x.com", "a@x.com, b@y.com")` true; `isAdminEmail("c@z.com", "a@x.com")` false; `isAdminEmail(null, "a@x.com")` false; `isAdminEmail("a@x.com", "")` false; `isAdminEmail("a@x.com.evil.io", "a@x.com")` false (exact match, not prefix).
@@ -305,21 +349,38 @@ Note on the spelling-variant test: word-set Jaccard on `chachey`/`chache` is 0.5
 **Files:** Create `lib/review.ts`, `lib/geocode.ts`, `app/admin/review/actions.ts`, `tests/lib/review.test.ts`, `tests/lib/geocode.test.ts`, `tests/lib/review-actions.test.ts`
 
 **Interfaces:**
+
 - Consumes: Task 2 tables, Task 3 `slugify`, Task 9 `requireAdmin`.
 - Produces (db-level, no auth, no Next imports):
+
   ```ts
   export const ApproveInput: z.ZodObject<{
     id: z.ZodNumber;
-    place: z.ZodUnion<[{existingId: number}, {name: string; locality: string; cityId: number; lat: number; lng: number}]>;
-    dish: z.ZodUnion<[{existingId: number}, {name: string}]>;
-    tsSeconds: z.ZodNullable<z.ZodNumber>; note: z.ZodString /* <=140 */ }>;
-  export function approveRecommendation(db: Db, input: z.infer<typeof ApproveInput>, reviewer: string): Promise<void>;
+    place: z.ZodUnion<
+      [
+        { existingId: number },
+        { name: string; locality: string; cityId: number; lat: number; lng: number },
+      ]
+    >;
+    dish: z.ZodUnion<[{ existingId: number }, { name: string }]>;
+    tsSeconds: z.ZodNullable<z.ZodNumber>;
+    note: z.ZodString; /* <=140 */
+  }>;
+  export function approveRecommendation(
+    db: Db,
+    input: z.infer<typeof ApproveInput>,
+    reviewer: string,
+  ): Promise<void>;
   export function rejectRecommendation(db: Db, id: number): Promise<void>;
   export function mergePlaces(db: Db, fromId: number, intoId: number): Promise<void>;
   export function addManualRecommendation(db: Db, input: ManualInput): Promise<number>;
   // ManualInput = { platform: "youtube"|"instagram"; externalId: string; creatorId: number } & Omit<z.infer<typeof ApproveInput>, "id">
-  export function suggestLocation(query: string, deps?: { fetchImpl?: typeof fetch; sleep?: (ms: number) => Promise<void>; ua?: string }): Promise<{ lat: number; lng: number; osmId: string; displayName: string } | null>;
+  export function suggestLocation(
+    query: string,
+    deps?: { fetchImpl?: typeof fetch; sleep?: (ms: number) => Promise<void>; ua?: string },
+  ): Promise<{ lat: number; lng: number; osmId: string; displayName: string } | null>;
   ```
+
   Server actions in `actions.ts` call `requireAdmin()` first, then the db function, then `revalidatePath("/admin/review")` (public revalidation comes in Plan 2).
   `approveRecommendation`: transaction; creates place/dish if `name` given (unique slug with `-2` suffix on collision, adds the typed name as alias when matching an existing id); sets `status='approved'`, `reviewed_at`, `places.last_verified=today`. `mergePlaces`: moves all recommendations and aliases to `intoId`, adds `from.name` as alias of `into`, deletes `from`. Rejects when `fromId === intoId`.
   `suggestLocation`: waits >= 1000 ms between calls (module-level last-call timestamp), sends `User-Agent`, returns null on empty result, restricts with `countrycodes=in`.
@@ -350,6 +411,7 @@ Note on the spelling-variant test: word-set Jaccard on `chachey`/`chache` is 0.5
 **Files:** Create `app/admin/review/page.tsx`, `app/admin/review/ReviewCard.tsx`, `app/admin/review/ManualAdd.tsx`, `app/admin/review/merge/page.tsx`
 
 **Interfaces:**
+
 - Consumes: Task 10 actions (`approveAction`, `rejectAction`, `mergePlacesAction`, `manualAddAction`, `suggestLocationAction`), `extracted.suggestions` from Task 7.
 - Produces: `/admin/review` showing oldest pending first, 1 card at a time: YouTube embed (`youtube-nocookie.com/embed/{id}?start={ts}`) beside editable fields (creator, place with suggestion chips, dish with suggestion chips, timestamp, note with live 140 counter, "Suggest location" button, lat/lng inputs). Keyboard: `A` approve, `R` reject, `E` focus edit, `J/K` next/prev, shortcuts disabled while typing in an input. States: loading skeleton, empty ("Queue clear."), error banner with retry. Visible `:focus-visible`, 44px targets, no color-only status.
 

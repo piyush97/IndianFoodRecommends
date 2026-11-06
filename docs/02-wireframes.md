@@ -3,6 +3,7 @@
 Layout follows content: search first, list + map, proof (video) always one tap away.
 
 ## W1 · Home `/`
+
 ```
 ┌──────────────────────────────────────┐
 │ Indian Food Recommends      [Cities▾]│
@@ -29,6 +30,7 @@ Layout follows content: search first, list + map, proof (video) always one tap a
 ```
 
 ## W2 · City + dish page `/delhi/chole-bhature`
+
 ```
 ┌──────────────────────────────────────┐
 │ ← Delhi                              │
@@ -48,6 +50,7 @@ Map tab: MapLibre pins, tap pin → same card as bottom sheet.
 ```
 
 ## W3 · Place page `/delhi/place/chache-di-hatti-kamla-nagar`
+
 ```
 ┌──────────────────────────────────────┐
 │ Chache Di Hatti                      │
@@ -71,6 +74,7 @@ Map tab: MapLibre pins, tap pin → same card as bottom sheet.
 ```
 
 ## W4 · Creator page `/creator/delhi-food-walks`
+
 ```
 ┌──────────────────────────────────────┐
 │ (avatar) Delhi Food Walks            │
@@ -83,6 +87,7 @@ Map tab: MapLibre pins, tap pin → same card as bottom sheet.
 ```
 
 ## W5 · Submit a pick `/submit` (S4)
+
 ```
 ┌──────────────────────────────────────┐
 │ Saw a vlogger recommend a place?     │
@@ -96,6 +101,7 @@ Map tab: MapLibre pins, tap pin → same card as bottom sheet.
 ```
 
 ## W6 · Admin review queue `/admin/review`
+
 ```
 ┌────────────────────────────────────────────────────────────┐
 │ Review queue (37 pending)     Filter: [LLM][Community][City]│
