@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { PickList } from "../../../../components/PickList";
@@ -69,6 +70,12 @@ async function Creator({ params, searchParams }: Props) {
               Instagram<span className="sr-only">, opens Instagram</span>
             </a>
           )}
+          <Link
+            href={`/creator/${creator.slug}/kit`}
+            className="inline-flex min-h-11 items-center rounded-[var(--radius-step)] border border-line px-3 focus-visible:outline-2 focus-visible:outline-accent"
+          >
+            Creator share kit
+          </Link>
         </div>
       </section>
 
