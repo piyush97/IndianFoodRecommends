@@ -6,6 +6,7 @@ import { extractPicks } from "../lib/llm/extract";
 import { listUploads } from "../lib/youtube";
 import { runIngest } from "../lib/worker/ingest";
 import { runEval, type Labelled } from "../lib/worker/eval";
+import { notifyRevalidate } from "../lib/revalidate-client";
 
 // With a TypeSafe key, Jev screens each video before the LLM reads it.
 function extractor() {
@@ -32,6 +33,10 @@ async function ingest(): Promise<void> {
     geocode: geocodeDelhi,
   });
   console.log(JSON.stringify({ autoReview: review }));
+  if (review.approved > 0) {
+    const ok = await notifyRevalidate(["public"]);
+    console.log(JSON.stringify({ revalidated: ok }));
+  }
 }
 
 async function evaluate(): Promise<void> {

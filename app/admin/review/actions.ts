@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "../../../db";
@@ -22,18 +22,21 @@ export async function approveAction(input: ApproveInput): Promise<void> {
   const { email } = await requireAdmin();
   await approveRecommendation(db, input, email);
   revalidatePath("/admin/review");
+  revalidateTag("public", "max");
 }
 
 export async function rejectAction(id: number): Promise<void> {
   await requireAdmin();
   await rejectRecommendation(db, Id.parse(id));
   revalidatePath("/admin/review");
+  revalidateTag("public", "max");
 }
 
 export async function mergeAction(fromId: number, intoId: number): Promise<void> {
   await requireAdmin();
   await mergePlaces(db, Id.parse(fromId), Id.parse(intoId));
   revalidatePath("/admin/review");
+  revalidateTag("public", "max");
 }
 
 function backWithError(message: string): never {
@@ -54,6 +57,7 @@ export async function approveFormAction(form: FormData): Promise<void> {
     backWithError(error instanceof Error ? error.message : "Approve failed.");
   }
   revalidatePath("/admin/review");
+  revalidateTag("public", "max");
   redirect("/admin/review");
 }
 
@@ -61,6 +65,7 @@ export async function rejectFormAction(form: FormData): Promise<void> {
   await requireAdmin();
   await rejectRecommendation(db, Id.parse(form.get("id")));
   revalidatePath("/admin/review");
+  revalidateTag("public", "max");
   redirect("/admin/review");
 }
 
@@ -85,5 +90,6 @@ export async function manualAddFormAction(form: FormData): Promise<void> {
     backWithError(error instanceof Error ? error.message.slice(0, 200) : "Manual add failed.");
   }
   revalidatePath("/admin/review");
+  revalidateTag("public", "max");
   redirect("/admin/review?added=1");
 }
