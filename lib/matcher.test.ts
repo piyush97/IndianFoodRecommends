@@ -8,7 +8,7 @@ const handle = testDb();
 const describeDb = handle ? describe : describe.skip;
 
 describeDb("matcher", () => {
-  const db = handle!.db as Db;
+  const db = handle?.db as Db;
   let delhiId = 0;
   let mumbaiId = 0;
 

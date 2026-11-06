@@ -14,7 +14,7 @@ const handle = testDb();
 const describeDb = handle ? describe : describe.skip;
 
 describeDb("admin server actions", () => {
-  const db = handle!.db as Db;
+  const db = handle?.db as Db;
 
   beforeEach(async () => {
     await truncateAll(db);

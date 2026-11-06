@@ -30,7 +30,7 @@ const PICK: ExtractedPick = {
 };
 
 describeDb("runIngest", () => {
-  const db = handle!.db as Db;
+  const db = handle?.db as Db;
   let creatorId = 0;
 
   beforeEach(async () => {
@@ -97,8 +97,12 @@ describeDb("runIngest", () => {
       }),
     );
     expect(summary.errors).toBe(1);
-    expect(summary.videos).toBe(2);
+    expect(summary.videos).toBe(1);
     expect(summary.picks).toBe(1);
+    // The failed video left no source row, so the next run retries it.
+    expect(await db.select().from(schema.sources)).toHaveLength(1);
+    const retry = await runIngest(deps());
+    expect(retry).toEqual({ videos: 1, picks: 1, errors: 0 });
   });
 
   it("keeps going when one channel feed fails", async () => {

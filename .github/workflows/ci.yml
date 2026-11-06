@@ -39,6 +39,8 @@ jobs:
           --health-retries 5
     env:
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/ifr
+      # Throwaway service DB, so tests may truncate it.
+      DATABASE_URL_TEST: postgres://postgres:postgres@localhost:5432/ifr
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4

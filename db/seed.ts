@@ -1,9 +1,9 @@
 import { sql } from "drizzle-orm";
-import { client, db, schema } from "./index";
+import { client, db as defaultDb, schema, type Db } from "./index";
 import { cities as cityRows, creators as creatorRows, dishes as dishRows } from "./seed-data";
 
 // Idempotent: safe to re-run. Slugs are the conflict keys.
-export async function seed() {
+export async function seed(db: Db = defaultDb) {
   await db
     .insert(schema.cities)
     .values(cityRows.map((c) => ({ ...c })))

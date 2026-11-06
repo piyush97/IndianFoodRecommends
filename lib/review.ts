@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { schema, type Db } from "../db";
 import { slugify } from "./text";
@@ -105,10 +105,12 @@ export async function approveRecommendation(
 }
 
 export async function rejectRecommendation(db: Db, id: number): Promise<void> {
-  await db
+  const rows = await db
     .update(schema.recommendations)
     .set({ status: "rejected", reviewedAt: new Date() })
-    .where(eq(schema.recommendations.id, id));
+    .where(and(eq(schema.recommendations.id, id), eq(schema.recommendations.status, "pending")))
+    .returning({ id: schema.recommendations.id });
+  if (rows.length === 0) throw new Error(`recommendation ${id} is not pending`);
 }
 
 export async function mergePlaces(db: Db, fromId: number, intoId: number): Promise<void> {
@@ -118,10 +120,24 @@ export async function mergePlaces(db: Db, fromId: number, intoId: number): Promi
     const [into] = await tx.select().from(schema.places).where(eq(schema.places.id, intoId));
     if (!from || !into) throw new Error("place not found");
 
+    // Drop picks that already exist on the kept place (same source, dish and
+    // timestamp); moving them would violate recs_dedupe_uk and abort the merge.
+    await tx.execute(sql`
+      delete from recommendations f using recommendations i
+      where f.place_id = ${fromId} and i.place_id = ${intoId}
+        and f.source_id = i.source_id
+        and coalesce(f.dish_id, -1) = coalesce(i.dish_id, -1)
+        and coalesce(f.ts_seconds, -1) = coalesce(i.ts_seconds, -1)
+    `);
     await tx
       .update(schema.recommendations)
       .set({ placeId: intoId })
       .where(eq(schema.recommendations.placeId, fromId));
+    // Reports cascade-delete with the place, so move them first.
+    await tx
+      .update(schema.reports)
+      .set({ placeId: intoId })
+      .where(eq(schema.reports.placeId, fromId));
 
     const aliases = await tx
       .select()

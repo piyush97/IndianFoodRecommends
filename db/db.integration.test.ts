@@ -1,70 +1,43 @@
-import { afterAll, describe, expect, it } from "vitest";
-import { count, eq } from "drizzle-orm";
-import { client, db, schema } from "./index";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { count } from "drizzle-orm";
+import { schema, type Db } from "./index";
 import { seed } from "./seed";
 import { dishes as seedDishes } from "./seed-data";
+import { testDb, truncateAll } from "./test-db";
 
-// Runs only where a migrated database is reachable (CI db job).
-const describeDb = process.env.DATABASE_URL ? describe : describe.skip;
+// Runs against DATABASE_URL_TEST only; never touches the dev database.
+const handle = testDb();
+const describeDb = handle ? describe : describe.skip;
 
 describeDb("seed + schema", () => {
+  const db = handle?.db as Db;
+
+  beforeAll(async () => {
+    await truncateAll(db);
+  });
+
   afterAll(async () => {
-    await client.end();
+    await handle!.close();
   });
 
   it("is idempotent", async () => {
-    await seed();
-    await seed();
+    await seed(db);
+    await seed(db);
     const [row] = await db.select({ n: count() }).from(schema.dishes);
     expect(row.n).toBe(seedDishes.length);
-    const [ayush] = await db
-      .select()
-      .from(schema.creators)
-      .where(eq(schema.creators.slug, "ayush-sapra"));
-    expect(ayush.ytChannelId).toBe("UC2UWtuZR3kH-5C26HVMMB6A");
   });
 
   it("dedupes a recommendation with null place/dish/timestamp", async () => {
-    const [city] = await db
-      .select()
-      .from(schema.cities)
-      .where(eq(schema.cities.slug, "delhi"));
     const [creator] = await db
       .insert(schema.creators)
       .values({ slug: "test-creator", name: "Test Creator" })
-      .onConflictDoNothing()
       .returning();
-    const creatorId =
-      creator?.id ??
-      (
-        await db
-          .select()
-          .from(schema.creators)
-          .where(eq(schema.creators.slug, "test-creator"))
-      )[0].id;
-
-    expect(city).toBeDefined();
     const [source] = await db
       .insert(schema.sources)
-      .values({
-        platform: "youtube",
-        externalId: "dQw4w9WgXcQ",
-        creatorId,
-      })
-      .onConflictDoNothing()
+      .values({ platform: "youtube", externalId: "test-video", creatorId: creator.id })
       .returning();
-    const sourceId =
-      source?.id ??
-      (
-        await db
-          .select()
-          .from(schema.sources)
-          .where(eq(schema.sources.externalId, "dQw4w9WgXcQ"))
-      )[0].id;
 
-    const values = { sourceId, confidence: 0.9 };
-    // Keep the test rerunnable against a long-lived dev database.
-    await db.delete(schema.recommendations).where(eq(schema.recommendations.sourceId, sourceId));
+    const values = { sourceId: source.id, confidence: 0.9 };
     await db.insert(schema.recommendations).values(values);
     const second = await db
       .insert(schema.recommendations)

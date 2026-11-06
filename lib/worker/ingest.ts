@@ -75,35 +75,46 @@ async function ingest({ db, listUploads, extract, now }: IngestDeps): Promise<In
       for (const upload of uploads) {
         if (await alreadyIngested(db, upload)) continue;
 
-        const [source] = await db
-          .insert(schema.sources)
-          .values({
-            platform: "youtube",
-            externalId: upload.videoId,
-            creatorId: creator.id,
-            publishedOn: upload.publishedAt.toISOString().slice(0, 10),
-          })
-          .onConflictDoNothing()
-          .returning();
-        if (!source) continue;
-        summary.videos++;
-
         try {
+          // Extract and match before writing anything: a failed LLM call must
+          // leave no `sources` row, or the next run would skip this video forever.
           const picks = await extract({ title: upload.title, description: upload.description });
+          const rows: Omit<typeof schema.recommendations.$inferInsert, "sourceId">[] = [];
           for (const pick of picks) {
             const cityId = pick.city ? cityByName.get(normalizeName(pick.city)) : undefined;
             const suggestions = {
               places: cityId ? await matchPlace(db, pick.place_name, cityId) : [],
               dishes: await matchPicks(db, pick.dishes),
             };
-            await db.insert(schema.recommendations).values({
-              sourceId: source.id,
+            rows.push({
               tsSeconds: pick.timestamp_seconds,
               confidence: pick.confidence,
               extracted: { ...pick, suggestions },
             });
-            summary.picks++;
           }
+
+          const inserted = await db.transaction(async (tx) => {
+            const [source] = await tx
+              .insert(schema.sources)
+              .values({
+                platform: "youtube",
+                externalId: upload.videoId,
+                creatorId: creator.id,
+                publishedOn: upload.publishedAt.toISOString().slice(0, 10),
+              })
+              .onConflictDoNothing()
+              .returning();
+            if (!source) return false;
+            if (rows.length > 0) {
+              await tx
+                .insert(schema.recommendations)
+                .values(rows.map((r) => ({ ...r, sourceId: source.id })));
+            }
+            return true;
+          });
+          if (!inserted) continue;
+          summary.videos++;
+          summary.picks += rows.length;
         } catch (error) {
           summary.errors++;
           console.error(`ingest: ${upload.videoId} failed:`, error);

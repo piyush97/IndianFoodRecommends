@@ -13,7 +13,7 @@ const handle = testDb();
 const describeDb = handle ? describe : describe.skip;
 
 describeDb("review operations", () => {
-  const db = handle!.db as Db;
+  const db = handle?.db as Db;
 
   beforeEach(async () => {
     await truncateAll(db);
@@ -164,6 +164,38 @@ describeDb("review operations", () => {
       .values({ slug: "x", name: "X", cityId: 1 })
       .returning();
     await expect(mergePlaces(db, place.id, place.id)).rejects.toThrow();
+  });
+
+  it("refuses to reject an already approved pick", async () => {
+    const id = await pendingRec();
+    await approveRecommendation(db, { id, ...validInput }, "[EMAIL]");
+    await expect(rejectRecommendation(db, id)).rejects.toThrow(/pending/);
+    const [rec] = await db.select().from(schema.recommendations);
+    expect(rec.status).toBe("approved");
+  });
+
+  it("keeps reports and survives duplicate picks when merging", async () => {
+    const [from] = await db
+      .insert(schema.places)
+      .values({ slug: "a", name: "A", cityId: 1 })
+      .returning();
+    const [into] = await db
+      .insert(schema.places)
+      .values({ slug: "b", name: "B", cityId: 1 })
+      .returning();
+    // Same source, no dish, no timestamp on both places: a dedupe collision.
+    await db.insert(schema.recommendations).values([
+      { sourceId: 1, placeId: from.id },
+      { sourceId: 1, placeId: into.id },
+    ]);
+    await db.insert(schema.reports).values({ placeId: from.id, kind: "closed" });
+
+    await mergePlaces(db, from.id, into.id);
+
+    const recs = await db.select().from(schema.recommendations);
+    expect(recs.map((r) => r.placeId)).toEqual([into.id]);
+    const reports = await db.select().from(schema.reports);
+    expect(reports.map((r) => r.placeId)).toEqual([into.id]);
   });
 });
 
