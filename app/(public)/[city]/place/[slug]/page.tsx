@@ -86,7 +86,14 @@ async function Place({ params }: { params: Params }) {
         )}
         {directions && (
           <div>
-            <a href={directions} target="_blank" rel="noopener noreferrer" className={action}>
+            <a
+              href={directions}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={action}
+              data-umami-event="directions"
+              data-umami-event-place={place.slug}
+            >
               Directions
               <span className="sr-only"> to {place.name}, opens Google Maps</span>
             </a>

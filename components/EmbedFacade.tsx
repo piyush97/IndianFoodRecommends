@@ -34,6 +34,8 @@ export function EmbedFacade({
       <button
         type="button"
         onClick={() => setOpen(true)}
+        data-umami-event="play"
+        data-umami-event-platform={platform}
         className="flex aspect-video w-full items-center justify-center rounded-[var(--radius-card)] border border-line bg-accent-soft px-4 text-center font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
       >
         <span aria-hidden="true" className="mr-2">

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "../components/Analytics";
 import { SITE_URL } from "../lib/seo/site";
 import "./globals.css";
 
@@ -16,6 +17,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en-IN">
       <body className="min-h-dvh">
         <div className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col px-4">{children}</div>
+        <Analytics />
       </body>
     </html>
   );

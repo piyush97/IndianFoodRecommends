@@ -61,6 +61,8 @@ export function PickList({
                 target="_blank"
                 rel="noopener noreferrer"
                 className={action}
+                data-umami-event="watch"
+                data-umami-event-place={card.placeSlug}
               >
                 {ts ? `Watch moment (${ts})` : "Watch video"}
                 <span className="sr-only">
@@ -70,7 +72,14 @@ export function PickList({
                 </span>
               </a>
               {directions && (
-                <a href={directions} target="_blank" rel="noopener noreferrer" className={action}>
+                <a
+                  href={directions}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={action}
+                  data-umami-event="directions"
+                  data-umami-event-place={card.placeSlug}
+                >
                   Directions
                   <span className="sr-only"> to {card.placeName}, opens Google Maps</span>
                 </a>
