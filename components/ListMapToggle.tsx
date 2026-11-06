@@ -1,13 +1,8 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { useState } from "react";
 import type { MapPoint } from "./map-points";
-
-const PlaceMap = dynamic(() => import("./PlaceMap"), {
-  ssr: false,
-  loading: () => <p className="text-muted">Loading map…</p>,
-});
+import { PlaceMapLazy as PlaceMap } from "./PlaceMapLazy";
 
 const tab =
   "min-h-11 rounded-[var(--radius-step)] border px-4 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
