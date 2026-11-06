@@ -224,12 +224,7 @@ async function publish(
   const dishMatch = pick.suggestions?.dishes?.find((m) => m.score >= REUSE_MATCH_SCORE);
 
   // Nominatim outside the transaction: it sleeps 1 s between calls.
-  const location =
-    placeMatch || !deps.geocode
-      ? null
-      : await deps
-          .geocode([pick.place_name, pick.locality, "Delhi"].filter(Boolean).join(", "))
-          .catch(() => null);
+  const location = placeMatch ? null : await locate(deps.geocode, pick);
 
   return deps.db
     .transaction(async (tx) => {
@@ -323,6 +318,23 @@ async function publish(
       }
       throw error;
     });
+}
+
+/**
+ * Small shops are rarely on OpenStreetMap. Try the shop, then the locality
+ * centre; the `approx:` osm_id prefix marks a neighbourhood-level pin.
+ */
+async function locate(
+  geocode: AutoReviewDeps["geocode"],
+  pick: ExtractedPick,
+): Promise<{ lat: number; lng: number; osmId: string } | null> {
+  if (!geocode) return null;
+  const exact = await geocode(
+    [pick.place_name, pick.locality, "Delhi"].filter(Boolean).join(", "),
+  ).catch(() => null);
+  if (exact || !pick.locality) return exact;
+  const area = await geocode(`${pick.locality}, Delhi`).catch(() => null);
+  return area ? { ...area, osmId: `approx:${area.osmId}` } : null;
 }
 
 function isUniqueViolation(error: unknown): boolean {

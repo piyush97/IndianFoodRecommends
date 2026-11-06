@@ -61,6 +61,21 @@ describeDb("autoReviewPending", () => {
     expect(place).toMatchObject({ name: "Chache Di Hatti", lat: 28.68, cityId: 1 });
   });
 
+  it("falls back to the locality centre when the shop itself is not on the map", async () => {
+    await pending(base);
+    const queries: string[] = [];
+    await autoReviewPending({
+      ...deps(),
+      geocode: async (q) => {
+        queries.push(q);
+        return q.startsWith("Chache") ? null : { lat: 28.69, lng: 77.21, osmId: "loc" };
+      },
+    });
+    expect(queries).toEqual(["Chache Di Hatti, Kamla Nagar, Delhi", "Kamla Nagar, Delhi"]);
+    const [place] = await db.select().from(schema.places);
+    expect(place).toMatchObject({ lat: 28.69, osmId: "approx:loc" });
+  });
+
   it("rejects a Kolkata pick and records why", async () => {
     await pending({ ...base, city: "Kolkata" });
     await autoReviewPending(deps());
