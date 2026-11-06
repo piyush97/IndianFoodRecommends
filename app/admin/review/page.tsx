@@ -2,7 +2,12 @@ import { Suspense } from "react";
 import { asc, count, eq } from "drizzle-orm";
 import { db, schema } from "../../../db";
 import type { Match } from "../../../lib/matcher";
-import { approveFormAction, rejectFormAction, suggestLocationFormAction } from "./actions";
+import {
+  approveFormAction,
+  manualAddFormAction,
+  rejectFormAction,
+  suggestLocationFormAction,
+} from "./actions";
 
 type Extracted = {
   place_name?: string;
@@ -60,7 +65,12 @@ async function ReviewCard({ searchParams }: { searchParams: Search }) {
       <section className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold">Review queue</h1>
         {error && <ErrorBanner message={error} />}
-        <p className="text-muted">Queue clear. New picks appear after the next ingest run.</p>
+        {one("added") && <p role="status">Pick added and published.</p>}
+        <p className="text-muted">
+          Queue clear. The daily run reviews picks automatically; only picks it could not check land
+          here.
+        </p>
+        <ManualAdd />
       </section>
     );
   }
@@ -238,5 +248,101 @@ function ErrorBanner({ message }: { message: string }) {
       <strong>Error: </strong>
       {message}
     </p>
+  );
+}
+
+async function ManualAdd() {
+  const [delhi] = await db.select().from(schema.cities).where(eq(schema.cities.slug, "delhi"));
+  const creators = await db
+    .select({ id: schema.creators.id, name: schema.creators.name })
+    .from(schema.creators)
+    .orderBy(asc(schema.creators.name));
+  const places = await db
+    .select({ id: schema.places.id, name: schema.places.name })
+    .from(schema.places)
+    .where(eq(schema.places.cityId, delhi.id))
+    .orderBy(asc(schema.places.name));
+  const dishes = await db
+    .select({ id: schema.dishes.id, name: schema.dishes.name })
+    .from(schema.dishes)
+    .orderBy(asc(schema.dishes.name));
+
+  return (
+    <form
+      action={manualAddFormAction}
+      className="mt-6 flex flex-col gap-3 rounded-[var(--radius-card)] border border-line p-4"
+    >
+      <h2 className="text-lg font-semibold">Add a pick by hand</h2>
+      <input type="hidden" name="cityId" value={delhi.id} />
+      <label className={label}>
+        YouTube or Instagram URL
+        <input name="url" type="url" required className={field} />
+      </label>
+      <label className={label}>
+        Creator
+        <select name="creatorId" required className={field}>
+          {creators.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className={label}>
+        Place
+        <select name="placeId" defaultValue="new" className={field}>
+          <option value="new">New place (fill fields below)</option>
+          {places.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className={label}>
+        New place name
+        <input name="placeName" className={field} />
+      </label>
+      <label className={label}>
+        Locality
+        <input name="locality" className={field} />
+      </label>
+      <div className="grid grid-cols-2 gap-3">
+        <label className={label}>
+          Latitude
+          <input name="lat" inputMode="decimal" className={field} />
+        </label>
+        <label className={label}>
+          Longitude
+          <input name="lng" inputMode="decimal" className={field} />
+        </label>
+      </div>
+      <label className={label}>
+        Dish
+        <select name="dishId" defaultValue="new" className={field}>
+          <option value="new">New dish (type name below)</option>
+          {dishes.map((d) => (
+            <option key={d.id} value={d.id}>
+              {d.name}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className={label}>
+        New dish name
+        <input name="dishName" className={field} />
+      </label>
+      <label className={label}>
+        Timestamp (seconds)
+        <input name="tsSeconds" inputMode="numeric" className={field} />
+      </label>
+      <label className={label}>
+        Note, your own words (max 140)
+        <textarea name="note" maxLength={140} rows={2} className={`${field} py-2`} />
+      </label>
+      <button type="submit" className={`${button} bg-accent text-paper`}>
+        Add and publish
+      </button>
+    </form>
   );
 }

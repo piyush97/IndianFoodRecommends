@@ -6,13 +6,14 @@ import { z } from "zod";
 import { db } from "../../../db";
 import { requireAdmin } from "../../../lib/auth";
 import {
+  addManualRecommendation,
   approveRecommendation,
   mergePlaces,
   rejectRecommendation,
   suggestLocation,
   type ApproveInput,
 } from "../../../lib/review";
-import { parseApproveForm } from "../../../lib/review-form";
+import { parseApproveForm, parseManualForm } from "../../../lib/review-form";
 
 // Server actions accept arbitrary client JSON: validate every argument.
 const Id = z.coerce.number().int().positive();
@@ -74,4 +75,15 @@ export async function suggestLocationFormAction(form: FormData): Promise<void> {
     found: hit.displayName,
   });
   redirect(`/admin/review?${params}`);
+}
+
+export async function manualAddFormAction(form: FormData): Promise<void> {
+  await requireAdmin();
+  try {
+    await addManualRecommendation(db, parseManualForm(form, Id.parse(form.get("cityId"))));
+  } catch (error) {
+    backWithError(error instanceof Error ? error.message.slice(0, 200) : "Manual add failed.");
+  }
+  revalidatePath("/admin/review");
+  redirect("/admin/review?added=1");
 }

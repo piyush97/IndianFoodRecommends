@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseApproveForm } from "./review-form";
+import { parseApproveForm, parseManualForm } from "./review-form";
 
 function form(fields: Record<string, string>): FormData {
   const data = new FormData();
@@ -53,5 +53,20 @@ describe("parseApproveForm", () => {
     expect(() =>
       parseApproveForm(form({ id: "7", placeId: "new", placeName: "X", dishId: "5", note: "" }), 1),
     ).toThrow();
+  });
+
+  it("parses the manual-add form without a recommendation id", () => {
+    const input = parseManualForm(
+      form({
+        url: "https://youtu.be/bKLgzkCAF6Q",
+        creatorId: "2",
+        placeId: "3",
+        dishId: "5",
+        tsSeconds: "",
+        note: "",
+      }),
+      1,
+    );
+    expect(input).toMatchObject({ url: "https://youtu.be/bKLgzkCAF6Q", creatorId: 2 });
   });
 });

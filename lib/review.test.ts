@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { schema, type Db } from "../db";
 import { testDb, truncateAll } from "../db/test-db";
 import {
+  addManualRecommendation,
   approveRecommendation,
   mergePlaces,
   rejectRecommendation,
@@ -156,6 +157,41 @@ describeDb("review operations", () => {
     expect((await db.select().from(schema.places)).map((p) => p.id)).toEqual([into.id]);
     const aliases = await db.select().from(schema.placeAliases);
     expect(aliases.map((a) => a.alias)).toContain("Chachey Di Hatti");
+  });
+
+  it("adds a manual Instagram pick as approved with its own source", async () => {
+    const id = await addManualRecommendation(db, {
+      url: "https://www.instagram.com/reel/C9xYz123AbC/",
+      creatorId: 1,
+      place: validInput.place,
+      dish: validInput.dish,
+      tsSeconds: null,
+      note: "Seen on reel",
+    });
+    const [rec] = await db
+      .select()
+      .from(schema.recommendations)
+      .where(eq(schema.recommendations.id, id));
+    expect(rec).toMatchObject({ status: "approved", origin: "manual" });
+    const [source] = await db
+      .select()
+      .from(schema.sources)
+      .where(eq(schema.sources.externalId, "C9xYz123AbC"));
+    expect(source.platform).toBe("instagram");
+  });
+
+  it("rejects a manual pick with an unsupported URL and writes nothing", async () => {
+    await expect(
+      addManualRecommendation(db, {
+        url: "https://example.com/x",
+        creatorId: 1,
+        place: validInput.place,
+        dish: validInput.dish,
+        tsSeconds: null,
+        note: "",
+      }),
+    ).rejects.toThrow(/URL/);
+    expect(await db.select().from(schema.places)).toHaveLength(0);
   });
 
   it("refuses to merge a place into itself", async () => {
