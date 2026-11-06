@@ -8,6 +8,7 @@ import {
   rejectFormAction,
   suggestLocationFormAction,
 } from "./actions";
+import { Shortcuts } from "./Shortcuts";
 
 type Extracted = {
   place_name?: string;
@@ -99,6 +100,7 @@ async function ReviewCard({ searchParams }: { searchParams: Search }) {
       </div>
 
       {error && <ErrorBanner message={error} />}
+      <Shortcuts />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="flex flex-col gap-3">
@@ -210,7 +212,7 @@ async function ReviewCard({ searchParams }: { searchParams: Search }) {
               <textarea name="note" maxLength={140} rows={2} className={`${field} py-2`} />
             </label>
 
-            <button type="submit" className={`${button} bg-accent text-paper`}>
+            <button id="approve-button" type="submit" className={`${button} bg-accent text-paper`}>
               Approve
             </button>
           </form>
@@ -228,7 +230,7 @@ async function ReviewCard({ searchParams }: { searchParams: Search }) {
             </form>
             <form action={rejectFormAction}>
               <input type="hidden" name="id" value={rec.id} />
-              <button type="submit" className={`${button} border border-line`}>
+              <button id="reject-button" type="submit" className={`${button} border border-line`}>
                 Reject
               </button>
             </form>
