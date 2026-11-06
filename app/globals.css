@@ -1,8 +1,9 @@
 @import "tailwindcss";
 
 /* Design tokens (S0-5). One accent, warm neutrals, two-step radius.
-   Contrast checked against --color-paper (#fdfbf7):
-   ink 15.9:1, muted 5.9:1, accent 6.4:1, white on accent 6.0:1 — all AA. */
+   Contrast measured against --color-paper (#fdfbf7) and dark paper (#14110f):
+   ink 17.4:1, muted 5.7:1, accent 7.1:1, white on accent 7.3:1;
+   dark ink 16.6:1, dark muted 7.2:1, dark accent 7.5:1 — all pass AA. */
 @theme {
   --color-ink: #1a1614;
   --color-muted: #6b635c;
