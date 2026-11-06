@@ -18,6 +18,14 @@ export const creators = [
     ytChannelId: "UC2UWtuZR3kH-5C26HVMMB6A",
     igHandle: "aayushsapra2",
   },
+  // Channel IDs resolved from each @handle page and checked against the live feed.
+  { slug: "delhi-food-walks", name: "Delhi Food Walks", ytChannelId: "UC2LxkEsKAr_Qrm_IKESnOnQ", igHandle: null },
+  { slug: "sadi-gaddi", name: "Sadi Gaddi", ytChannelId: "UCPEaAv-_U49k7j_X0wfkNQA", igHandle: null },
+  { slug: "bhooka-saand", name: "Bhooka Saand", ytChannelId: "UCv6Vt0cc-CNQrRj4yCBG9Ig", igHandle: null },
+  { slug: "veggie-paaji", name: "Veggie Paaji", ytChannelId: "UCVC9JRU1JpfupKHVV0sThOg", igHandle: null },
+  { slug: "foodie-incarnate", name: "Foodie Incarnate", ytChannelId: "UCMfyiLGzptAStxYf7GEIQYQ", igHandle: null },
+  { slug: "dilsefoodie", name: "Dilsefoodie Official", ytChannelId: "UCxiBEi8RF-l6ib4SMDTd35w", igHandle: null },
+  { slug: "the-urban-guide", name: "The Urban Guide", ytChannelId: "UCycORvCTjr7zn-fxttE81zw", igHandle: null },
 ];
 
 export const dishes: SeedDish[] = [

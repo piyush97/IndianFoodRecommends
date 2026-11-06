@@ -5,6 +5,13 @@ const slugOf = (s: string) =>
   s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
 describe("seed data", () => {
+  it("seeds 8 creators with unique YouTube channel ids", () => {
+    expect(creators).toHaveLength(8);
+    const ids = creators.map((c) => c.ytChannelId);
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const id of ids) expect(id).toMatch(/^UC[0-9A-Za-z_-]{22}$/);
+  });
+
   it("seeds the Ayush Sapra channel", () => {
     const ayush = creators.find((c) => c.slug === "ayush-sapra");
     expect(ayush?.ytChannelId).toBe("UC2UWtuZR3kH-5C26HVMMB6A");
