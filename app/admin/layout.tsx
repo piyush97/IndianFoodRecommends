@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { auth, isAdminEmail, signOut } from "../../lib/auth";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -14,6 +15,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 }
 
 async function AdminGate({ children }: { children: React.ReactNode }) {
+  await connection();
   const session = await auth();
   const email = session?.user?.email;
   if (!email) redirect("/api/auth/signin?callbackUrl=/admin/review");

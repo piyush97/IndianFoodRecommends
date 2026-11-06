@@ -81,6 +81,19 @@ describeDb("runIngest", () => {
     expect(recs[0].placeId).toBeNull();
   });
 
+  it("backfills a new creator's feed up to a year back", async () => {
+    let since: Date | undefined;
+    await runIngest(
+      deps({
+        listUploads: async (_id, opts) => {
+          since = opts?.since;
+          return [];
+        },
+      }),
+    );
+    expect(since?.toISOString().slice(0, 10)).toBe("2025-11-06");
+  });
+
   it("does not duplicate on a second run", async () => {
     await runIngest(deps());
     const second = await runIngest(deps());

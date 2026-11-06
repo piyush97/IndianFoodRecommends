@@ -136,6 +136,21 @@ describeDb("autoReviewPending", () => {
     expect(summary).toEqual({ approved: 1, rejected: 1, skipped: 0 });
   });
 
+  it("reviews community suggestions with the same gate", async () => {
+    await db.insert(schema.recommendations).values({
+      sourceId: 1,
+      confidence: 0.6,
+      origin: "community",
+      extracted: { ...base, confidence: 0.6, submitted: true },
+    });
+    await autoReviewPending({ ...deps(), check: async () => ({ ...good, grounded: 0.2 }) });
+    const [rec] = await db.select().from(schema.recommendations);
+    expect(rec.status).toBe("rejected");
+    expect((rec.extracted as { autoReview: { reason: string } }).autoReview.reason).toBe(
+      "not-grounded",
+    );
+  });
+
   it("leaves a pick pending when Jev is down", async () => {
     await pending(base);
     const summary = await autoReviewPending({

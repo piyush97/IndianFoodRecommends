@@ -1,4 +1,4 @@
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { schema, type Db } from "../db";
 import { CITIES, cityBySlug, cityFromName, type City } from "./cities";
 import type { ExtractedPick } from "./llm/extract";
@@ -127,7 +127,7 @@ export type AutoReviewDeps = {
 
 export type AutoReviewSummary = { approved: number; rejected: number; skipped: number };
 
-/** Decides every pending LLM pick. Picks whose video text is gone are rejected. */
+/** Decides every pending LLM or community pick. Picks whose video text is gone are rejected. */
 export async function autoReviewPending(deps: AutoReviewDeps): Promise<AutoReviewSummary> {
   const { db } = deps;
   const summary: AutoReviewSummary = { approved: 0, rejected: 0, skipped: 0 };
@@ -146,7 +146,11 @@ export async function autoReviewPending(deps: AutoReviewDeps): Promise<AutoRevie
     .innerJoin(schema.sources, eq(schema.sources.id, schema.recommendations.sourceId))
     .innerJoin(schema.creators, eq(schema.creators.id, schema.sources.creatorId))
     .where(
-      and(eq(schema.recommendations.status, "pending"), eq(schema.recommendations.origin, "llm")),
+      and(
+        eq(schema.recommendations.status, "pending"),
+        // Community suggestions pass the same video-grounding gate as LLM picks.
+        inArray(schema.recommendations.origin, ["llm", "community"]),
+      ),
     );
 
   const feeds = new Map<string, Map<string, Upload>>();

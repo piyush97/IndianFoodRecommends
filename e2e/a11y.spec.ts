@@ -10,6 +10,7 @@ const PAGES = [
   "/search?q=chole",
   "/search?q=zzzz",
   "/about",
+  "/submit",
 ];
 
 for (const path of PAGES) {

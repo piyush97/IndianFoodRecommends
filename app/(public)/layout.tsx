@@ -29,6 +29,13 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
           >
             About, content policy and creator opt-out
           </Link>
+          {" · "}
+          <Link
+            href="/submit"
+            className="inline-flex min-h-11 items-center underline focus-visible:outline-2 focus-visible:outline-accent"
+          >
+            Suggest a pick
+          </Link>
         </p>
         <p>
           {optOut ? (
