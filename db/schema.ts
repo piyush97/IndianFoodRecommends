@@ -118,13 +118,11 @@ export const recommendations = pgTable(
   },
   (t) => [
     index("recs_status_place_idx").on(t.status, t.placeId),
-    // coalesce so unmatched (NULL) place/dish/timestamp rows still dedupe.
-    uniqueIndex("recs_dedupe_uk").on(
-      t.sourceId,
-      sql`coalesce(${t.placeId}, -1)`,
-      sql`coalesce(${t.dishId}, -1)`,
-      sql`coalesce(${t.tsSeconds}, -1)`,
-    ),
+    // Only matched picks dedupe: one video may yield several unmatched pending
+    // picks. Videos themselves dedupe on sources(platform, external_id).
+    uniqueIndex("recs_dedupe_uk")
+      .on(t.sourceId, t.placeId, t.dishId, sql`coalesce(${t.tsSeconds}, -1)`)
+      .where(sql`${t.placeId} is not null and ${t.dishId} is not null`),
   ],
 );
 

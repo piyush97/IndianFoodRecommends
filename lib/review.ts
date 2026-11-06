@@ -3,7 +3,7 @@ import { z } from "zod";
 import { schema, type Db } from "../db";
 import { slugify } from "./text";
 
-type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];
+export type Tx = Parameters<Parameters<Db["transaction"]>[0]>[0];
 
 const PlaceNew = z.object({
   name: z.string().min(1),
@@ -23,7 +23,7 @@ export const ApproveInput = z.object({
 
 export type ApproveInput = z.infer<typeof ApproveInput>;
 
-async function insertWithSlug(
+export async function insertWithSlug(
   tx: Tx,
   fn: (slug: string) => Promise<{ id: number } | undefined>,
   base: string,

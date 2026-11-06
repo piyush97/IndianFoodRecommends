@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { db } from "../db";
+import { autoReviewPending, checkPick, geocodeDelhi } from "../lib/auto-review";
 import { classifyVideo, gatedExtract } from "../lib/jev";
 import { extractPicks } from "../lib/llm/extract";
 import { listUploads } from "../lib/youtube";
@@ -17,6 +18,20 @@ function extractor() {
 async function ingest(): Promise<void> {
   const summary = await runIngest({ db, listUploads, extract: extractor(), now: () => new Date() });
   console.log(JSON.stringify(summary));
+
+  // No human queue: Jev verifies each pick and code approves or rejects it.
+  const apiKey = process.env.TYPESAFE_API_KEY;
+  if (!apiKey) {
+    console.log("auto-review: TYPESAFE_API_KEY unset, picks stay pending");
+    return;
+  }
+  const review = await autoReviewPending({
+    db,
+    listUploads: (channelId) => listUploads(channelId),
+    check: (video, pick) => checkPick(video, pick, { apiKey }),
+    geocode: geocodeDelhi,
+  });
+  console.log(JSON.stringify({ autoReview: review }));
 }
 
 async function evaluate(): Promise<void> {

@@ -1,0 +1,2 @@
+DROP INDEX "recs_dedupe_uk";--> statement-breakpoint
+CREATE UNIQUE INDEX "recs_dedupe_uk" ON "recommendations" USING btree ("source_id","place_id","dish_id",coalesce("ts_seconds", -1)) WHERE "recommendations"."place_id" is not null and "recommendations"."dish_id" is not null;

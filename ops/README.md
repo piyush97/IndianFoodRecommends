@@ -20,7 +20,10 @@ journalctl -u ifr-ingest -n 100 --no-pager
 
 ## Notes
 
-- `.env` must hold `DATABASE_URL`, `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`.
+- `.env` must hold `DATABASE_URL` (Neon, the live DB), `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`, `TYPESAFE_API_KEY`.
 - No YouTube API key: ingest reads the public channel feed.
-- Do not enable the timer until the eval gate in Task 8 passes (precision >= 0.85).
+- Enabled 2026-11-06. Each run: ingest new videos, then auto-review every pending pick with Jev
+  (`lib/auto-review.ts`). No human queue; `/admin/review` only shows picks left pending when Jev was down.
+- Every decision is stored in `recommendations.extracted.autoReview` (reason + Jev scores).
+  Audit rejects: `select extracted->>'place_name', extracted->'autoReview'->>'reason' from recommendations where status='rejected';`
 - Manual run: `pnpm worker ingest`.

@@ -27,7 +27,7 @@ describeDb("seed + schema", () => {
     expect(row.n).toBe(seedDishes.length);
   });
 
-  it("dedupes a recommendation with null place/dish/timestamp", async () => {
+  it("dedupes matched picks but allows several unmatched pending picks", async () => {
     const [creator] = await db
       .insert(schema.creators)
       .values({ slug: "test-creator", name: "Test Creator" })
@@ -36,12 +36,22 @@ describeDb("seed + schema", () => {
       .insert(schema.sources)
       .values({ platform: "youtube", externalId: "test-video", creatorId: creator.id })
       .returning();
+    const [city] = await db.select().from(schema.cities).limit(1);
+    const [place] = await db
+      .insert(schema.places)
+      .values({ slug: "test-place", name: "Test Place", cityId: city.id })
+      .returning();
+    const [dish] = await db.select().from(schema.dishes).limit(1);
 
-    const values = { sourceId: source.id, confidence: 0.9 };
-    await db.insert(schema.recommendations).values(values);
+    const unmatched = { sourceId: source.id, confidence: 0.9 };
+    await db.insert(schema.recommendations).values(unmatched);
+    await db.insert(schema.recommendations).values(unmatched);
+
+    const matched = { sourceId: source.id, placeId: place.id, dishId: dish.id };
+    await db.insert(schema.recommendations).values(matched);
     const second = await db
       .insert(schema.recommendations)
-      .values(values)
+      .values(matched)
       .onConflictDoNothing()
       .returning();
 
