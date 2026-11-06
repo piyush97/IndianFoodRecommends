@@ -1,0 +1,9 @@
+[Unit]
+Description=Back up IndianFoodRecommends daily at 02:30 IST
+
+[Timer]
+OnCalendar=*-*-* 02:30:00 Asia/Kolkata
+Persistent=true
+
+[Install]
+WantedBy=timers.target

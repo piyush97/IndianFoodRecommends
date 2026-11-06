@@ -27,3 +27,23 @@ journalctl -u ifr-ingest -n 100 --no-pager
 - Every decision is stored in `recommendations.extracted.autoReview` (reason + Jev scores).
   Audit rejects: `select extracted->>'place_name', extracted->'autoReview'->>'reason' from recommendations where status='rejected';`
 - Manual run: `pnpm worker ingest`.
+
+# Nightly backups
+
+`ops/backup.sh` dumps the production database (Neon, `DATABASE_URL_UNPOOLED` from `.env`) to
+`/var/backups/ifr/ifr-<UTC time>.dump` (custom format, mode 600) and keeps the newest 14.
+A failed dump exits non-zero and deletes nothing. Neon runs Postgres 18, so the PGDG
+`postgresql-client-18` package is installed; the script picks the newest local `pg_dump`.
+
+```bash
+sudo systemctl link /root/Projects/IndianFoodRecommends/ops/ifr-backup.service
+sudo systemctl link /root/Projects/IndianFoodRecommends/ops/ifr-backup.timer
+sudo systemctl enable --now ifr-backup.timer      # daily 02:30 IST
+bash ops/backup.test.sh                           # stubbed pg_dump, 3 cases
+```
+
+Restore into a scratch database:
+
+```bash
+/usr/lib/postgresql/18/bin/pg_restore --no-owner --dbname "$SCRATCH_URL" /var/backups/ifr/<file>.dump
+```
