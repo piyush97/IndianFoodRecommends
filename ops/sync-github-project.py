@@ -23,6 +23,7 @@ DONE = {
     "S0-1", "S0-2", "S0-3", "S0-4", "S0-5", "S0-6", "S0-7",
     "S1-1", "S1-2", "S1-3", "S1-4", "S1-5", "S1-6", "S1-7", "S1-8", "S1-9", "S1-10", "S1-11",
     "S2-1", "S2-2", "S2-3", "S2-4", "S2-5", "S2-6", "S2-7", "S2-8", "S2-9", "S2-10",
+    "S3-1", "S3-2", "S3-3", "S3-4", "S3-5", "S3-6", "S3-7", "S3-8", "S3-9",
 }
 NOTES = {
     "S0-7": "Done with Neon via Vercel Marketplace. No Google Cloud key: YouTube RSS replaced the Data API.",
@@ -30,6 +31,12 @@ NOTES = {
     "S1-3": "Replaced: eval harness exists (`pnpm worker eval`); the human 50-video gate was replaced by automatic Jev review at owner's request.",
     "S1-9": "Done without the E2E test; admin E2E needs a test-auth strategy (Plan 2).",
     "S1-11": "Replaced by automatic Jev review (lib/auto-review.ts); no human queue.",
+    "S3-4": "Lighthouse mobile on prod: home 99, dish 95, place 98, CLS 0 (ops/lighthouse.md).",
+    "S3-5": "axe in Playwright on 8 pages: 0 serious/critical.",
+    "S3-6": "Umami wired behind NEXT_PUBLIC_UMAMI_WEBSITE_ID; owner creates the free Umami account to turn it on.",
+    "S3-7": "CSP + headers live; fresh security review: admin page data leak and pg_dump argv password fixed.",
+    "S3-8": "About/content policy/opt-out page live; opt-out email pending owner (NEXT_PUBLIC_OPTOUT_EMAIL).",
+    "S3-9": "Prod deploy + nightly Neon backups (14 kept). Domain stays the Vercel subdomain until owner buys one.",
     "S2-4": "Done with MapLibre + OpenFreeMap tiles (no API key); list is the default view.",
     "S2-9": "Done via tag `public` + POST /api/revalidate called by the worker after approvals.",
     "S2-10": "Done: Playwright search→dish→place→watch and 360px overflow, in the CI db job.",
