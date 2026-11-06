@@ -10,7 +10,7 @@ test("a visitor can suggest a pick without CSP violations", async ({ page }) => 
     );
   });
   await page.goto("/submit");
-  await page.getByLabel("Video or reel link").fill("https://youtu.be/abcdefghijk");
+  await page.getByLabel("YouTube video link").fill("https://youtu.be/abcdefghijk");
   await page.getByRole("combobox", { name: "Creator" }).selectOption({ label: "E2E Creator" });
   await page.getByRole("combobox", { name: "City" }).selectOption({ label: "Delhi" });
   await page.getByLabel("Place name").fill("Sita Ram Diwan Chand");

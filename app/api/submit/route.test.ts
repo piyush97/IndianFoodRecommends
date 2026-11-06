@@ -19,13 +19,13 @@ function req(body: unknown) {
 describe("POST /api/submit", () => {
   beforeEach(() => {
     process.env.REPORT_SALT = "salt";
-    process.env.NEXT_PUBLIC_VERCEL_ENV = "production";
+    process.env.VERCEL = "1";
     checkBotId.mockReset();
     createSubmission.mockReset();
   });
   afterEach(() => {
     delete process.env.REPORT_SALT;
-    delete process.env.NEXT_PUBLIC_VERCEL_ENV;
+    delete process.env.VERCEL;
   });
 
   it("blocks bots before touching the database", async () => {
@@ -35,7 +35,7 @@ describe("POST /api/submit", () => {
   });
 
   it("skips BotID off Vercel, where it cannot classify", async () => {
-    delete process.env.NEXT_PUBLIC_VERCEL_ENV;
+    delete process.env.VERCEL;
     createSubmission.mockResolvedValue({ ok: true });
     expect((await POST(req({ url: "u" }))).status).toBe(201);
     expect(checkBotId).not.toHaveBeenCalled();

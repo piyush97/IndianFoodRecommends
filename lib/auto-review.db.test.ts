@@ -9,6 +9,7 @@ const describeDb = handle ? describe : describe.skip;
 
 const good: PickCheck = {
   grounded: 0.9,
+  dishGrounded: 0.9,
   isVenue: 0.9,
   recommends: 0.9,
   city: "delhi",
@@ -136,19 +137,56 @@ describeDb("autoReviewPending", () => {
     expect(summary).toEqual({ approved: 1, rejected: 1, skipped: 0 });
   });
 
-  it("reviews community suggestions with the same gate", async () => {
-    await db.insert(schema.recommendations).values({
-      sourceId: 1,
-      confidence: 0.6,
-      origin: "community",
-      extracted: { ...base, confidence: 0.6, submitted: true },
-    });
-    await autoReviewPending({ ...deps(), check: async () => ({ ...good, grounded: 0.2 }) });
+  async function submission(over: Partial<typeof schema.submissions.$inferInsert> = {}) {
+    const [row] = await db
+      .insert(schema.submissions)
+      .values({
+        videoId: "v1",
+        creatorId: 1,
+        citySlug: "delhi",
+        placeName: "Chache Di Hatti",
+        dishName: "Chole Bhature",
+        tsSeconds: 252,
+        ipHash: "h",
+        ...over,
+      })
+      .returning();
+    return row.id;
+  }
+
+  it("publishes a submission only from the creator's own feed, creating the source then", async () => {
+    await db.delete(schema.sources);
+    await submission();
+    const summary = await autoReviewPending(deps());
+    expect(summary.approved).toBe(1);
+    const [sub] = await db.select().from(schema.submissions);
+    expect(sub).toMatchObject({ status: "approved" });
+    const [source] = await db.select().from(schema.sources);
+    expect(source).toMatchObject({ externalId: "v1", creatorId: 1 });
     const [rec] = await db.select().from(schema.recommendations);
-    expect(rec.status).toBe("rejected");
-    expect((rec.extracted as { autoReview: { reason: string } }).autoReview.reason).toBe(
-      "not-grounded",
-    );
+    expect(rec).toMatchObject({ origin: "community", status: "approved", tsSeconds: 252 });
+  });
+
+  it("rejects a submission whose video is not in that creator's feed", async () => {
+    await submission({ videoId: "someone-elses" });
+    await autoReviewPending(deps());
+    const [sub] = await db.select().from(schema.submissions);
+    expect(sub).toMatchObject({ status: "rejected", reason: "not-creators-video" });
+    expect(await db.select().from(schema.recommendations)).toHaveLength(0);
+  });
+
+  it("rejects a submission whose city Jev does not confirm", async () => {
+    await submission();
+    await autoReviewPending({ ...deps(), check: async () => ({ ...good, city: "mumbai" }) });
+    const [sub] = await db.select().from(schema.submissions);
+    expect(sub).toMatchObject({ status: "rejected", reason: "city-mismatch" });
+  });
+
+  it("adds a submitted pick to a video the worker already ingested", async () => {
+    await submission();
+    await autoReviewPending(deps());
+    expect(await db.select().from(schema.sources)).toHaveLength(1);
+    expect((await db.select().from(schema.recommendations))[0].sourceId).toBe(1);
   });
 
   it("leaves a pick pending when Jev is down", async () => {

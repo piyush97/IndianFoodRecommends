@@ -12,6 +12,7 @@ const pick: ExtractedPick = {
 };
 const good: PickCheck = {
   grounded: 0.9,
+  dishGrounded: 0.9,
   isVenue: 0.9,
   recommends: 0.85,
   city: "delhi",
@@ -92,6 +93,39 @@ describe("decidePick", () => {
     expect(decidePick({ ...pick, confidence: 0.3 }, good)).toEqual({
       approve: false,
       reason: "low-confidence",
+    });
+  });
+
+  describe("community suggestions (visitor-supplied text)", () => {
+    const submitted = { ...pick, submitted: true } as ExtractedPick & { submitted: true };
+
+    it("does not trust the visitor's city: Jev must agree with it", () => {
+      expect(
+        decidePick(
+          { ...submitted, city: "Delhi" },
+          { ...good, city: "mumbai", cityConfidence: 0.95 },
+        ),
+      ).toEqual({
+        approve: false,
+        reason: "city-mismatch",
+      });
+      expect(decidePick({ ...submitted, city: "Delhi" }, { ...good, cityConfidence: 0.5 })).toEqual(
+        {
+          approve: false,
+          reason: "city-mismatch",
+        },
+      );
+      expect(decidePick({ ...submitted, city: "Delhi" }, good)).toEqual({
+        approve: true,
+        city: "delhi",
+      });
+    });
+
+    it("requires the video to mention the submitted dish", () => {
+      expect(decidePick(submitted, { ...good, dishGrounded: 0.2 })).toEqual({
+        approve: false,
+        reason: "dish-not-grounded",
+      });
     });
   });
 });

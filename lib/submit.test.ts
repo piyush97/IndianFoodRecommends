@@ -47,19 +47,37 @@ describeDb("createSubmission", () => {
     await handle?.close();
   });
 
-  it("stores a pending community pick and no video text", async () => {
+  it("stores a pending submission with no video text", async () => {
     expect(await createSubmission(db, valid, "ip1", now)).toEqual({ ok: true });
-    const [rec] = await db.select().from(schema.recommendations);
-    expect(rec).toMatchObject({ status: "pending", origin: "community", tsSeconds: 252 });
-    expect(rec.extracted).toMatchObject({
-      place_name: "Chache Di Hatti",
-      dishes: ["Chole Bhature"],
-      city: "Delhi",
-      timestamp_seconds: 252,
-      submitted: true,
+    const [row] = await db.select().from(schema.submissions);
+    expect(row).toMatchObject({
+      videoId: "dQw4w9WgXcQ",
+      creatorId: 1,
+      citySlug: "delhi",
+      placeName: "Chache Di Hatti",
+      dishName: "Chole Bhature",
+      tsSeconds: 252,
+      status: "pending",
+      ipHash: "ip1",
     });
-    const [source] = await db.select().from(schema.sources);
-    expect(source).toMatchObject({ platform: "youtube", externalId: "dQw4w9WgXcQ" });
+    expect(await db.select().from(schema.recommendations)).toHaveLength(0);
+  });
+
+  it("never creates a source row, so the creator's own ingest still sees the video", async () => {
+    await createSubmission(db, valid, "ip1", now);
+    expect(await db.select().from(schema.sources)).toHaveLength(0);
+    expect(await db.select().from(schema.submissions)).toHaveLength(1);
+  });
+
+  it("rejects Instagram links: only YouTube feeds can be checked", async () => {
+    expect(
+      await createSubmission(
+        db,
+        { ...valid, url: "https://www.instagram.com/reel/C9xYz123AbC/" },
+        "ip1",
+        now,
+      ),
+    ).toEqual({ ok: false, status: 400 });
   });
 
   it("does not duplicate the same place for the same video", async () => {
@@ -69,8 +87,7 @@ describeDb("createSubmission", () => {
     ).toEqual({
       ok: true,
     });
-    expect(await db.select().from(schema.recommendations)).toHaveLength(1);
-    expect(await db.select().from(schema.sources)).toHaveLength(1);
+    expect(await db.select().from(schema.submissions)).toHaveLength(1);
   });
 
   it("allows 3 per hour per IP, then 429", async () => {
@@ -83,7 +100,7 @@ describeDb("createSubmission", () => {
       ok: false,
       status: 429,
     });
-    expect(await db.select().from(schema.recommendations)).toHaveLength(3);
+    expect(await db.select().from(schema.submissions)).toHaveLength(3);
   });
 
   it("rejects unknown or opted-out creators", async () => {
@@ -108,6 +125,6 @@ describeDb("createSubmission", () => {
       ok: false,
       status: 400,
     });
-    expect(await db.select().from(schema.recommendations)).toHaveLength(0);
+    expect(await db.select().from(schema.submissions)).toHaveLength(0);
   });
 });

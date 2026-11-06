@@ -15,6 +15,7 @@ import type { Upload } from "./youtube";
 
 export type PickCheck = {
   grounded: number; // video text names this place
+  dishGrounded: number; // video text mentions the dish
   isVenue: number; // place_name is a shop/restaurant, not a dish or a person
   recommends: number; // video speaks well of it
   /** Jev's pick among registered city slugs or "other", used only when the LLM gave no city. */
@@ -33,6 +34,8 @@ export type Decision =
         | "not-a-venue"
         | "not-recommended"
         | "low-confidence"
+        | "city-mismatch"
+        | "dish-not-grounded"
         | "duplicate";
     };
 
@@ -43,9 +46,17 @@ const MIN_RECOMMENDS = 0.6;
 const MIN_CITY_WHEN_UNSTATED = 0.8;
 const REUSE_MATCH_SCORE = 0.8;
 
-export function decidePick(pick: ExtractedPick, check: PickCheck): Decision {
+type Reviewable = ExtractedPick & { submitted?: boolean };
+
+export function decidePick(pick: Reviewable, check: PickCheck): Decision {
   let city: City | null;
-  if (pick.city) {
+  if (pick.submitted) {
+    // Visitor-typed city: only the video decides, so Jev must name the same city.
+    city = cityFromName(pick.city);
+    if (!city || check.city !== city.slug || check.cityConfidence < MIN_CITY_WHEN_UNSTATED) {
+      return { approve: false, reason: "city-mismatch" };
+    }
+  } else if (pick.city) {
     city = cityFromName(pick.city);
     if (!city) return { approve: false, reason: "not-supported-city" };
   } else {
@@ -54,6 +65,10 @@ export function decidePick(pick: ExtractedPick, check: PickCheck): Decision {
   }
   if (pick.confidence < MIN_LLM_CONFIDENCE) return { approve: false, reason: "low-confidence" };
   if (check.grounded < MIN_GROUNDED) return { approve: false, reason: "not-grounded" };
+  // Visitor-typed dish becomes a public page: it must appear in the video text.
+  if (pick.submitted && check.dishGrounded < MIN_GROUNDED) {
+    return { approve: false, reason: "dish-not-grounded" };
+  }
   if (check.isVenue < MIN_VENUE) return { approve: false, reason: "not-a-venue" };
   if (check.recommends < MIN_RECOMMENDS) return { approve: false, reason: "not-recommended" };
   return { approve: true, city: city.slug };
@@ -80,6 +95,10 @@ export async function checkPick(
           type: "noul",
           instructions: "The `title` or `description` names the food place `place_name`",
         },
+        dish_grounded: {
+          type: "noul",
+          instructions: "The `title` or `description` mentions the dish in `dishes`",
+        },
         is_venue: {
           type: "noul",
           instructions:
@@ -92,7 +111,8 @@ export async function checkPick(
         },
         city: {
           type: "choice",
-          instructions: "Which city `place_name` is located in",
+          instructions:
+            "Which city `place_name` is located in, judging only from `title` and `description`",
           criteria: {
             ...Object.fromEntries(CITIES.map((c) => [c.slug, [c.name, ...c.aliases].join(", ")])),
             other: "Any other city, or it cannot be told",
@@ -103,12 +123,13 @@ export async function checkPick(
   });
   if (!res.ok) throw new Error(`Jev request failed with status ${res.status}`);
   const { answers } = (await res.json()) as {
-    answers: Record<"grounded" | "is_venue" | "recommends", { noul: number }> & {
+    answers: Record<"grounded" | "dish_grounded" | "is_venue" | "recommends", { noul: number }> & {
       city: { choice: string; confidence: number };
     };
   };
   return {
     grounded: answers.grounded.noul,
+    dishGrounded: answers.dish_grounded.noul,
     isVenue: answers.is_venue.noul,
     recommends: answers.recommends.noul,
     city: answers.city.choice,
@@ -135,6 +156,18 @@ export async function autoReviewPending(deps: AutoReviewDeps): Promise<AutoRevie
     (await db.select().from(schema.cities)).map((c) => [c.slug, c.id] as const),
   );
 
+  const feeds = new Map<string, Map<string, Upload>>();
+  async function videoText(channelId: string | null, videoId: string): Promise<Upload | undefined> {
+    if (!channelId) return undefined;
+    if (!feeds.has(channelId)) {
+      const uploads = await deps.listUploads(channelId).catch(() => []);
+      feeds.set(channelId, new Map(uploads.map((u) => [u.videoId, u])));
+    }
+    return feeds.get(channelId)!.get(videoId);
+  }
+
+  summary.rejected += await admitSubmissions(db, videoText);
+
   const pending = await db
     .select({
       id: schema.recommendations.id,
@@ -152,16 +185,6 @@ export async function autoReviewPending(deps: AutoReviewDeps): Promise<AutoRevie
         inArray(schema.recommendations.origin, ["llm", "community"]),
       ),
     );
-
-  const feeds = new Map<string, Map<string, Upload>>();
-  async function videoText(channelId: string | null, videoId: string): Promise<Upload | undefined> {
-    if (!channelId) return undefined;
-    if (!feeds.has(channelId)) {
-      const uploads = await deps.listUploads(channelId).catch(() => []);
-      feeds.set(channelId, new Map(uploads.map((u) => [u.videoId, u])));
-    }
-    return feeds.get(channelId)!.get(videoId);
-  }
 
   for (const row of pending) {
     const extracted = (row.extracted ?? {}) as ExtractedPick & { suggestions?: Suggestions };
@@ -204,7 +227,94 @@ export async function autoReviewPending(deps: AutoReviewDeps): Promise<AutoRevie
       summary.rejected++;
     }
   }
+  await syncSubmissions(db);
   return summary;
+}
+
+/**
+ * Turns pending visitor submissions into pending community picks, but only when
+ * the video is in the chosen creator's own feed. The `sources` row is created
+ * here, after that check, so an unchecked URL never blocks or mislabels ingest.
+ * Returns how many submissions were rejected outright.
+ */
+async function admitSubmissions(
+  db: Db,
+  videoText: (channelId: string | null, videoId: string) => Promise<Upload | undefined>,
+): Promise<number> {
+  const rows = await db
+    .select({ sub: schema.submissions, channelId: schema.creators.ytChannelId })
+    .from(schema.submissions)
+    .innerJoin(schema.creators, eq(schema.creators.id, schema.submissions.creatorId))
+    .where(and(eq(schema.submissions.status, "pending"), eq(schema.creators.optedOut, false)));
+
+  let rejected = 0;
+  for (const { sub, channelId } of rows) {
+    const video = await videoText(channelId, sub.videoId);
+    if (!video) {
+      await db
+        .update(schema.submissions)
+        .set({ status: "rejected", reason: "not-creators-video", reviewedAt: new Date() })
+        .where(eq(schema.submissions.id, sub.id));
+      rejected++;
+      continue;
+    }
+    const city = cityBySlug(sub.citySlug);
+    await db.transaction(async (tx) => {
+      await tx
+        .insert(schema.sources)
+        .values({
+          platform: "youtube",
+          externalId: sub.videoId,
+          creatorId: sub.creatorId,
+          publishedOn: video.publishedAt.toISOString().slice(0, 10),
+        })
+        .onConflictDoNothing();
+      const [source] = await tx
+        .select({ id: schema.sources.id })
+        .from(schema.sources)
+        .where(
+          and(eq(schema.sources.platform, "youtube"), eq(schema.sources.externalId, sub.videoId)),
+        );
+      const [rec] = await tx
+        .insert(schema.recommendations)
+        .values({
+          sourceId: source.id,
+          status: "pending",
+          origin: "community",
+          tsSeconds: sub.tsSeconds,
+          confidence: 0.6,
+          extracted: {
+            place_name: sub.placeName,
+            locality: null,
+            city: city?.name ?? sub.citySlug,
+            dishes: [sub.dishName],
+            timestamp_seconds: sub.tsSeconds,
+            confidence: 0.6,
+            submitted: true,
+            submissionId: sub.id,
+          },
+        })
+        .returning({ id: schema.recommendations.id });
+      // Status follows the recommendation from here; see syncSubmissions.
+      await tx
+        .update(schema.submissions)
+        .set({ recommendationId: rec.id })
+        .where(eq(schema.submissions.id, sub.id));
+    });
+  }
+  return rejected;
+}
+
+/** Copies each linked community pick's verdict back onto its submission. */
+async function syncSubmissions(db: Db): Promise<void> {
+  await db.execute(sql`
+    update submissions s
+    set status = r.status,
+        reason = r.extracted->'autoReview'->>'reason',
+        reviewed_at = r.reviewed_at
+    from recommendations r
+    where s.recommendation_id = r.id and s.status = 'pending' and r.status <> 'pending'
+  `);
 }
 
 async function settle(

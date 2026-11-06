@@ -11,8 +11,10 @@ const MESSAGES = {
 
 export async function POST(request: Request): Promise<Response> {
   // Vercel BotID: invisible challenge, attached by instrumentation-client.ts. It only works
-  // on Vercel deployments; local and CI builds fall back to the per-IP rate limit.
-  if (process.env.NEXT_PUBLIC_VERCEL_ENV) {
+  // on Vercel, which always sets VERCEL=1 at runtime; local and CI builds fall back to the
+  // per-IP rate limit. Not keyed on a NEXT_PUBLIC_ value, so it cannot be switched off by
+  // a build-time setting.
+  if (process.env.VERCEL === "1") {
     const verification = await checkBotId();
     if (verification.isBot) return Response.json({ error: "Request blocked." }, { status: 403 });
   }

@@ -18,8 +18,9 @@ export default function SubmitPage() {
     <section className="flex max-w-prose flex-col gap-4">
       <h1 className="text-3xl font-semibold tracking-tight">Saw a vlogger recommend a place?</h1>
       <p className="text-muted">
-        Send the video and we will check it against what the creator says. It shows on the site only
-        if the place is named in the video.
+        Send a YouTube video from one of the creators we follow. It shows on the site only if the
+        video is on that creator&apos;s channel and its description names the place, the dish and
+        the city.
       </p>
       <Suspense fallback={<Skeleton />}>
         <Form />

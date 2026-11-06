@@ -50,7 +50,7 @@ export function SubmitForm({
   return (
     <form onSubmit={submit} className="flex flex-col gap-4">
       <label className={label}>
-        Video or reel link
+        YouTube video link
         <input
           name="url"
           type="url"

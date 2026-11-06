@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Skeleton } from "../../../../../components/Skeleton";
+import { escapeXml } from "../../../../../lib/badge";
 import { absoluteUrl } from "../../../../../lib/seo/site";
 import { cachedCreator } from "../../../data";
 
@@ -25,7 +26,7 @@ async function Kit({ params }: Pick<PageProps<"/creator/[slug]/kit">, "params">)
   if (!data) notFound();
   const page = absoluteUrl(`/creator/${slug}`);
   const badge = absoluteUrl(`/creator/${slug}/badge`);
-  const snippet = `<a href="${page}"><img src="${badge}" alt="${data.creator.name.replace(/"/g, "&quot;")} on Indian Food Recommends" height="28"></a>`;
+  const snippet = `<a href="${page}"><img src="${badge}" alt="${escapeXml(data.creator.name)} on Indian Food Recommends" height="28"></a>`;
 
   return (
     <section className="flex max-w-prose flex-col gap-6">

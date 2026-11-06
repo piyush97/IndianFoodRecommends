@@ -57,7 +57,7 @@ async function ingest({ db, listUploads, extract, now }: IngestDeps): Promise<In
       const [latest] = await db
         .select({ publishedOn: schema.sources.publishedOn })
         .from(schema.sources)
-        .where(eq(schema.sources.creatorId, creator.id))
+        .where(and(eq(schema.sources.creatorId, creator.id), isNotNull(schema.sources.publishedOn)))
         .orderBy(desc(schema.sources.publishedOn))
         .limit(1);
 

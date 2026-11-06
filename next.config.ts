@@ -1,3 +1,4 @@
+import { withBotId } from "botid/next/config";
 import type { NextConfig } from "next";
 import { buildCsp } from "./lib/seo/csp";
 
@@ -36,4 +37,5 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// Adds BotID's challenge rewrites (botid README, step 1).
+export default withBotId(nextConfig);
