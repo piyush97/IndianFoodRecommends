@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { formatTs, youtubeEmbedUrl, type Platform } from "../lib/public/links";
 
 /** Nothing from YouTube or Instagram loads until the visitor asks for it. */
@@ -16,6 +16,11 @@ export function EmbedFacade({
   creator: string;
 }) {
   const [open, setOpen] = useState(false);
+  const frame = useRef<HTMLIFrameElement>(null);
+  // Keep keyboard users in place: the button they pressed is replaced by the frame.
+  useEffect(() => {
+    if (open) frame.current?.focus();
+  }, [open]);
   const ts = formatTs(tsSeconds);
   const label =
     platform === "instagram"
@@ -45,6 +50,7 @@ export function EmbedFacade({
       : `${youtubeEmbedUrl(externalId, tsSeconds)}${tsSeconds ? "&" : "?"}autoplay=1`;
   return (
     <iframe
+      ref={frame}
       src={src}
       title={label}
       className={`w-full rounded-[var(--radius-card)] border border-line ${

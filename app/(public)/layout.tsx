@@ -28,8 +28,16 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
         </nav>
       </header>
       <main className="flex flex-1 flex-col gap-8 py-8">{children}</main>
-      <footer className="border-t border-line py-6 text-sm text-muted">
+      <footer className="flex flex-col gap-1 border-t border-line py-6 text-sm text-muted">
         <p>Picks come from the food vloggers credited on each page, with a link to their video.</p>
+        <p>
+          <Link
+            href="/about"
+            className="inline-flex min-h-11 items-center underline focus-visible:outline-2 focus-visible:outline-accent"
+          >
+            About, content policy and creator opt-out
+          </Link>
+        </p>
         <p>
           {optOut ? (
             <>

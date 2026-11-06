@@ -10,12 +10,16 @@ export function PickList({
   citySlug,
   emptyText,
   numbered = true,
+  headingLevel = 3,
 }: {
   cards: PickCard[];
   citySlug: string;
   emptyText: string;
   numbered?: boolean;
+  /** 2 when the list sits directly under the page h1, 3 under a section h2. */
+  headingLevel?: 2 | 3;
 }) {
+  const Heading = headingLevel === 2 ? "h2" : "h3";
   if (cards.length === 0) return <p className="text-muted">{emptyText}</p>;
 
   return (
@@ -26,16 +30,16 @@ export function PickList({
         const n = card.creators.length;
         return (
           <li key={card.placeSlug} className="flex flex-col gap-2 py-4">
-            <h3 className="text-lg font-semibold">
+            <Heading className="text-lg font-semibold">
               {numbered && <span className="text-muted">{i + 1}. </span>}
               <Link
                 href={`/${citySlug}/place/${card.placeSlug}`}
-                className="underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-accent"
+                className="underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-accent"
               >
                 {card.placeName}
               </Link>
               {card.locality && <span className="font-normal text-muted"> · {card.locality}</span>}
-            </h3>
+            </Heading>
             <p className="text-sm">
               Picked by {n} {n === 1 ? "creator" : "creators"}:{" "}
               {card.creators.map((c, j) => (

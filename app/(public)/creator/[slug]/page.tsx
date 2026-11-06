@@ -92,6 +92,7 @@ async function Creator({ params, searchParams }: Props) {
       )}
 
       <PickList
+        headingLevel={2}
         cards={data.picks}
         citySlug="delhi"
         emptyText={
