@@ -13,7 +13,7 @@
 ## Global Constraints
 
 - YouTube API data (titles, descriptions, stats) is never persisted. Persist only `video_id`, channel ID, and our own derived facts. Fetched text lives in memory for the LLM call only.
-- Use `playlistItems.list` on the uploads playlist (`"UU" + channelId.slice(2)`), never `search.list` (100 quota units vs 1).
+- YouTube channel feed `https://www.youtube.com/feeds/videos.xml?channel_id=<id>`: no API key, no quota, latest 15 uploads with title and description.
 - LLM base URL from env `LLM_BASE_URL` (default `http://localhost:8317/v1`), key from `LLM_API_KEY`, model from `LLM_MODEL`. The Next.js app never calls the LLM. Only `/worker` does.
 - Nominatim: max 1 request/second, descriptive `User-Agent` from env `NOMINATIM_UA`. Results are suggestions only; an editor confirms lat/lng.
 - Coordinates must fall inside India bounds: lat 6.0 to 37.5, lng 68.0 to 97.5.
@@ -82,7 +82,7 @@ tests/**                      # mirrors lib/ and worker/
 
 - [ ] **Step 1:** Scaffold into the existing dir (keep `docs/`). Add scripts `typecheck: tsc --noEmit`, `test: vitest run`, `db:up: docker compose up -d`.
 - [ ] **Step 2:** `docker-compose.yml`: `postgres:16`, user/password/db `ifr`, port 5432, init script creating `ifr_test` and `CREATE EXTENSION pg_trgm` in both DBs.
-- [ ] **Step 3:** `.env.example` lists `DATABASE_URL`, `DATABASE_URL_TEST`, `YOUTUBE_API_KEY`, `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`, `NOMINATIM_UA`, `ADMIN_EMAILS`, `AUTH_SECRET`, `AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET`. `.gitignore` ignores `.env`.
+- [ ] **Step 3:** `.env.example` lists `DATABASE_URL`, `DATABASE_URL_TEST`, `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`, `NOMINATIM_UA`, `ADMIN_EMAILS`, `AUTH_SECRET`, `AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET`. `.gitignore` ignores `.env`.
 - [ ] **Step 4:** Smoke test `tests/smoke.test.ts`: `expect(1 + 1).toBe(2)`.
 - [ ] **Step 5:** CI workflow on PR/push: pnpm install, `lint`, `typecheck`, `test`; Postgres service container with pg_trgm for later tasks.
 - [ ] **Step 6: Verify.** Run `pnpm lint && pnpm typecheck && pnpm test && pnpm build`. Expected: all exit 0.
@@ -196,36 +196,29 @@ tests/**                      # mirrors lib/ and worker/
 
 ---
 
-### Task 6: YouTube client
+### Task 6: YouTube feed client (no API key)
 
 **Model:** Sonnet 5.5 (S1-1) · **Difficulty:** medium
 
-**Files:** Create `lib/youtube.ts`, `tests/lib/youtube.test.ts`
+**Files:** Create `lib/youtube.ts`, `lib/youtube.test.ts` (tests colocated; repo convention).
 
 **Interfaces:**
 - Produces:
   ```ts
-  export class QuotaExceededError extends Error {}
-  export const uploadsPlaylistId: (channelId: string) => string; // "UU" + channelId.slice(2)
   export type YtFetch = typeof fetch;
-  export function listUploads(channelId: string, apiKey: string,
-    opts?: { since?: Date; maxPages?: number; fetchImpl?: YtFetch }): Promise<{ videoId: string; publishedAt: Date }[]>;
-  export function getSnippets(videoIds: string[], apiKey: string,
-    fetchImpl?: YtFetch): Promise<{ videoId: string; title: string; description: string }[]>;
+  export type Upload = { videoId: string; publishedAt: Date; title: string; description: string };
+  export function feedUrl(channelId: string): string;
+  export function parseFeed(xml: string): Upload[];
+  export function listUploads(channelId: string,
+    opts?: { since?: Date; fetchImpl?: YtFetch }): Promise<Upload[]>;
   ```
-  `listUploads` pages `playlistItems.list` (maxResults 50, default `maxPages` 4), stops once items older than `since`. `getSnippets` batches 50 ids per `videos.list?part=snippet`.
+  Uses the public channel feed `https://www.youtube.com/feeds/videos.xml?channel_id=<id>`: no key, no quota, latest 15 uploads with title and full description. `listUploads` drops videos older than `since`. Entries without a video id are skipped.
 
-- [ ] **Step 1: Write failing tests** with fake fetch:
-  - `uploadsPlaylistId("UC2UWtuZR3kH-5C26HVMMB6A")` → `"UU2UWtuZR3kH-5C26HVMMB6A"`
-  - `listUploads` follows `nextPageToken` and stops at `since`
-  - `getSnippets` with 120 ids makes 3 requests
-  - HTTP 403 with `error.errors[0].reason === "quotaExceeded"` → throws `QuotaExceededError`
-  - other non-2xx → throws generic `Error` including status
-  - API key is sent only as `key` query param and never appears in thrown error messages
-- [ ] **Step 2:** Run `pnpm vitest run tests/lib/youtube.test.ts`. Expected: FAIL.
-- [ ] **Step 3:** Implement with plain `fetch`, no googleapis dependency.
-- [ ] **Step 4:** Run the test. Expected: PASS.
-- [ ] **Step 5: Commit** on `feat/youtube-client`: `feat: youtube uploads and snippet client`.
+- [x] **Step 1:** Failing tests with a fake fetch: feed URL has no key, parse reads id/date/title/description and decodes entities, entries without id skipped, `since` filter, non-2xx throws with status.
+- [x] **Step 2:** Run `pnpm vitest run lib/youtube.test.ts`. Expected: FAIL.
+- [x] **Step 3:** Implement with plain `fetch` and regex parsing. No dependencies, no XML lib.
+- [x] **Step 4:** Run the test. Expected: PASS.
+- [x] **Step 5: Commit** `feat: YouTube channel feed client, no API key`.
 
 ---
 
@@ -390,7 +383,7 @@ Note on the spelling-variant test: word-set Jaccard on `chachey`/`chache` is 0.5
 
 ## Human prerequisites before Task 7 and 11
 
-1. YouTube Data API key (Google Cloud, enable YouTube Data API v3) → `YOUTUBE_API_KEY`.
+1. No YouTube API key: ingest reads the public channel feed (`videos.xml?channel_id=<id>`), no quota.
 2. cliproxyapi key → `LLM_API_KEY`; pick `LLM_MODEL` from `curl -H "Authorization: Bearer $LLM_API_KEY" localhost:8317/v1/models`.
 3. GitHub OAuth app for Auth.js (`AUTH_GITHUB_ID/SECRET`), `ADMIN_EMAILS` set to your email.
 4. Docker available for `pnpm db:up`.

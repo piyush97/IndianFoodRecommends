@@ -38,8 +38,8 @@ erDiagram
 - YouTube compliance: we persist only `external_id` (video ID), creator channel ID, and our derived facts. No titles/descriptions/stats. **Verify with policy review that video IDs are allowed beyond 30 days; if not, add 30-day refresh job.**
 
 ## 3. Ingestion pipeline (`/worker`)
-1. `yt-sync`: for each tracked creator, `playlistItems.list` on uploads playlist (1 quota unit/page, not `search.list` at 100). Collect new video IDs since last run.
-2. `extract`: fetch `videos.list` snippet (title, description) in memory → prompt LLM via cliproxyapi (`OPENAI_BASE_URL=http://localhost:8317/v1`) with JSON schema output:
+1. `yt-sync`: for each tracked creator, fetch the public uploads feed (`videos.xml?channel_id=<id>`). No API key, no quota, latest 15 uploads. Keep new video IDs and publish dates only.
+2. `extract`: fetch `videos.list` snippet (title, description) in memory → prompt LLM via cliproxyapi (`LLM_BASE_URL=http://localhost:8317/v1`) with JSON schema output:
    `{ items: [{ place_name, locality, city, dishes[], timestamp_seconds|null, confidence }] }`. Discard YouTube text after call.
 3. `match`: trigram match place + dish against existing rows/aliases (threshold 0.6) → suggest id.
 4. `geocode`: Nominatim (1 req/s, custom UA) for new places → suggestion only.
