@@ -14,7 +14,7 @@ function upload(videoId: string): Upload {
 }
 
 describeDb("autoReviewPending", () => {
-  const db = handle!.db as Db;
+  const db = handle?.db as Db;
 
   beforeEach(async () => {
     await truncateAll(db);
