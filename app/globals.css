@@ -1,23 +1,26 @@
 @import "tailwindcss";
 
-/* Design tokens (S0-5). One accent, warm neutrals, two-step radius.
-   Contrast measured against --color-paper (#fdfbf7) and dark paper (#14110f):
-   ink 17.4:1, muted 5.7:1, accent 7.1:1, white on accent 7.3:1;
-   dark ink 16.6:1, dark muted 7.2:1, dark accent 7.5:1 — all pass AA. */
+/* Dabba Lid Codes. Unbleached cotton ground, soot ink, three enamel route colours
+   bound to cities. Light only: the use scene is a phone in daylight.
+   Contrast on --color-paper (#f2eee5): ink 16.2:1, muted 6.0:1, accent (vermilion)
+   5.3:1; paper on accent 5.3:1, paper on leaf 5.6:1, ink on turmeric 9.7:1. */
 @theme {
-  --color-ink: #1a1614;
-  --color-muted: #6b635c;
-  --color-paper: #fdfbf7;
-  --color-line: #e5ded4;
-  --color-accent: #9a3412;
-  --color-accent-soft: #fdf0e7;
+  --color-ink: #1d1a16;
+  --color-muted: #5c554c;
+  --color-paper: #f2eee5;
+  --color-cloth: #e8e2d4;
+  --color-line: #cfc6b4;
+  --color-accent: #b8361d;
+  --color-accent-soft: #f4dccf;
 
-  --radius-step: 0.375rem;
-  --radius-card: 0.75rem;
+  /* Route colours: one per city, used on lid codes, city tabs and map pins. */
+  --color-route-delhi: #b8361d;
+  --color-route-mumbai: #2a6b45;
+  --color-route-kolkata: #e2a823;
 
-  --font-sans:
-    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans",
-    "Noto Sans Devanagari", sans-serif;
+  --radius-step: 4px;
+
+  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
 
   --text-xs: 0.8125rem;
   --text-sm: 0.9375rem;
@@ -25,25 +28,13 @@
   --text-lg: 1.25rem;
   --text-xl: 1.5rem;
   --text-2xl: 1.875rem;
-  --text-3xl: 2.375rem;
-}
-
-/* Tailwind 4 ignores @theme inside @media, so dark mode overrides the
-   generated custom properties directly. */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-ink: #f5f0e8;
-    --color-muted: #a89e94;
-    --color-paper: #14110f;
-    --color-line: #2e2723;
-    --color-accent: #f0876a;
-    --color-accent-soft: #241814;
-  }
+  --text-3xl: 2.5rem;
 }
 
 @layer base {
   html {
-    color-scheme: light dark;
+    color-scheme: light;
+    -webkit-text-size-adjust: 100%;
   }
 
   body {
@@ -51,17 +42,123 @@
     color: var(--color-ink);
     font-family: var(--font-sans);
     font-size: var(--text-base);
-    line-height: 1.55;
+    line-height: 1.5;
     text-wrap: pretty;
+    font-variant-numeric: tabular-nums;
+    /* Archivo's variable width axis: hinted advances round to whole pixels and open holes in words. */
+    text-rendering: geometricPrecision;
+  }
+
+  /* MapLibre attribution in the site's voice, small enough to keep pins clear. */
+  .maplibregl-ctrl-attrib {
+    font: 500 11px/1.4 var(--font-sans);
+    background: rgb(242 238 229 / 0.9) !important;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  ::selection {
+    background: var(--color-route-kolkata);
+    color: var(--color-ink);
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-accent);
+    outline: 3px solid var(--color-ink);
     outline-offset: 2px;
   }
 
+  input,
+  textarea {
+    caret-color: var(--color-accent);
+  }
+
+  /* The UA stylesheet resets text-rendering on form controls. */
+  button,
+  input,
+  select,
+  textarea {
+    text-rendering: inherit;
+  }
+
+  /* Muted ink, not browser grey: 6.0:1 on the field ground. */
+  ::placeholder {
+    color: var(--color-muted);
+    opacity: 1;
+  }
+
   a {
-    color: var(--color-accent);
-    text-underline-offset: 0.2em;
+    color: inherit;
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 0.22em;
+  }
+}
+
+@layer components {
+  /* Condensed caps for headings and codes: the lid-painting voice. */
+  .type-lid {
+    font-stretch: 62%;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    word-spacing: 0.05em;
+    line-height: 0.95;
+    font-kerning: normal;
+  }
+
+  /* The enamel tile: flat colour, crisp 4px corners, one inset hairline like a
+     painted border. No drop shadow; enamel is flat. */
+  .enamel {
+    border-radius: var(--radius-step);
+    box-shadow: inset 0 0 0 1.5px rgb(0 0 0 / 0.18);
+  }
+
+  .btn {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: var(--radius-step);
+    padding-inline: 0.875rem;
+    font-size: var(--text-sm);
+    font-weight: 700;
+    text-decoration: none;
+    transition:
+      background-color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+      color 160ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .btn-ink {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+  .btn-ink:hover {
+    background: #3a342c;
+  }
+  .btn-line {
+    box-shadow: inset 0 0 0 1.5px var(--color-ink);
+    color: var(--color-ink);
+  }
+  .btn-line:hover {
+    background: var(--color-cloth);
+  }
+  .btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  .field {
+    min-height: 2.75rem;
+    width: 100%;
+    border-radius: var(--radius-step);
+    background: #fbf9f4;
+    padding-inline: 0.75rem;
+    box-shadow: inset 0 0 0 1.5px var(--color-line);
+  }
+  .field:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 2.5px var(--color-ink);
   }
 }

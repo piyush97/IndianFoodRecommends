@@ -1,0 +1,409 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-06T21:15:00Z",
+  "title": "Design System: Indian Food Recommends",
+  "extensions": {
+    "world": {
+      "name": "Dabba Lid Codes",
+      "seed": "27363d0e1181c0b3",
+      "mode": "Operate",
+      "colorScheme": "light",
+      "rasterProvenance": "none"
+    },
+    "colorMeta": {
+      "ink": {
+        "role": "neutral",
+        "displayName": "Soot Ink",
+        "canonical": "#1d1a16",
+        "tonalRamp": [
+          "#1d1a16",
+          "#3a342c",
+          "#5c554c",
+          "#7d756a",
+          "#9e968a",
+          "#bfb8ab",
+          "#ddd7cb",
+          "#f2eee5"
+        ]
+      },
+      "ink-hover": {
+        "role": "neutral",
+        "displayName": "Pressed Soot",
+        "canonical": "#3a342c",
+        "tonalRamp": [
+          "#1d1a16",
+          "#3a342c",
+          "#5c554c",
+          "#7d756a",
+          "#9e968a",
+          "#bfb8ab",
+          "#ddd7cb",
+          "#f2eee5"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Faded Ink",
+        "canonical": "#5c554c",
+        "tonalRamp": [
+          "#1d1a16",
+          "#3a342c",
+          "#5c554c",
+          "#7d756a",
+          "#9e968a",
+          "#bfb8ab",
+          "#ddd7cb",
+          "#f2eee5"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Unbleached Cotton",
+        "canonical": "#f2eee5",
+        "tonalRamp": [
+          "#2a261f",
+          "#4a443a",
+          "#6b6457",
+          "#8d8576",
+          "#b0a896",
+          "#cfc6b4",
+          "#e8e2d4",
+          "#f2eee5"
+        ]
+      },
+      "field": {
+        "role": "neutral",
+        "displayName": "Bleached Field",
+        "canonical": "#fbf9f4",
+        "tonalRamp": [
+          "#2a261f",
+          "#4a443a",
+          "#6b6457",
+          "#8d8576",
+          "#b0a896",
+          "#e8e2d4",
+          "#f2eee5",
+          "#fbf9f4"
+        ]
+      },
+      "cloth": {
+        "role": "neutral",
+        "displayName": "Washed Cloth",
+        "canonical": "#e8e2d4",
+        "tonalRamp": [
+          "#2a261f",
+          "#4a443a",
+          "#6b6457",
+          "#8d8576",
+          "#b0a896",
+          "#cfc6b4",
+          "#e8e2d4",
+          "#f2eee5"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Thread Line",
+        "canonical": "#cfc6b4",
+        "tonalRamp": [
+          "#2a261f",
+          "#4a443a",
+          "#6b6457",
+          "#8d8576",
+          "#b0a896",
+          "#cfc6b4",
+          "#e8e2d4",
+          "#f2eee5"
+        ]
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Delhi Vermilion",
+        "canonical": "#b8361d",
+        "tonalRamp": [
+          "#3a0f07",
+          "#5e190c",
+          "#862512",
+          "#b8361d",
+          "#d25a40",
+          "#e48a75",
+          "#f4dccf",
+          "#fbf0ea"
+        ]
+      },
+      "accent-soft": {
+        "role": "primary",
+        "displayName": "Vermilion Wash (admin only)",
+        "canonical": "#f4dccf",
+        "tonalRamp": [
+          "#3a0f07",
+          "#5e190c",
+          "#862512",
+          "#b8361d",
+          "#d25a40",
+          "#e48a75",
+          "#f4dccf",
+          "#fbf0ea"
+        ]
+      },
+      "route-delhi": {
+        "role": "primary",
+        "displayName": "Delhi Vermilion",
+        "canonical": "#b8361d",
+        "tonalRamp": [
+          "#3a0f07",
+          "#5e190c",
+          "#862512",
+          "#b8361d",
+          "#d25a40",
+          "#e48a75",
+          "#f4dccf",
+          "#fbf0ea"
+        ]
+      },
+      "route-mumbai": {
+        "role": "secondary",
+        "displayName": "Mumbai Leaf",
+        "canonical": "#2a6b45",
+        "tonalRamp": [
+          "#0c2215",
+          "#153823",
+          "#1f5134",
+          "#2a6b45",
+          "#478a62",
+          "#76ad8c",
+          "#b6d6c2",
+          "#e6f1ea"
+        ]
+      },
+      "route-kolkata": {
+        "role": "tertiary",
+        "displayName": "Kolkata Turmeric",
+        "canonical": "#e2a823",
+        "tonalRamp": [
+          "#3d2a04",
+          "#664708",
+          "#8f650e",
+          "#b98515",
+          "#e2a823",
+          "#ecc261",
+          "#f5dca0",
+          "#fbf1d9"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Lid Display",
+        "purpose": "Page H1 in condensed caps; 2.6rem, 3.2rem from 640px."
+      },
+      "headline": {
+        "displayName": "Lid Headline",
+        "purpose": "Place name in ranked rows, with inline muted No.N rank."
+      },
+      "title": { "displayName": "Lid Title", "purpose": "Wordmark and city tabs." },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Running text at normal width, tabular numerals, text-wrap pretty."
+      },
+      "label": {
+        "displayName": "Button Label",
+        "purpose": "Bold 0.9375rem on ink and line buttons."
+      }
+    },
+    "shadows": [
+      {
+        "name": "enamel-edge",
+        "value": "inset 0 0 0 1.5px rgb(0 0 0 / 0.18)",
+        "purpose": "Painted border on every enamel tile (city tabs, lid tiles, map pins, play tile). The only shadow on colour."
+      },
+      {
+        "name": "ink-outline",
+        "value": "inset 0 0 0 1.5px #1d1a16",
+        "purpose": "Outline button and List/Map segment border."
+      },
+      {
+        "name": "field-outline",
+        "value": "inset 0 0 0 1.5px #cfc6b4",
+        "purpose": "Field rest state and inactive 'soon' tabs."
+      },
+      {
+        "name": "field-focus",
+        "value": "inset 0 0 0 2.5px #1d1a16",
+        "purpose": "Field focus; replaces the outline ring."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-colour",
+        "value": "160ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Button background and colour changes only."
+      },
+      {
+        "name": "play-lift",
+        "value": "200ms ease-out scale(1.05)",
+        "purpose": "Embed play tile on hover."
+      },
+      {
+        "name": "chevron-turn",
+        "value": "200ms rotate(180deg)",
+        "purpose": "Report disclosure chevron on open."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "container", "value": "768px" }
+    ],
+    "focus": {
+      "value": "outline: 3px solid #1d1a16; outline-offset: 2px",
+      "purpose": "Global focus-visible on everything except fields."
+    },
+    "textRendering": {
+      "value": "geometricPrecision",
+      "purpose": "Archivo wdth axis: hinted advances round to whole pixels and open holes in words. Form controls inherit it."
+    },
+    "contrast": {
+      "ink-on-paper": "16.2:1",
+      "muted-on-paper": "6.0:1",
+      "accent-on-paper": "5.3:1",
+      "paper-on-accent": "5.3:1",
+      "paper-on-leaf": "5.6:1",
+      "ink-on-turmeric": "9.7:1"
+    }
+  },
+  "components": [
+    {
+      "name": "Ink Button",
+      "kind": "button",
+      "refersTo": "button-ink",
+      "description": "Primary action: Watch moment, Search, Send.",
+      "html": "<a class=\"ds-btn ds-btn-ink\" href=\"#\"><svg aria-hidden=\"true\" width=\"14\" height=\"14\" viewBox=\"0 0 14 14\" fill=\"currentColor\"><path d=\"M3 1.8v10.4a.6.6 0 0 0 .9.5l8.4-5.2a.6.6 0 0 0 0-1L3.9 1.3a.6.6 0 0 0-.9.5Z\"/></svg>Watch moment (4:12)</a>",
+      "css": ".ds-btn { display: inline-flex; min-height: 44px; align-items: center; gap: 8px; border-radius: 4px; padding: 0 14px; font-family: var(--font-sans, Archivo, system-ui, sans-serif); font-size: 0.9375rem; font-weight: 700; text-decoration: none; font-variant-numeric: tabular-nums; transition: background-color 160ms cubic-bezier(0.16,1,0.3,1), color 160ms cubic-bezier(0.16,1,0.3,1); } .ds-btn-ink { background: #1d1a16; color: #f2eee5; } .ds-btn-ink:hover { background: #3a342c; } .ds-btn:focus-visible { outline: 3px solid #1d1a16; outline-offset: 2px; }"
+    },
+    {
+      "name": "Line Button",
+      "kind": "button",
+      "refersTo": "button-line",
+      "description": "Secondary action: Directions.",
+      "html": "<a class=\"ds-btn-line\" href=\"#\"><svg aria-hidden=\"true\" width=\"14\" height=\"14\" viewBox=\"0 0 14 14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M2.5 11.5 11.5 2.5M5 2.5h6.5V9\"/></svg>Directions</a>",
+      "css": ".ds-btn-line { display: inline-flex; min-height: 44px; align-items: center; gap: 8px; border-radius: 4px; padding: 0 14px; font-family: var(--font-sans, Archivo, system-ui, sans-serif); font-size: 0.9375rem; font-weight: 700; text-decoration: none; color: #1d1a16; box-shadow: inset 0 0 0 1.5px #1d1a16; transition: background-color 160ms cubic-bezier(0.16,1,0.3,1); } .ds-btn-line:hover { background: #e8e2d4; } .ds-btn-line:focus-visible { outline: 3px solid #1d1a16; outline-offset: 2px; }"
+    },
+    {
+      "name": "Search Field",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "Full-width search with inset magnifier and ink Search button.",
+      "html": "<form class=\"ds-search\" role=\"search\"><label for=\"ds-q\" class=\"ds-sr\">Search dish, place or creator</label><div class=\"ds-search-wrap\"><svg aria-hidden=\"true\" width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"><circle cx=\"7\" cy=\"7\" r=\"5\"/><path d=\"m11 11 3.5 3.5\"/></svg><input id=\"ds-q\" class=\"ds-field\" type=\"search\" placeholder=\"Dish, place or creator\"></div></form>",
+      "css": ".ds-search { display: flex; gap: 8px; } .ds-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); } .ds-search-wrap { position: relative; flex: 1; } .ds-search-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #5c554c; pointer-events: none; } .ds-field { width: 100%; min-height: 44px; border: 0; border-radius: 4px; background: #fbf9f4; padding: 0 12px 0 36px; font: 400 1.0625rem/1.5 var(--font-sans, Archivo, system-ui, sans-serif); color: #1d1a16; caret-color: #b8361d; box-shadow: inset 0 0 0 1.5px #cfc6b4; } .ds-field::placeholder { color: #5c554c; opacity: 1; } .ds-field:focus-visible { outline: none; box-shadow: inset 0 0 0 2.5px #1d1a16; }"
+    },
+    {
+      "name": "City Tabs",
+      "kind": "nav",
+      "refersTo": "city-tab-delhi",
+      "description": "Enamel tiles in each city's route colour; cities without picks show 'soon'.",
+      "html": "<nav class=\"ds-tabs\" aria-label=\"Cities\"><a class=\"ds-tab ds-enamel\" href=\"#\" style=\"background:#b8361d;color:#f2eee5\">Delhi</a><a class=\"ds-tab ds-enamel\" href=\"#\" style=\"background:#2a6b45;color:#f2eee5\">Mumbai</a><span class=\"ds-tab ds-tab-soon\">Kolkata <small>soon</small></span></nav>",
+      "css": ".ds-tabs { display: flex; flex-wrap: wrap; gap: 8px; } .ds-tab { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; border-radius: 4px; font-family: var(--font-sans, Archivo, system-ui, sans-serif); font-stretch: 62%; font-weight: 800; text-transform: uppercase; line-height: 0.95; font-size: 1.0625rem; text-decoration: none; } .ds-enamel { box-shadow: inset 0 0 0 1.5px rgb(0 0 0 / 0.18); } .ds-tab:focus-visible { outline: 3px solid #1d1a16; outline-offset: 2px; } .ds-tab-soon { color: #5c554c; box-shadow: inset 0 0 0 1.5px #cfc6b4; } .ds-tab-soon small { font-size: 0.8125rem; font-weight: 600; text-transform: none; }"
+    },
+    {
+      "name": "Lid Code",
+      "kind": "custom",
+      "refersTo": "lid-code",
+      "description": "Signature tile: city code, creator count, 'creators', video time. aria-hidden; the row states the same facts in words.",
+      "html": "<span class=\"ds-lid\" aria-hidden=\"true\"><span class=\"ds-lid-code\">DL</span><span class=\"ds-lid-n\">3</span><span class=\"ds-lid-word\">creators</span><span class=\"ds-lid-word\">4:12</span></span> <span class=\"ds-lid\" aria-hidden=\"true\" style=\"background:#e2a823;color:#1d1a16\"><span class=\"ds-lid-code\">KL</span><span class=\"ds-lid-n\">1</span><span class=\"ds-lid-word\">creator</span></span>",
+      "css": ".ds-lid { display: inline-grid; place-items: center; text-align: center; min-width: 64px; padding: 6px 8px; border-radius: 4px; background: #b8361d; color: #f2eee5; box-shadow: inset 0 0 0 1.5px rgb(0 0 0 / 0.18); font-family: var(--font-sans, Archivo, system-ui, sans-serif); font-stretch: 62%; font-weight: 800; text-transform: uppercase; line-height: 0.95; font-variant-numeric: tabular-nums; } .ds-lid-code { font-size: 0.8125rem; } .ds-lid-n { font-size: 1.5rem; } .ds-lid-word { font-size: 0.8125rem; font-weight: 600; text-transform: none; }"
+    },
+    {
+      "name": "Ranked Row",
+      "kind": "custom",
+      "refersTo": "lid-code",
+      "description": "Band between hairline rules: No.N + place heading, creators in words, lid tile right, Watch + Directions.",
+      "html": "<ol class=\"ds-list\"><li class=\"ds-row\"><div class=\"ds-row-top\"><div class=\"ds-row-text\"><h3 class=\"ds-row-h\"><span class=\"ds-rank\">No.1</span><a href=\"#\">Sita Ram Diwan Chand</a></h3><p class=\"ds-muted\">Paharganj</p><p class=\"ds-sm\">Picked by 3 creators: <a href=\"#\"><b>Creator A</b></a>, <a href=\"#\"><b>Creator B</b></a>, <a href=\"#\"><b>Creator C</b></a></p></div><span class=\"ds-lid\" aria-hidden=\"true\">DL<br><span style=\"font-size:1.5rem\">3</span><br><small>creators</small></span></div></li></ol>",
+      "css": ".ds-list { list-style: none; margin: 0; padding: 0; border-top: 2px solid #1d1a16; font-family: var(--font-sans, Archivo, system-ui, sans-serif); color: #1d1a16; } .ds-row { border-bottom: 1px solid #cfc6b4; padding: 16px 0; } .ds-row-top { display: flex; align-items: flex-start; gap: 12px; } .ds-row-text { flex: 1; min-width: 0; } .ds-row-h { margin: 0; font-size: 1.65rem; font-stretch: 62%; font-weight: 800; text-transform: uppercase; line-height: 0.95; } .ds-row-h a { color: inherit; text-decoration: none; } .ds-row-h a:hover { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; } .ds-rank { margin-right: 8px; vertical-align: 0.18em; font-size: 0.9375rem; color: #5c554c; font-variant-numeric: tabular-nums; } .ds-muted { margin: 4px 0 0; font-size: 0.9375rem; color: #5c554c; } .ds-sm { margin: 6px 0 0; font-size: 0.9375rem; } .ds-sm a { color: inherit; } .ds-lid { display: inline-block; text-align: center; min-width: 64px; padding: 6px 8px; border-radius: 4px; background: #b8361d; color: #f2eee5; box-shadow: inset 0 0 0 1.5px rgb(0 0 0 / 0.18); font-stretch: 62%; font-weight: 800; line-height: 0.95; }"
+    },
+    {
+      "name": "Map Pin",
+      "kind": "custom",
+      "refersTo": "map-pin",
+      "description": "32px enamel tile numbered like its row; dashed paper tile when approximate.",
+      "html": "<span class=\"ds-pin\">1</span> <span class=\"ds-pin ds-pin-approx\">2</span>",
+      "css": ".ds-pin { display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 4px; background: #b8361d; color: #f2eee5; box-shadow: inset 0 0 0 1.5px rgb(0 0 0 / 0.18); font-family: var(--font-sans, Archivo, system-ui, sans-serif); font-stretch: 62%; font-weight: 800; font-size: 1.0625rem; line-height: 0.95; } .ds-pin-approx { background: #f2eee5; color: #1d1a16; box-shadow: none; border: 2px dashed #b8361d; }"
+    },
+    {
+      "name": "List/Map Toggle",
+      "kind": "nav",
+      "description": "Two 44px segments inside one ink outline; pressed segment is ink-filled.",
+      "html": "<div class=\"ds-seg\" role=\"group\" aria-label=\"View\"><button type=\"button\" aria-pressed=\"true\">List</button><button type=\"button\" aria-pressed=\"false\">Map</button></div>",
+      "css": ".ds-seg { display: inline-flex; overflow: hidden; border-radius: 4px; box-shadow: inset 0 0 0 1.5px #1d1a16; } .ds-seg button { min-height: 44px; padding: 0 20px; border: 0; background: transparent; color: #1d1a16; font: 700 0.9375rem var(--font-sans, Archivo, system-ui, sans-serif); text-transform: uppercase; letter-spacing: 0.025em; cursor: pointer; } .ds-seg button:hover { background: #e8e2d4; } .ds-seg button[aria-pressed=\"true\"] { background: #1d1a16; color: #f2eee5; } .ds-seg button:focus-visible { outline: 3px solid #1d1a16; outline-offset: 2px; }"
+    },
+    {
+      "name": "Embed Facade",
+      "kind": "custom",
+      "description": "16:9 ink block with vermilion enamel play tile; nothing third-party loads until pressed.",
+      "html": "<button type=\"button\" class=\"ds-embed\"><span class=\"ds-play\" aria-hidden=\"true\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 14 14\" fill=\"currentColor\"><path d=\"M3.5 1.8v10.4a.6.6 0 0 0 .9.5l8.2-5.2a.6.6 0 0 0 0-1L4.4 1.3a.6.6 0 0 0-.9.5Z\"/></svg></span><span>Play Creator A's video at 4:12</span></button>",
+      "css": ".ds-embed { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; width: 100%; aspect-ratio: 16/9; border: 0; border-radius: 4px; background: #1d1a16; color: #f2eee5; font: 600 1.0625rem var(--font-sans, Archivo, system-ui, sans-serif); cursor: pointer; } .ds-play { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 4px; background: #b8361d; box-shadow: inset 0 0 0 1.5px rgb(0 0 0 / 0.18); transition: transform 200ms ease-out; } .ds-embed:hover .ds-play { transform: scale(1.05); } .ds-embed:focus-visible { outline: 3px solid #1d1a16; outline-offset: 2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Dabba Lid Codes",
+    "overview": "Mumbai's dabbawalas paint short route codes on tiffin lids so a box is sorted at a glance. This site does the same for food picks: every place carries a painted enamel tile in its city's route colour, showing the city code, how many creators agree, and the video moment. The world sits on unbleached cotton (a warm off-white, not cream paper) with soot-black ink, and it is light only because the use scene is a phone in daylight.\n\nThe surface is an operating list, not a showcase. One column (max 768px), ranked rows divided by hairline rules, two 44px actions per row, and nothing floating above the page. Depth comes from flat colour and inset painted borders, never drop shadows. One typeface, Archivo, carries both voices through its width axis: condensed 800-weight caps for headings and codes, normal width for everything you read. The world refuses the white-card, star-rating-badge food-app list.\n\nNo raster images ship. There are no food or place photos; video thumbnails appear only inside a clicked embed. Raster provenance: none.",
+    "keyCharacteristics": [
+      "Warm cotton ground, soot ink, three enamel route colours bound to cities.",
+      "Archivo variable: condensed caps (wdth 62%, weight 800) for lid voice, normal width for body.",
+      "Hairline rules divide rows; no cards, no chips, no drop shadows.",
+      "4px corners on every interactive surface.",
+      "Lid tile is the signature: city code, creator count, the word \"creator(s)\", optional video time.",
+      "List rank and map pin share one number and one colour.",
+      "Tabular numerals everywhere; 44px minimum targets."
+    ],
+    "rules": [
+      {
+        "name": "The One City, One Colour Rule",
+        "body": "A route colour appears only where it names its city: the city tab, that city's lid tiles, that city's map pins. Never use a route colour as decoration or for status.",
+        "section": "colors"
+      },
+      {
+        "name": "The Turmeric Takes Ink Rule",
+        "body": "Text on Kolkata turmeric is always ink. Paper on turmeric fails contrast.",
+        "section": "colors"
+      },
+      {
+        "name": "The Lid Voice Rule",
+        "body": "Condensed caps (wdth 62%, weight 800, uppercase, zero tracking, 0.95 leading) are for headings, the wordmark, city tabs, lid tiles and pins. Never for sentences, buttons or body copy.",
+        "section": "typography"
+      },
+      {
+        "name": "The Whole-Pixel Rule",
+        "body": "Body and form controls render with `text-rendering: geometricPrecision`, because hinting Archivo's width axis rounds advances to whole pixels and opens holes inside words. Form controls must inherit it.",
+        "section": "typography"
+      },
+      {
+        "name": "The Rank Is the Pin Rule",
+        "body": "A place's list position N appears as \"No.N\" in its row heading and as N on its map pin. Never renumber one without the other.",
+        "section": "layout"
+      },
+      {
+        "name": "The Flat Enamel Rule",
+        "body": "Enamel is flat. Only inset strokes are allowed; any offset or blurred outer shadow is out of world.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do bind each route colour to its city: Delhi #b8361d, Mumbai #2a6b45, Kolkata #e2a823 with ink text.",
+      "Do divide rows with hairline rules (1px thread line) and open lists with a 2px ink rule.",
+      "Do put the rank inline in the heading as \"No.N\" and put the same N on the map pin.",
+      "Do show city code, creator count and the word \"creator(s)\" on every lid tile, plus the video time when known, and repeat those facts in words beside it.",
+      "Do keep every target at least 44px and keep 4px corners on tiles, buttons and fields.",
+      "Do use tabular numerals for counts and times.",
+      "Do mark approximate pins with a dashed border and say \"approximate pin\" in text."
+    ],
+    "donts": [
+      "Don't use cards, chips, rating badges or boxed list items.",
+      "Don't use drop shadows; the only shadows are inset hairlines on enamel and outlined controls.",
+      "Don't let a lid tile stand alone without the words beside it.",
+      "Don't put paper-coloured text on turmeric.",
+      "Don't use the condensed lid voice for sentences or buttons.",
+      "Don't ship food or place photos or other raster imagery; none are licensed.",
+      "Don't add a dark theme; the world is light only."
+    ]
+  }
+}

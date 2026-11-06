@@ -6,7 +6,7 @@ export function Skeleton() {
         <div
           key={i}
           aria-hidden="true"
-          className="h-20 animate-pulse rounded-[var(--radius-card)] bg-line"
+          className="h-20 animate-pulse rounded-[var(--radius-step)] bg-line"
         />
       ))}
     </div>

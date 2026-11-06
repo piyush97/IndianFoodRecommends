@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { PageHead } from "../../../../components/PageHead";
 import { JsonLd } from "../../../../components/JsonLd";
 import { dishItemList } from "../../../../lib/seo/jsonld";
 import { notFound } from "next/navigation";
@@ -52,23 +52,15 @@ async function Dish({ params }: { params: Params }) {
           })),
         })}
       />
-      <div className="flex flex-col gap-2">
-        <Link
-          href={`/${data.city.slug}`}
-          className="min-h-11 content-center text-sm underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-accent"
-        >
-          ← {data.city.name}
-        </Link>
-        <h1 className="text-3xl font-semibold tracking-tight">
-          {data.dish.name} in {data.city.name}
-        </h1>
-        {places > 0 && (
-          <p className="text-muted">
-            {places} {places === 1 ? "place" : "places"} picked by {creators} food{" "}
-            {creators === 1 ? "vlogger" : "vloggers"}
-          </p>
-        )}
-      </div>
+      <PageHead
+        back={{ href: `/${data.city.slug}`, label: data.city.name }}
+        title={`${data.dish.name} in ${data.city.name}`}
+        sub={
+          places > 0
+            ? `${places} ${places === 1 ? "place" : "places"} picked by ${creators} food ${creators === 1 ? "vlogger" : "vloggers"}`
+            : undefined
+        }
+      />
       <ListMapToggle
         citySlug={data.city.slug}
         points={mapPoints(data.places)}

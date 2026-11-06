@@ -1,7 +1,16 @@
 import type { Metadata } from "next";
 import { Analytics } from "../components/Analytics";
 import { SITE_URL } from "../lib/seo/site";
+import { Archivo } from "next/font/google";
 import "./globals.css";
+
+// Variable width axis carries both voices: condensed lid codes and normal body.
+const archivo = Archivo({
+  subsets: ["latin"],
+  axes: ["wdth"],
+  variable: "--font-archivo",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -14,7 +23,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en-IN">
+    <html lang="en-IN" className={archivo.variable}>
       <body className="min-h-dvh">
         <div className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col px-4">{children}</div>
         <Analytics />

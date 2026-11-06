@@ -53,7 +53,7 @@ export function NearMeList({
                 setSorted(cards);
                 setState("ranked");
               }}
-              className="min-h-11 rounded-[var(--radius-step)] border border-line px-4 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+              className="btn btn-line"
             >
               Sort by most picked
             </button>
@@ -62,7 +62,7 @@ export function NearMeList({
               type="button"
               onClick={locate}
               disabled={state === "locating"}
-              className="min-h-11 rounded-[var(--radius-step)] border border-line px-4 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-60"
+              className="btn btn-line"
             >
               {state === "locating" ? "Finding you…" : "Sort by distance from me"}
             </button>

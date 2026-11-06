@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 export default function SubmitPage() {
   return (
     <section className="flex max-w-prose flex-col gap-4">
-      <h1 className="text-3xl font-semibold tracking-tight">Saw a vlogger recommend a place?</h1>
+      <h1 className="type-lid text-[2.6rem] sm:text-[3.2rem]">Saw a vlogger recommend a place?</h1>
       <p className="text-muted">
         Send a YouTube video from one of the creators we follow. It shows on the site only if the
         video is on that creator&apos;s channel and its description names the place, the dish and

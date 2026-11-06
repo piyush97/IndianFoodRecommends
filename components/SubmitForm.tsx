@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 const field =
-  "min-h-11 w-full rounded-[var(--radius-step)] border border-line bg-paper px-3 font-normal focus-visible:outline-2 focus-visible:outline-accent";
+  "min-h-11 w-full rounded-[var(--radius-step)] border border-line bg-paper px-3 font-normal ";
 const label = "flex flex-col gap-1 text-sm font-medium";
 
 export function SubmitForm({
@@ -41,7 +41,7 @@ export function SubmitForm({
 
   if (status === "done") {
     return (
-      <p role="status" className="rounded-[var(--radius-card)] border border-line p-4">
+      <p role="status" className="rounded-[var(--radius-step)] border border-line p-4">
         Thanks. We check every suggestion against the video before it shows.
       </p>
     );
@@ -94,7 +94,7 @@ export function SubmitForm({
           name="timestamp"
           inputMode="numeric"
           pattern="(\d{1,2}:)?\d{1,3}:\d{2}"
-          placeholder="4:12"
+          placeholder="e.g. 4:12"
           maxLength={10}
           aria-describedby="ts-help"
           className={field}
@@ -103,11 +103,7 @@ export function SubmitForm({
           When the creator talks about the place, like 4:12 or 1:02:05.
         </span>
       </label>
-      <button
-        type="submit"
-        disabled={status === "sending"}
-        className="min-h-11 self-start rounded-[var(--radius-step)] bg-accent px-4 font-medium text-paper focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-60"
-      >
+      <button type="submit" disabled={status === "sending"} className="btn btn-ink self-start">
         {status === "sending" ? "Sending…" : "Send for review"}
       </button>
       <p aria-live="polite" className="text-sm">

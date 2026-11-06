@@ -1,7 +1,14 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { schema, type Db } from "../../db";
 import { testDb, truncateAll } from "../../db/test-db";
-import { getCreator, getDishInCity, getHome, getPlace, listActiveCities } from "./queries";
+import {
+  getCreator,
+  getDishInCity,
+  getHome,
+  getPlace,
+  getPlaceCards,
+  listActiveCities,
+} from "./queries";
 
 const handle = testDb();
 const describeDb = handle ? describe : describe.skip;
@@ -66,6 +73,17 @@ describeDb("public queries", () => {
     expect(chole?.picks).toBe(3);
     expect(home?.creators.map((c) => c.slug)).not.toContain("gone");
     expect(home?.recent.map((p) => p.placeSlug)).not.toContain("d");
+  });
+
+  it("gives the home page the city's top places by rank", async () => {
+    const home = await getHome(db, "delhi", now);
+    expect(home?.top.map((p) => p.placeSlug)).toEqual(["a", "b"]);
+  });
+
+  it("builds ranked cards for a set of place slugs, skipping hidden places", async () => {
+    const cards = await getPlaceCards(db, ["b", "a", "d", "nope"], now);
+    expect(cards.map((c) => c.placeSlug)).toEqual(["a", "b"]);
+    expect(cards[0]).toMatchObject({ citySlug: "delhi", proof: { externalId: "v1" } });
   });
 
   it("returns null for a place with no visible picks", async () => {
