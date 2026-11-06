@@ -126,7 +126,7 @@ tests/**                      # mirrors lib/ and worker/
 - [ ] **Step 1: Write failing tests:** `slugify("Chache Di Hatti")` → `"chache-di-hatti"`; `slugify("  Sita Ram's  Diwan-Chand!! ")` → `"sita-rams-diwan-chand"`; `slugify("चाचे")` → `"item"`; `normalizeName("Chāche  Dī-Hatti")` → `"chache di hatti"`; `normalizeName("चाचे दी हट्टी")` unchanged apart from whitespace.
 - [ ] **Step 2:** Run `pnpm vitest run tests/lib/text.test.ts`. Expected: FAIL.
 - [ ] **Step 3:** Implement both functions.
-- [ ] **Step 4:** Run the test. Expected: PASS.
+- [x] **Step 4:** Run the test. Expected: PASS.
 - [ ] **Step 5: Commit** on `feat/text-utils`: `feat: slugify and normalizeName`.
 
 ---
@@ -156,7 +156,7 @@ tests/**                      # mirrors lib/ and worker/
   - input is normalized before comparison (extra spaces, case)
 - [ ] **Step 2:** Run `pnpm vitest run tests/lib/matcher.test.ts`. Expected: FAIL.
 - [ ] **Step 3:** Implement with a single SQL per call using `similarity()` over `normalizeName`d input; `DISTINCT ON (id)` to keep the best score per entity. Note: Devanagari trigram works on raw characters; test 2 pins it.
-- [ ] **Step 4:** Run the test. Expected: PASS.
+- [x] **Step 4:** Run the test. Expected: PASS.
 - [ ] **Step 5: Commit** on `feat/matcher`: `feat: trigram place and dish matcher with aliases`.
 
 ---
@@ -191,7 +191,7 @@ tests/**                      # mirrors lib/ and worker/
   - description of 20k chars → the prompt sent to `chat` contains at most 6000 description chars
 - [ ] **Step 2:** Run `pnpm vitest run tests/lib/llm-extract.test.ts`. Expected: FAIL.
 - [ ] **Step 3:** Implement. System prompt demands JSON only, India context, one item per distinct place, `timestamp_seconds` only from chapter lines like `04:12 Chache Di Hatti`, otherwise null.
-- [ ] **Step 4:** Run the test. Expected: PASS.
+- [x] **Step 4:** Run the test. Expected: PASS.
 - [ ] **Step 5: Commit** on `feat/llm-extract`: `feat: LLM pick extraction via cliproxyapi with zod and retry`.
 
 ---
@@ -252,7 +252,7 @@ tests/**                      # mirrors lib/ and worker/
 
 **Model:** Opus 5.5 for scorer + prompt iteration (S1-3); labels by **Human** · **Difficulty:** medium
 
-**Files:** Create `worker/eval.ts`, `worker/eval/labelled.example.json`, `tests/worker/eval.test.ts`. (`worker/eval/labelled.json` is created by the human, 50 videos, committed; contains video IDs + expected picks only, no YouTube text. The runner fetches snippets live.)
+**Files:** Create `lib/worker/eval.ts`, `worker/eval/labelled.example.json`, `lib/worker/eval.test.ts`. (`worker/eval/labelled.json` is created by the human, 50 videos, committed; contains video IDs + expected picks only, no YouTube text. The runner fetches snippets live.)
 
 **Interfaces:**
 - Produces:
@@ -260,15 +260,15 @@ tests/**                      # mirrors lib/ and worker/
   export type Labelled = { videoId: string; expected: { place: string; dishes: string[] }[] };
   export function scoreExtraction(expected: Labelled["expected"], actual: ExtractedPick[]):
     { tp: number; fp: number; fn: number; precision: number; recall: number };
-  export function runEval(labelled: Labelled[], deps: { getSnippets; extract }): Promise<{ precision: number; recall: number; perVideo: unknown[] }>;
+  export function runEval(labelled: Labelled[], deps: { channelId: string; listUploads; extract }): Promise<{ precision: number; recall: number; perVideo: unknown[] }>;
   ```
   A pick is a true positive when `normalizeName(place)` of expected and actual are equal or their word-set Jaccard similarity is >= 0.6 (pure function, no DB). Gate: precision >= 0.85 before enabling the timer.
 
-- [ ] **Step 1: Write failing tests:** perfect match → precision 1, recall 1; extra hallucinated place → precision 0.5; missed place → recall 0.5; spelling variant `Chachey di Hatti` vs `Chache Di Hatti` counts as TP; empty actual and empty expected → precision 1, recall 1.
-- [ ] **Step 2:** Run `pnpm vitest run tests/worker/eval.test.ts`. Expected: FAIL.
-- [ ] **Step 3:** Implement; add `pnpm worker eval` printing precision/recall and per-video misses.
-- [ ] **Step 4:** Run the test. Expected: PASS.
-- [ ] **Step 5: Commit** on `feat/eval`: `feat(worker): extraction eval harness`.
+- [x] **Step 1: Write failing tests:** perfect match → precision 1, recall 1; extra hallucinated place → precision 0.5; missed place → recall 0.5; spelling variant `Chachey di Hatti` vs `Chache Di Hatti` counts as TP; empty actual and empty expected → precision 1, recall 1.
+- [x] **Step 2:** Run `pnpm vitest run lib/worker/eval.test.ts`. Expected: FAIL.
+- [x] **Step 3:** Implemented `scoreExtraction` (Dice over character trigrams), `runEval` reading the channel feed once, `pnpm worker eval`. CLI switch added.
+- [x] **Step 4:** Run the test. Expected: PASS.
+- [x] **Step 5: Commit** `feat(worker): extraction eval harness`.
 - [ ] **Step 6 (Human):** Label 50 Ayush Sapra Delhi videos in `labelled.json`. Run `pnpm worker eval`; if precision < 0.85, iterate the Task 5 prompt or `LLM_MODEL` (try each model cliproxyapi exposes) and re-run. Record the chosen model and score in `docs/05-tech-design.md §8`.
 
 Note on the spelling-variant test: word-set Jaccard on `chachey`/`chache` is 0.5 per word, so use trigram-style character similarity (>= 0.6) per word, not exact word equality. The test pins the behavior.
@@ -293,7 +293,7 @@ Note on the spelling-variant test: word-set Jaccard on `chachey`/`chache` is 0.5
 - [ ] **Step 1: Write failing tests:** `isAdminEmail("A@x.com", "a@x.com, b@y.com")` true; `isAdminEmail("c@z.com", "a@x.com")` false; `isAdminEmail(null, "a@x.com")` false; `isAdminEmail("a@x.com", "")` false; `isAdminEmail("a@x.com.evil.io", "a@x.com")` false (exact match, not prefix).
 - [ ] **Step 2:** Run `pnpm vitest run tests/lib/auth.test.ts`. Expected: FAIL.
 - [ ] **Step 3:** Implement. `requireAdmin` reads session via Auth.js `auth()`.
-- [ ] **Step 4:** Run the test. Expected: PASS. Then `pnpm build` passes.
+- [x] **Step 4:** Run the test. Expected: PASS. Then `pnpm build` passes.
 - [ ] **Step 5: Commit** on `feat/admin-auth`: `feat(admin): allowlisted GitHub auth`.
 
 ---
