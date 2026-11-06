@@ -4,8 +4,10 @@ const UMAMI_API = "https://api-gateway.umami.dev";
 
 /**
  * Content Security Policy. `'unsafe-inline'` scripts are required: pages are
- * partially prerendered, so a per-request nonce cannot be embedded. Everything
- * else is pinned to the hosts the site actually uses.
+ * partially prerendered, so a per-request nonce cannot be embedded. That means
+ * this policy is NOT an XSS defence; output escaping is. What it does enforce:
+ * no framing, no plugins, no foreign <base>, scripts and fetches only from the
+ * hosts the site actually uses, embeds only from YouTube and Instagram.
  */
 export function buildCsp({
   analytics,
@@ -24,7 +26,8 @@ export function buildCsp({
     "default-src 'self'",
     `script-src ${script.join(" ")}`,
     "style-src 'self' 'unsafe-inline'",
-    `img-src 'self' data: blob: ${MAP}`,
+    // authjs.dev: provider logo on the Auth.js sign-in page.
+    `img-src 'self' data: blob: ${MAP} https://authjs.dev`,
     "font-src 'self' data:",
     `connect-src ${connect.join(" ")}`,
     "worker-src 'self' blob:",

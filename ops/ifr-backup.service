@@ -6,5 +6,12 @@ Wants=network-online.target
 [Service]
 Type=oneshot
 WorkingDirectory=/root/Projects/IndianFoodRecommends
-EnvironmentFile=/root/Projects/IndianFoodRecommends/.env
+# Only the production DB URL: the backup needs nothing else from .env.
+EnvironmentFile=/etc/ifr/backup.env
 ExecStart=/usr/bin/env bash ops/backup.sh
+ProtectSystem=strict
+ReadWritePaths=/var/backups/ifr
+PrivateTmp=yes
+NoNewPrivileges=yes
+ProtectKernelTunables=yes
+ProtectControlGroups=yes

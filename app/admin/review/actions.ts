@@ -54,7 +54,12 @@ export async function approveFormAction(form: FormData): Promise<void> {
   try {
     await approveRecommendation(db, input, email);
   } catch (error) {
-    backWithError(error instanceof Error ? error.message : "Approve failed.");
+    console.error("approve failed:", error);
+    backWithError(
+      error instanceof Error && /not pending/.test(error.message)
+        ? "This pick was already reviewed."
+        : "Approve failed. Check the place and dish, then try again.",
+    );
   }
   revalidatePath("/admin/review");
   revalidateTag("public", "max");
@@ -87,7 +92,12 @@ export async function manualAddFormAction(form: FormData): Promise<void> {
   try {
     await addManualRecommendation(db, parseManualForm(form, Id.parse(form.get("cityId"))));
   } catch (error) {
-    backWithError(error instanceof Error ? error.message.slice(0, 200) : "Manual add failed.");
+    console.error("manual add failed:", error);
+    backWithError(
+      error instanceof Error && /URL must be/.test(error.message)
+        ? "Use a YouTube video or an Instagram post or reel URL."
+        : "Manual add failed. Check the URL, place and dish fields.",
+    );
   }
   revalidatePath("/admin/review");
   revalidateTag("public", "max");

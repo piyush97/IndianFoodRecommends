@@ -23,7 +23,22 @@ target="$BACKUP_DIR/ifr-$(date -u +%Y%m%dT%H%M%SZ).dump"
 partial="$target.partial"
 trap 'rm -f "$partial"' EXIT
 
-"$PG_DUMP" --format=custom --no-owner --no-privileges "$URL" > "$partial"
+# Keep the password out of argv (readable by any local user via ps): strip it
+# from the URL in pure bash and pass it through PGPASSWORD instead.
+scheme="${URL%%://*}"
+rest="${URL#*://}"
+userinfo=""
+if [[ "$rest" == *@* ]]; then
+  userinfo="${rest%%@*}"
+  rest="${rest#*@}"
+fi
+user="${userinfo%%:*}"
+password=""
+[[ "$userinfo" == *:* ]] && password="${userinfo#*:}"
+printf -v password '%b' "${password//%/\\x}" # percent-decode
+safe_url="${scheme}://${user:+${user}@}${rest}"
+
+PGPASSWORD="$password" "$PG_DUMP" --format=custom --no-owner --no-privileges "$safe_url" > "$partial"
 mv "$partial" "$target"
 chmod 600 "$target"
 

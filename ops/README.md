@@ -30,7 +30,7 @@ journalctl -u ifr-ingest -n 100 --no-pager
 
 # Nightly backups
 
-`ops/backup.sh` dumps the production database (Neon, `DATABASE_URL_UNPOOLED` from `.env`) to
+`ops/backup.sh` dumps the production database (Neon, `DATABASE_URL_UNPOOLED` from `/etc/ifr/backup.env`, mode 600, that one line only) to
 `/var/backups/ifr/ifr-<UTC time>.dump` (custom format, mode 600) and keeps the newest 14.
 A failed dump exits non-zero and deletes nothing. Neon runs Postgres 18, so the PGDG
 `postgresql-client-18` package is installed; the script picks the newest local `pg_dump`.

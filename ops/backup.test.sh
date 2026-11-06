@@ -25,6 +25,22 @@ grep -q "fake dump" "$tmp/backups/$newest" || fail "newest file is not the new d
 [ "$(stat -c %a "$tmp/backups/$newest")" = "600" ] || fail "dump is not mode 600"
 [ ! -e "$tmp/backups/ifr-20261001T000000Z.dump" ] || fail "oldest dump not pruned"
 
+# 1b. Password never appears in pg_dump's argv (visible in ps); it goes via PGPASSWORD.
+cat > "$tmp/bin/pg_dump" <<'EOF'
+#!/usr/bin/env bash
+echo "ARGS:$*" > "$ARGS_FILE"
+echo "PW:${PGPASSWORD:-}" >> "$ARGS_FILE"
+echo dump
+EOF
+chmod +x "$tmp/bin/pg_dump"
+ARGS_FILE="$tmp/args" PG_DUMP="$tmp/bin/pg_dump" BACKUP_DIR="$tmp/backups" \
+  DATABASE_URL='postgresql://neondb_owner:s3cr%40t@ep-x.neon.tech/neondb?sslmode=require' \
+  bash "$here/backup.sh" >/dev/null
+grep -q "s3cr" <(grep '^ARGS:' "$tmp/args") && fail "password leaked into pg_dump argv"
+grep -q '^PW:s3cr@t$' "$tmp/args" || fail "PGPASSWORD not set from URL (decoded)"
+grep -q 'ep-x.neon.tech' "$tmp/args" || fail "host missing from connection string"
+grep -q 'neondb_owner@' "$tmp/args" || fail "user missing from connection string"
+
 # 2. Failing dump: non-zero exit, nothing deleted, no partial file left.
 before=$(ls "$tmp/backups" | sort)
 printf '#!/usr/bin/env bash\necho boom >&2\nexit 3\n' > "$tmp/bin/pg_dump"
@@ -39,4 +55,4 @@ if BACKUP_DIR="$tmp/backups" env -u DATABASE_URL -u DATABASE_URL_UNPOOLED bash "
   fail "expected refusal without DATABASE_URL"
 fi
 
-echo "PASS backup.sh (3 cases)"
+echo "PASS backup.sh (4 cases)"

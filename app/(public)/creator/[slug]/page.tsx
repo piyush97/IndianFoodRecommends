@@ -32,9 +32,12 @@ export default function CreatorPage({ params, searchParams }: Props) {
 async function Creator({ params, searchParams }: Props) {
   const { slug } = await params;
   const { dish } = await searchParams;
-  const dishSlug = typeof dish === "string" && dish !== "" ? dish : undefined;
-  const data = await cachedCreator(slug, dishSlug);
-  if (!data) notFound();
+  const all = await cachedCreator(slug);
+  if (!all) notFound();
+  // Only known dish slugs reach the cache key, so random ?dish= values cannot fill it.
+  const dishSlug =
+    typeof dish === "string" && all.dishes.some((d) => d.slug === dish) ? dish : undefined;
+  const data = dishSlug ? ((await cachedCreator(slug, dishSlug)) ?? all) : all;
   const { creator } = data;
   const active = data.dishes.find((d) => d.slug === dishSlug);
 
