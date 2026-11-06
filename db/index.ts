@@ -16,4 +16,5 @@ export const client = postgres(url ?? "postgres://localhost:5432/ifr", {
 });
 
 export const db = drizzle(client, { schema });
+export type Db = typeof db;
 export { schema };
