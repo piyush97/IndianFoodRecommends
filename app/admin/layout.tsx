@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { auth, isAdminEmail, signOut } from "../../lib/auth";
@@ -28,7 +29,15 @@ async function AdminGate({ children }: { children: React.ReactNode }) {
   return (
     <>
       <header className="flex items-center justify-between gap-4 border-b border-line pb-3 text-sm">
-        <span className="font-medium">Indian Food Recommends · admin</span>
+        <nav aria-label="Admin" className="flex items-center gap-4">
+          <span className="font-medium">Admin</span>
+          <Link href="/admin/review" className="min-h-11 content-center underline">
+            Review
+          </Link>
+          <Link href="/admin/stale" className="min-h-11 content-center underline">
+            Stale places
+          </Link>
+        </nav>
         <form
           action={async () => {
             "use server";
