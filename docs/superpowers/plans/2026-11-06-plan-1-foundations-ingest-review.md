@@ -290,11 +290,11 @@ Note on the spelling-variant test: word-set Jaccard on `chachey`/`chache` is 0.5
   ```
   Auth.js GitHub provider; `signIn` callback rejects emails failing `isAdminEmail`. Middleware redirects unauthenticated `/admin/*` to sign-in. Layout also calls `requireAdmin()` (defense in depth).
 
-- [ ] **Step 1: Write failing tests:** `isAdminEmail("A@x.com", "a@x.com, b@y.com")` true; `isAdminEmail("c@z.com", "a@x.com")` false; `isAdminEmail(null, "a@x.com")` false; `isAdminEmail("a@x.com", "")` false; `isAdminEmail("a@x.com.evil.io", "a@x.com")` false (exact match, not prefix).
-- [ ] **Step 2:** Run `pnpm vitest run tests/lib/auth.test.ts`. Expected: FAIL.
-- [ ] **Step 3:** Implement. `requireAdmin` reads session via Auth.js `auth()`.
+- [x] **Step 1: Write failing tests:** `isAdminEmail("A@x.com", "a@x.com, b@y.com")` true; `isAdminEmail("c@z.com", "a@x.com")` false; `isAdminEmail(null, "a@x.com")` false; `isAdminEmail("a@x.com", "")` false; `isAdminEmail("a@x.com.evil.io", "a@x.com")` false (exact match, not prefix).
+- [x] **Step 2:** Run `pnpm vitest run lib/auth.test.ts`. Expected: FAIL.
+- [x] **Step 3:** Implemented. `isAdminEmail` lives in `lib/admin-email.ts` (pure, testable); `lib/auth.ts` wires Auth.js GitHub and `requireAdmin`. Middleware skipped: Next 16 deprecates `middleware.ts`; the admin layout and every server action re-check instead.
 - [x] **Step 4:** Run the test. Expected: PASS. Then `pnpm build` passes.
-- [ ] **Step 5: Commit** on `feat/admin-auth`: `feat(admin): allowlisted GitHub auth`.
+- [x] **Step 5: Commit** `feat(admin): allowlisted GitHub auth`.
 
 ---
 
@@ -335,7 +335,7 @@ Note on the spelling-variant test: word-set Jaccard on `chachey`/`chache` is 0.5
   - `mergePlaces(a, b)` moves recs, adds alias, deletes `a`; `mergePlaces(a, a)` rejects
   - transactional: failure during approve leaves no orphan place
 - [x] **Step 2: Write failing tests (geocode):** two consecutive calls call `sleep` with >= 1000 total; UA header present; empty array → `null`; request URL has `countrycodes=in`.
-- [ ] **Step 3 (deferred until Task 9 auth exists): Write failing test (actions)** in `tests/lib/review-actions.test.ts`: import the server action module with `requireAdmin` mocked to throw `AuthError`; calling approve/reject/merge actions rejects and DB is unchanged (Review Focus #5).
+- [x] **Step 3: Write failing test (actions)** in `tests/lib/review-actions.test.ts`: import the server action module with `requireAdmin` mocked to throw `AuthError`; calling approve/reject/merge actions rejects and DB is unchanged (Review Focus #5).
 - [x] **Step 4:** Run `pnpm vitest run lib/review.test.ts`. Expected: FAIL. (geocode lives in the same file)
 - [x] **Step 5:** Implemented `lib/review.ts` (approve, reject, merge, geocode). Server actions wait for auth.
 - [x] **Step 6:** Re-run. Expected: PASS.
