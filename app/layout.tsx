@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
+import { SITE_URL } from "../lib/seo/site";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Indian Food Recommends",
+  metadataBase: new URL(SITE_URL),
+  title: { default: "Indian Food Recommends", template: "%s · Indian Food Recommends" },
+  alternates: { canonical: "/" },
+  openGraph: { siteName: "Indian Food Recommends", locale: "en_IN", type: "website" },
   description:
     "Where Delhi food vloggers say to eat: places ranked by how many creators picked them, with the video moment.",
 };

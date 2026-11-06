@@ -1,9 +1,21 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { PickList } from "../../../components/PickList";
 import { Skeleton } from "../../../components/Skeleton";
 import { cachedCity } from "../data";
+
+export async function generateMetadata({ params }: PageProps<"/[city]">): Promise<Metadata> {
+  const { city } = await params;
+  const data = await cachedCity(city);
+  if (!data) return { title: "Not found", robots: { index: false } };
+  return {
+    title: `Food vlogger picks in ${data.city.name}`,
+    description: `${data.places.length} places in ${data.city.name} recommended by food vloggers, ranked by how many of them picked each one.`,
+    alternates: { canonical: `/${data.city.slug}` },
+  };
+}
 
 export default function CityPage({ params }: PageProps<"/[city]">) {
   return (

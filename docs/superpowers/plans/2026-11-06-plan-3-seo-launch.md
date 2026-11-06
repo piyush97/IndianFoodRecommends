@@ -36,15 +36,30 @@
 **Files:** Create `lib/seo/site.ts`, `lib/seo/jsonld.ts`, `lib/seo/jsonld.test.ts`; modify each public page to export `generateMetadata` and render `<JsonLd data={…} />` (`components/JsonLd.tsx`).
 
 **Interfaces — Produces:**
+
 ```ts
 // site.ts
 export const SITE_URL: string; // env or default, no trailing slash
 export function absoluteUrl(path: string): string;
 // jsonld.ts
 export function serializeJsonLd(data: object): string; // escapes "<"
-export function dishItemList(input: { city: string; dish: string; path: string; places: { name: string; path: string }[] }): object; // schema.org ItemList of ListItem{position,url,name}
-export function restaurantLd(input: { name: string; path: string; locality: string | null; city: string; lat: number | null; lng: number | null; dishes: string[] }): object; // schema.org Restaurant, geo only when coords, servesCuisine omitted, address {addressLocality, addressRegion: city, addressCountry: "IN"}
+export function dishItemList(input: {
+  city: string;
+  dish: string;
+  path: string;
+  places: { name: string; path: string }[];
+}): object; // schema.org ItemList of ListItem{position,url,name}
+export function restaurantLd(input: {
+  name: string;
+  path: string;
+  locality: string | null;
+  city: string;
+  lat: number | null;
+  lng: number | null;
+  dishes: string[];
+}): object; // schema.org Restaurant, geo only when coords, servesCuisine omitted, address {addressLocality, addressRegion: city, addressCountry: "IN"}
 ```
+
 Metadata per page: title `"{Dish} in {City}: where food vloggers eat"`, `"{Place}, {Locality}: picked by {N} food vloggers"`, `"{Creator}'s food picks in Delhi"`, `"Food vlogger picks in {City}"`; description from counts only (no invented claims); `alternates.canonical` = absolute path; `/search` gets `robots: { index: false }`.
 
 - [ ] **Step 1: Failing tests:** `serializeJsonLd({ name: "</script><b>" })` contains no `</script>` and contains `\u003c/script>`; `dishItemList` positions are 1..n and urls absolute; `restaurantLd` with null coords has no `geo`; with coords has `geo: { "@type": "GeoCoordinates", latitude, longitude }`; `absoluteUrl("/delhi")` → `${SITE_URL}/delhi`.
