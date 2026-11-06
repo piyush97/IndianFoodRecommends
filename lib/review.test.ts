@@ -225,6 +225,24 @@ describe("suggestLocation", () => {
     expect(result).toEqual({ lat: 28.68, lng: 77.2, osmId: "123", displayName: "Delhi" });
   });
 
+  it("answers a repeated query from cache without a second request", async () => {
+    let calls = 0;
+    const deps = {
+      ua: "ifr/0.1 (me@example.com)",
+      sleep: async () => {},
+      fetchImpl: async () => {
+        calls++;
+        return new Response(
+          JSON.stringify([{ lat: "28.6", lon: "77.2", osm_id: "9", display_name: "D" }]),
+        );
+      },
+    };
+    await suggestLocation("Cache Me, Delhi", deps);
+    const second = await suggestLocation("  cache me,  delhi ", deps);
+    expect(calls).toBe(1);
+    expect(second?.osmId).toBe("9");
+  });
+
   it("waits at least a second between calls", async () => {
     let waited = 0;
     const deps = {

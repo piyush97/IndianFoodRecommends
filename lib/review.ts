@@ -163,11 +163,16 @@ export type GeocodeDeps = {
 };
 
 let lastCall = 0;
+type GeoHit = { lat: number; lng: number; osmId: string; displayName: string };
+// Per-process cache: one ingest run often looks up the same place twice.
+const geoCache = new Map<string, GeoHit | null>();
 
 export async function suggestLocation(
   query: string,
   deps: GeocodeDeps = {},
-): Promise<{ lat: number; lng: number; osmId: string; displayName: string } | null> {
+): Promise<GeoHit | null> {
+  const key = query.trim().toLowerCase().replace(/\s+/g, " ");
+  if (geoCache.has(key)) return geoCache.get(key)!;
   const sleep = deps.sleep ?? ((ms: number) => new Promise((r) => setTimeout(r, ms)));
   const wait = Math.max(0, 1000 - (Date.now() - lastCall));
   if (lastCall !== 0) await sleep(wait);
@@ -190,11 +195,14 @@ export async function suggestLocation(
     display_name: string;
   }[];
   const first = rows[0];
-  if (!first) return null;
-  return {
-    lat: Number(first.lat),
-    lng: Number(first.lon),
-    osmId: String(first.osm_id),
-    displayName: first.display_name,
-  };
+  const hit: GeoHit | null = first
+    ? {
+        lat: Number(first.lat),
+        lng: Number(first.lon),
+        osmId: String(first.osm_id),
+        displayName: first.display_name,
+      }
+    : null;
+  geoCache.set(key, hit);
+  return hit;
 }

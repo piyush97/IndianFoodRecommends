@@ -39,7 +39,7 @@ erDiagram
 
 - `pending` rows: `place_id` / `dish_id` nullable until review; raw guess in `extracted` jsonb (our LLM output, not YouTube text).
 - Indexes: `gin_trgm_ops` on `place.name`, `dish.name`, aliases; `(status, place_id)`, `(status, dish_id)`.
-- YouTube compliance: we persist only `external_id` (video ID), creator channel ID, and our derived facts. No titles/descriptions/stats. **Verify with policy review that video IDs are allowed beyond 30 days; if not, add 30-day refresh job.**
+- YouTube data (S0-6 decision, 2026-11-06): ingest uses the public channel RSS feed, not the YouTube Data API, so the API Services 30-day storage rule (III.E.4) does not apply to our pipeline. We still persist only `external_id` (video ID), channel ID, publish date and our own derived facts; titles and descriptions live in memory for one run. Video IDs are kept indefinitely because the public site needs them for embeds. If we ever switch back to the Data API, add a 30-day refresh job for any API-sourced field. Legal risk accepted by owner.
 
 ## 3. Ingestion pipeline (`/worker`)
 
@@ -95,6 +95,6 @@ SEO: `schema.org/Restaurant` JSON-LD on place pages, `ItemList` on dish pages, s
 
 ## 8. Open technical questions
 
-1. Video ID retention under YouTube policy (legal read).
+1. ~~Video ID retention under YouTube policy~~ decided in §2 (RSS, no API Services).
 2. Which cliproxyapi model is best for extraction (eval set decides).
 3. Neon vs Supabase (either works; pick by free tier limits at signup).
