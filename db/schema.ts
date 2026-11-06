@@ -172,3 +172,35 @@ export const ingestRuns = pgTable(
   },
   (t) => [index("ingest_runs_ext_idx").on(t.platform, t.externalId)],
 );
+
+/**
+ * Visitor suggestions, kept apart from `sources` so an unchecked URL can never
+ * block or mislabel a creator's own ingest. Auto-review turns an accepted row
+ * into a normal source + recommendation.
+ */
+export const submissions = pgTable(
+  "submissions",
+  {
+    id: serial("id").primaryKey(),
+    videoId: text("video_id").notNull(),
+    creatorId: integer("creator_id")
+      .notNull()
+      .references(() => creators.id, { onDelete: "cascade" }),
+    citySlug: text("city_slug").notNull(),
+    placeName: text("place_name").notNull(),
+    dishName: text("dish_name").notNull(),
+    tsSeconds: integer("ts_seconds"),
+    ipHash: text("ip_hash").notNull(),
+    status: recStatus("status").notNull().default("pending"),
+    reason: text("reason"),
+    recommendationId: integer("recommendation_id").references(() => recommendations.id, {
+      onDelete: "set null",
+    }),
+    createdAt,
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+  },
+  (t) => [
+    index("submissions_ip_created_idx").on(t.ipHash, t.createdAt),
+    index("submissions_status_idx").on(t.status),
+  ],
+);

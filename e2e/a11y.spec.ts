@@ -10,6 +10,8 @@ const PAGES = [
   "/search?q=chole",
   "/search?q=zzzz",
   "/about",
+  "/submit",
+  "/creator/e2e-creator/kit",
 ];
 
 for (const path of PAGES) {

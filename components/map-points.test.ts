@@ -3,6 +3,7 @@ import type { PickCard } from "../lib/public/queries";
 import { mapPoints } from "./map-points";
 
 const card = (slug: string, lat: number | null, lng: number | null, approx = false): PickCard => ({
+  citySlug: "delhi",
   placeSlug: slug,
   placeName: slug.toUpperCase(),
   locality: null,

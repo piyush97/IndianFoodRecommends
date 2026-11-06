@@ -14,7 +14,7 @@ export default async function Image({
   await connection();
   const { city, slug } = await params;
   const data = await cachedPlace(city, slug).catch(() => null);
-  if (!data) return ogCard({ title: "Where Delhi food vloggers say to eat" });
+  if (!data) return ogCard({ title: "Where Indian food vloggers say to eat" });
   const where = [data.place.locality, data.city.name].filter(Boolean).join(", ");
   return ogCard({
     title: data.place.name,

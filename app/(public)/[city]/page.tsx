@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { PickList } from "../../../components/PickList";
+import { NearMeList } from "../../../components/NearMeList";
 import { Skeleton } from "../../../components/Skeleton";
 import { cachedCity } from "../data";
 
@@ -57,11 +57,7 @@ async function City({ params }: { params: PageProps<"/[city]">["params"] }) {
       </section>
       <section className="flex flex-col gap-3">
         <h2 className="text-xl font-semibold">Most picked places</h2>
-        <PickList
-          cards={data.places}
-          citySlug={data.city.slug}
-          emptyText={`No picks yet for ${data.city.name}.`}
-        />
+        <NearMeList cards={data.places} emptyText={`No picks yet for ${data.city.name}.`} />
       </section>
     </>
   );

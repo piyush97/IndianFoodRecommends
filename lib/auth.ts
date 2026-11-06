@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
 import { isAdminEmail } from "./admin-email";
@@ -36,6 +37,8 @@ export async function requireAdmin(): Promise<{ email: string }> {
  * admin page must call this before reading the database.
  */
 export async function requireAdminPage(): Promise<{ email: string }> {
+  // Auth.js reads cookies and random values: never during prerender.
+  await connection();
   try {
     return await requireAdmin();
   } catch {

@@ -42,6 +42,10 @@ jobs:
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/ifr
       # Throwaway service DB, so tests may truncate it.
       DATABASE_URL_TEST: postgres://postgres:postgres@localhost:5432/ifr
+      # Throwaway values for the E2E server (not secrets: CI-only, no real data).
+      REPORT_SALT: ci-only-salt
+      AUTH_SECRET: ci-only-auth-secret
+      AUTH_TRUST_HOST: "true"
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4

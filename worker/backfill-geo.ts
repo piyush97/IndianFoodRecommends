@@ -1,19 +1,25 @@
 import { and, eq, isNotNull, isNull } from "drizzle-orm";
 import { db, schema } from "../db";
-import { geocodeDelhi } from "../lib/auto-review";
+import { geocodeIndia } from "../lib/auto-review";
 
 /** One-off: give places without coordinates a shop or locality-level pin. */
 async function main(): Promise<void> {
+  const cityName = new Map(
+    (await db.select().from(schema.cities)).map((c) => [c.id, c.name] as const),
+  );
   const rows = await db
     .select()
     .from(schema.places)
     .where(and(isNull(schema.places.lat), isNotNull(schema.places.name)));
   let fixed = 0;
   for (const place of rows) {
-    const exact = await geocodeDelhi(
-      [place.name, place.locality, "Delhi"].filter(Boolean).join(", "),
+    const exact = await geocodeIndia(
+      [place.name, place.locality, cityName.get(place.cityId)].filter(Boolean).join(", "),
     );
-    const area = exact || !place.locality ? null : await geocodeDelhi(`${place.locality}, Delhi`);
+    const area =
+      exact || !place.locality
+        ? null
+        : await geocodeIndia(`${place.locality}, ${cityName.get(place.cityId)}`);
     const hit = exact ?? (area ? { ...area, osmId: `approx:${area.osmId}` } : null);
     if (!hit) continue;
     await db

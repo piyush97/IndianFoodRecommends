@@ -16,7 +16,9 @@ export type IngestSummary = { videos: number; picks: number; errors: number };
 
 const LOCK_ID = 727001;
 const ZERO: IngestSummary = { videos: 0, picks: 0, errors: 0 };
-const NINETY_DAYS_MS = 90 * 24 * 60 * 60 * 1000;
+// First run per creator: the feed holds at most 15 uploads anyway, so look back a year
+// to cover creators who post monthly.
+const FIRST_RUN_WINDOW_MS = 365 * 24 * 60 * 60 * 1000;
 
 export async function runIngest(deps: IngestDeps): Promise<IngestSummary> {
   const connection = await deps.db.$client.reserve();
@@ -55,13 +57,13 @@ async function ingest({ db, listUploads, extract, now }: IngestDeps): Promise<In
       const [latest] = await db
         .select({ publishedOn: schema.sources.publishedOn })
         .from(schema.sources)
-        .where(eq(schema.sources.creatorId, creator.id))
+        .where(and(eq(schema.sources.creatorId, creator.id), isNotNull(schema.sources.publishedOn)))
         .orderBy(desc(schema.sources.publishedOn))
         .limit(1);
 
       const since = latest?.publishedOn
         ? new Date(`${latest.publishedOn}T00:00:00Z`)
-        : new Date(now().getTime() - NINETY_DAYS_MS);
+        : new Date(now().getTime() - FIRST_RUN_WINDOW_MS);
 
       let uploads: Upload[];
       try {

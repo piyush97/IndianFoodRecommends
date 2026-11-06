@@ -4,7 +4,7 @@ import { classifyVideo, gatedExtract, shouldExtract, type VideoVerdict } from ".
 
 const delhi: VideoVerdict = {
   namesPlace: 0.9,
-  city: "delhi",
+  city: "covered",
   cityConfidence: 0.95,
   negative: 0.05,
 };
@@ -23,10 +23,10 @@ describe("shouldExtract", () => {
     expect(shouldExtract(delhi).extract).toBe(true);
   });
 
-  it("skips a confidently non-Delhi video", () => {
+  it("skips a video confidently outside our cities", () => {
     expect(shouldExtract({ ...delhi, city: "other", cityConfidence: 0.92 })).toEqual({
       extract: false,
-      reason: "not-delhi",
+      reason: "not-covered",
     });
   });
 

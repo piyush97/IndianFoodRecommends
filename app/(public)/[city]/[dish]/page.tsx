@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { ListMapToggle } from "../../../../components/ListMapToggle";
 import { mapPoints } from "../../../../components/map-points";
-import { PickList } from "../../../../components/PickList";
+import { NearMeList } from "../../../../components/NearMeList";
 import { Skeleton } from "../../../../components/Skeleton";
 import { cachedDish } from "../../data";
 
@@ -73,10 +73,9 @@ async function Dish({ params }: { params: Params }) {
         citySlug={data.city.slug}
         points={mapPoints(data.places)}
         list={
-          <PickList
+          <NearMeList
             headingLevel={2}
             cards={data.places}
-            citySlug={data.city.slug}
             emptyText={`No picks yet for ${data.dish.name} in ${data.city.name}.`}
           />
         }

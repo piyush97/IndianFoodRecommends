@@ -7,7 +7,14 @@ import type { Upload } from "./youtube";
 const handle = testDb();
 const describeDb = handle ? describe : describe.skip;
 
-const good: PickCheck = { grounded: 0.9, isVenue: 0.9, recommends: 0.9, inDelhi: 0.9 };
+const good: PickCheck = {
+  grounded: 0.9,
+  dishGrounded: 0.9,
+  isVenue: 0.9,
+  recommends: 0.9,
+  city: "delhi",
+  cityConfidence: 0.9,
+};
 
 function upload(videoId: string): Upload {
   return { videoId, publishedAt: new Date(), title: "Delhi tour", description: "Chache Di Hatti" };
@@ -18,7 +25,10 @@ describeDb("autoReviewPending", () => {
 
   beforeEach(async () => {
     await truncateAll(db);
-    await db.insert(schema.cities).values({ slug: "delhi", name: "Delhi" });
+    await db.insert(schema.cities).values([
+      { slug: "delhi", name: "Delhi" },
+      { slug: "mumbai", name: "Mumbai" },
+    ]);
     await db.insert(schema.creators).values({ slug: "a", name: "A", ytChannelId: "UC1" });
     await db.insert(schema.sources).values({ platform: "youtube", externalId: "v1", creatorId: 1 });
   });
@@ -76,13 +86,28 @@ describeDb("autoReviewPending", () => {
     expect(place).toMatchObject({ lat: 28.69, osmId: "approx:loc" });
   });
 
-  it("rejects a Kolkata pick and records why", async () => {
-    await pending({ ...base, city: "Kolkata" });
+  it("files a Mumbai pick under Mumbai and geocodes it there", async () => {
+    await pending({ ...base, city: "Mumbai", place_name: "Bademiya", locality: "Colaba" });
+    const queries: string[] = [];
+    await autoReviewPending({
+      ...deps(),
+      geocode: async (q) => {
+        queries.push(q);
+        return { lat: 18.92, lng: 72.83, osmId: "m" };
+      },
+    });
+    const [place] = await db.select().from(schema.places);
+    expect(place).toMatchObject({ name: "Bademiya", cityId: 2 });
+    expect(queries[0]).toBe("Bademiya, Colaba, Mumbai");
+  });
+
+  it("rejects a Pune pick and records why", async () => {
+    await pending({ ...base, city: "Pune" });
     await autoReviewPending(deps());
     const [rec] = await db.select().from(schema.recommendations);
     expect(rec.status).toBe("rejected");
     expect((rec.extracted as { autoReview: { reason: string } }).autoReview.reason).toBe(
-      "not-delhi",
+      "not-supported-city",
     );
     expect(await db.select().from(schema.places)).toHaveLength(0);
   });
@@ -110,6 +135,58 @@ describeDb("autoReviewPending", () => {
     await pending(base);
     const summary = await autoReviewPending(deps());
     expect(summary).toEqual({ approved: 1, rejected: 1, skipped: 0 });
+  });
+
+  async function submission(over: Partial<typeof schema.submissions.$inferInsert> = {}) {
+    const [row] = await db
+      .insert(schema.submissions)
+      .values({
+        videoId: "v1",
+        creatorId: 1,
+        citySlug: "delhi",
+        placeName: "Chache Di Hatti",
+        dishName: "Chole Bhature",
+        tsSeconds: 252,
+        ipHash: "h",
+        ...over,
+      })
+      .returning();
+    return row.id;
+  }
+
+  it("publishes a submission only from the creator's own feed, creating the source then", async () => {
+    await db.delete(schema.sources);
+    await submission();
+    const summary = await autoReviewPending(deps());
+    expect(summary.approved).toBe(1);
+    const [sub] = await db.select().from(schema.submissions);
+    expect(sub).toMatchObject({ status: "approved" });
+    const [source] = await db.select().from(schema.sources);
+    expect(source).toMatchObject({ externalId: "v1", creatorId: 1 });
+    const [rec] = await db.select().from(schema.recommendations);
+    expect(rec).toMatchObject({ origin: "community", status: "approved", tsSeconds: 252 });
+  });
+
+  it("rejects a submission whose video is not in that creator's feed", async () => {
+    await submission({ videoId: "someone-elses" });
+    await autoReviewPending(deps());
+    const [sub] = await db.select().from(schema.submissions);
+    expect(sub).toMatchObject({ status: "rejected", reason: "not-creators-video" });
+    expect(await db.select().from(schema.recommendations)).toHaveLength(0);
+  });
+
+  it("rejects a submission whose city Jev does not confirm", async () => {
+    await submission();
+    await autoReviewPending({ ...deps(), check: async () => ({ ...good, city: "mumbai" }) });
+    const [sub] = await db.select().from(schema.submissions);
+    expect(sub).toMatchObject({ status: "rejected", reason: "city-mismatch" });
+  });
+
+  it("adds a submitted pick to a video the worker already ingested", async () => {
+    await submission();
+    await autoReviewPending(deps());
+    expect(await db.select().from(schema.sources)).toHaveLength(1);
+    expect((await db.select().from(schema.recommendations))[0].sourceId).toBe(1);
   });
 
   it("leaves a pick pending when Jev is down", async () => {

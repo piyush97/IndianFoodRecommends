@@ -1,9 +1,23 @@
 import { cacheLife, cacheTag } from "next/cache";
 import { db } from "../../db";
-import { getCity, getCreator, getDishInCity, getHome, getPlace } from "../../lib/public/queries";
+import {
+  getCity,
+  getCreator,
+  getDishInCity,
+  getHome,
+  getPlace,
+  listActiveCities,
+} from "../../lib/public/queries";
 
 // Cached reads for public pages. Every entry carries the `public` tag so the
 // worker can refresh everything after a run with one revalidateTag call.
+
+export async function cachedCities() {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("public");
+  return listActiveCities(db);
+}
 
 export async function cachedHome(city: string) {
   "use cache";

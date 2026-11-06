@@ -19,6 +19,7 @@
     "e2e:seed": "tsx e2e/seed.ts"
   },
   "dependencies": {
+    "botid": "^1.5.12",
     "drizzle-orm": "^0.45.4",
     "maplibre-gl": "5",
     "next": "16.4.5",

@@ -14,7 +14,7 @@ export function testDb(): { db: Db; close: () => Promise<void> } | null {
 
 export async function truncateAll(db: Db): Promise<void> {
   await db.execute(
-    sql.raw(`TRUNCATE cities, creators, sources, places, dishes, recommendations,
+    sql.raw(`TRUNCATE cities, creators, sources, places, dishes, recommendations, submissions,
      place_aliases, dish_aliases, reports, ingest_runs RESTART IDENTITY CASCADE`),
   );
 }

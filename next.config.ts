@@ -1,3 +1,4 @@
+import { withBotId } from "botid/next/config";
 import type { NextConfig } from "next";
 import { buildCsp } from "./lib/seo/csp";
 
@@ -26,7 +27,8 @@ const nextConfig: NextConfig = {
           { key: "Content-Security-Policy", value: csp },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+          // geolocation=(self): the opt-in "near me" sort; embeds and other origins stay blocked.
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(self)" },
           { key: "X-Frame-Options", value: "DENY" },
           { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" },
         ],
@@ -35,4 +37,5 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// Adds BotID's challenge rewrites (botid README, step 1).
+export default withBotId(nextConfig);

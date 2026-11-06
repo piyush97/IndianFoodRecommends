@@ -7,13 +7,11 @@ const action =
 
 export function PickList({
   cards,
-  citySlug,
   emptyText,
   numbered = true,
   headingLevel = 3,
 }: {
   cards: PickCard[];
-  citySlug: string;
   emptyText: string;
   numbered?: boolean;
   /** 2 when the list sits directly under the page h1, 3 under a section h2. */
@@ -33,7 +31,7 @@ export function PickList({
             <Heading className="text-lg font-semibold">
               {numbered && <span className="text-muted">{i + 1}. </span>}
               <Link
-                href={`/${citySlug}/place/${card.placeSlug}`}
+                href={`/${card.citySlug}/place/${card.placeSlug}`}
                 className="underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-accent"
               >
                 {card.placeName}

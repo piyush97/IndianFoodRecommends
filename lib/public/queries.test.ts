@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { schema, type Db } from "../../db";
 import { testDb, truncateAll } from "../../db/test-db";
-import { getCreator, getDishInCity, getHome, getPlace } from "./queries";
+import { getCreator, getDishInCity, getHome, getPlace, listActiveCities } from "./queries";
 
 const handle = testDb();
 const describeDb = handle ? describe : describe.skip;
@@ -83,6 +83,11 @@ describeDb("public queries", () => {
     expect(await getCreator(db, "gone")).toBeNull();
     const two = await getCreator(db, "two", "momos");
     expect(two?.picks.map((p) => p.placeSlug)).toEqual(["b"]);
+    expect(two?.picks[0].citySlug).toBe("delhi");
+  });
+
+  it("lists every city that has visible picks", async () => {
+    expect(await listActiveCities(db)).toEqual([{ slug: "delhi", name: "Delhi", picks: 4 }]);
   });
 
   it("returns null for unknown slugs", async () => {
