@@ -55,6 +55,21 @@ describeDb("createReport", () => {
     ).toEqual({ ok: false, status: 400 });
   });
 
+  it("holds the limit under parallel requests from one IP", async () => {
+    const results = await Promise.all(
+      Array.from({ length: 20 }, () => createReport(db, { placeId: 1, kind: "other" }, "burst", now)),
+    );
+    expect(results.filter((r) => r.ok)).toHaveLength(5);
+    expect(await db.select().from(schema.reports)).toHaveLength(5);
+  });
+
+  it("returns 400 for a placeId outside the integer column range", async () => {
+    expect(await createReport(db, { placeId: 3_000_000_000, kind: "closed" }, "h", now)).toEqual({
+      ok: false,
+      status: 400,
+    });
+  });
+
   it("rate limits the sixth report per IP hash per minute", async () => {
     for (let i = 0; i < 5; i++) {
       expect(await createReport(db, { placeId: 1, kind: "other" }, "same", now)).toEqual({
