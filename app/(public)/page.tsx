@@ -3,14 +3,14 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { PickList } from "../../components/PickList";
 import { Skeleton } from "../../components/Skeleton";
-import { cachedHome } from "./data";
+import { cachedCities, cachedHome } from "./data";
 
 export default function Home() {
   return (
     <>
       <section className="flex flex-col gap-4">
         <h1 className="text-3xl font-semibold tracking-tight">
-          Where Delhi food vloggers say to eat
+          Where Indian food vloggers say to eat
         </h1>
         <form action="/search" className="flex gap-2" role="search">
           <label htmlFor="q" className="sr-only">
@@ -39,27 +39,31 @@ export default function Home() {
   );
 }
 
+const chip =
+  "inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-step)] border border-line px-3 focus-visible:outline-2 focus-visible:outline-accent";
+
 async function HomeLists() {
-  // Read at request time so builds never need the database; the data itself
-  // stays cached for hours via `use cache` in cachedHome.
+  // Request time only: builds never need the database; the data stays cached for hours.
   await connection();
-  const home = await cachedHome("delhi");
-  if (!home) return <p className="text-muted">No picks yet for Delhi.</p>;
+  const cities = await cachedCities();
+  if (cities.length === 0) return <p className="text-muted">No picks yet.</p>;
+  const homes = (await Promise.all(cities.map((c) => cachedHome(c.slug)))).filter(
+    (h) => h !== null,
+  );
 
   return (
     <>
-      <section className="flex flex-col gap-3">
-        <h2 className="text-xl font-semibold">Popular in Delhi</h2>
-        {home.dishes.length === 0 ? (
-          <p className="text-muted">No picks yet for Delhi.</p>
-        ) : (
+      {homes.map((home) => (
+        <section key={home.city.slug} className="flex flex-col gap-3">
+          <h2 className="text-xl font-semibold">
+            <Link href={`/${home.city.slug}`} className="underline underline-offset-4">
+              {home.city.name}
+            </Link>
+          </h2>
           <ul className="flex flex-wrap gap-2">
             {home.dishes.slice(0, 8).map((d) => (
               <li key={d.slug}>
-                <Link
-                  href={`/delhi/${d.slug}`}
-                  className="inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-step)] border border-line px-3 focus-visible:outline-2 focus-visible:outline-accent"
-                >
+                <Link href={`/${home.city.slug}/${d.slug}`} className={chip}>
                   {d.name}
                   <span className="text-sm text-muted">
                     {d.picks} {d.picks === 1 ? "pick" : "picks"}
@@ -68,13 +72,19 @@ async function HomeLists() {
               </li>
             ))}
           </ul>
-        )}
-      </section>
+          <h3 className="text-lg font-semibold">Recently added in {home.city.name}</h3>
+          <PickList
+            cards={home.recent.slice(0, 4)}
+            numbered={false}
+            emptyText={`No picks yet for ${home.city.name}.`}
+          />
+        </section>
+      ))}
 
       <section className="flex flex-col gap-3">
         <h2 className="text-xl font-semibold">Creators</h2>
         <ul className="flex flex-col gap-1">
-          {home.creators.map((c) => (
+          {mergeCreators(homes).map((c) => (
             <li key={c.slug}>
               <Link
                 href={`/creator/${c.slug}`}
@@ -89,16 +99,17 @@ async function HomeLists() {
           ))}
         </ul>
       </section>
-
-      <section className="flex flex-col gap-3">
-        <h2 className="text-xl font-semibold">Recently added</h2>
-        <PickList
-          cards={home.recent}
-          citySlug="delhi"
-          numbered={false}
-          emptyText="No picks yet for Delhi."
-        />
-      </section>
     </>
   );
+}
+
+function mergeCreators(homes: { creators: { slug: string; name: string; picks: number }[] }[]) {
+  const all = new Map<string, { slug: string; name: string; picks: number }>();
+  for (const h of homes) {
+    for (const c of h.creators) {
+      const prev = all.get(c.slug);
+      all.set(c.slug, { ...c, picks: (prev?.picks ?? 0) + c.picks });
+    }
+  }
+  return [...all.values()].sort((a, b) => b.picks - a.picks || a.name.localeCompare(b.name));
 }

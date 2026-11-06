@@ -15,8 +15,8 @@ export async function generateMetadata({ params }: Pick<Props, "params">): Promi
   const data = await cachedCreator(slug);
   if (!data) return { title: "Not found", robots: { index: false } };
   return {
-    title: `${data.creator.name}'s food picks in Delhi`,
-    description: `${data.total} Delhi food ${data.total === 1 ? "pick" : "picks"} from ${data.creator.name}, each linked to the video moment.`,
+    title: `${data.creator.name}'s food picks`,
+    description: `${data.total} food ${data.total === 1 ? "pick" : "picks"} from ${data.creator.name}, each linked to the video moment.`,
     alternates: { canonical: `/creator/${data.creator.slug}` },
   };
 }
@@ -46,7 +46,7 @@ async function Creator({ params, searchParams }: Props) {
       <section className="flex flex-col gap-2">
         <h1 className="text-3xl font-semibold tracking-tight">{creator.name}</h1>
         <p className="text-muted">
-          {data.total} {data.total === 1 ? "pick" : "picks"} · Delhi
+          {data.total} {data.total === 1 ? "pick" : "picks"}
         </p>
         <div className="flex flex-wrap gap-2 text-sm">
           {creator.ytChannelId && (
@@ -97,11 +97,10 @@ async function Creator({ params, searchParams }: Props) {
       <PickList
         headingLevel={2}
         cards={data.picks}
-        citySlug="delhi"
         emptyText={
           active
             ? `No picks yet for ${active.name} by ${creator.name}.`
-            : `No picks yet by ${creator.name} in Delhi.`
+            : `No picks yet by ${creator.name}.`
         }
       />
     </>

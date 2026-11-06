@@ -76,7 +76,6 @@ async function Dish({ params }: { params: Params }) {
           <PickList
             headingLevel={2}
             cards={data.places}
-            citySlug={data.city.slug}
             emptyText={`No picks yet for ${data.dish.name} in ${data.city.name}.`}
           />
         }

@@ -35,11 +35,13 @@
 **Files:** Create `lib/cities.ts`, `lib/cities.test.ts`; modify `db/seed-data.ts` (cities from registry + Mumbai/Kolkata creators), `lib/auto-review.ts`, `lib/jev.ts`, `lib/worker/ingest.ts`, `app/(public)/page.tsx`, `app/(public)/layout.tsx`, `app/(public)/creator/[slug]/page.tsx`, `components/PickList.tsx`, `lib/public/queries.ts` (`PickCard.citySlug`), `app/admin/review/page.tsx`.
 
 **Interfaces — Produces:**
+
 ```ts
 export type City = { slug: string; name: string; state: string; aliases: string[] };
 export const CITIES: readonly City[]; // delhi, mumbai, kolkata
 export function cityFromName(name: string | null | undefined): City | null; // normalizeName exact match on name or alias
 ```
+
 Auto-review: `decidePick` approves when `cityFromName(pick.city)` is a known city (not only Delhi), `in_city` Jev question asks about that city; unstated city → Jev choice over the 3 cities + "other" (≥ 0.8). `publish` uses the matched city's id and geocodes with `", {city.name}"`. Jev video screen: `city` choice is `known` (any registry city) / `other` / `unknown`. Home page renders sections for every city with ≥ 1 pick, Delhi first. Header: cities with picks are links, others "(soon)". Creator page: per-card `citySlug`, title "…food picks" without a city.
 
 - [ ] **Step 1: Failing tests:** `cityFromName("Gurugram")` → delhi; `"Bombay"` → mumbai; `"Calcutta"` → kolkata; `"Pune"` → null; `decidePick({city:"Mumbai"},good)` approves; `{city:"Pune"}` → `not-supported-city`; auto-review DB test: Mumbai pick lands with `city_id` of Mumbai; `getCreator` cards carry their own `citySlug`.

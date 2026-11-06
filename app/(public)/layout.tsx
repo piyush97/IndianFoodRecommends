@@ -1,6 +1,8 @@
 import Link from "next/link";
-
-const SOON = ["Mumbai", "Kolkata"];
+import { connection } from "next/server";
+import { Suspense } from "react";
+import { CITIES } from "../../lib/cities";
+import { cachedCities } from "./data";
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   const optOut = process.env.NEXT_PUBLIC_OPTOUT_EMAIL;
@@ -13,19 +15,9 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
         >
           Indian Food Recommends
         </Link>
-        <nav aria-label="Cities" className="flex flex-wrap items-center gap-3 text-sm">
-          <Link
-            href="/delhi"
-            className="min-h-11 content-center underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-accent"
-          >
-            Delhi
-          </Link>
-          {SOON.map((city) => (
-            <span key={city} className="text-muted">
-              {city} (soon)
-            </span>
-          ))}
-        </nav>
+        <Suspense fallback={<span className="text-sm text-muted">Cities</span>}>
+          <CityNav />
+        </Suspense>
       </header>
       <main className="flex min-h-[100dvh] flex-1 flex-col gap-8 py-8">{children}</main>
       <footer className="flex flex-col gap-1 border-t border-line py-6 text-sm text-muted">
@@ -55,5 +47,30 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
         </p>
       </footer>
     </>
+  );
+}
+
+/** Cities with picks are links; the rest of the registry shows as "soon". */
+async function CityNav() {
+  await connection();
+  const active = new Set((await cachedCities()).map((c) => c.slug));
+  return (
+    <nav aria-label="Cities" className="flex flex-wrap items-center gap-3 text-sm">
+      {CITIES.map((city) =>
+        active.has(city.slug) ? (
+          <Link
+            key={city.slug}
+            href={`/${city.slug}`}
+            className="min-h-11 content-center underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-accent"
+          >
+            {city.name}
+          </Link>
+        ) : (
+          <span key={city.slug} className="text-muted">
+            {city.name} (soon)
+          </span>
+        ),
+      )}
+    </nav>
   );
 }

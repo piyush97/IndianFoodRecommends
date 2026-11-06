@@ -1,9 +1,10 @@
+import { CITIES } from "./cities";
 import type { ExtractedPick } from "./llm/extract";
 
 /**
  * Jev (TypeSafe) is a classifier, not a text generator: ~$0.04 per million input
  * tokens. We ask it cheap yes/no and pick-one questions so the expensive LLM only
- * reads videos that can produce a Delhi pick.
+ * reads videos that can produce a pick in a city we cover.
  */
 
 type Video = { title: string; description: string };
@@ -11,7 +12,7 @@ type Video = { title: string; description: string };
 export type VideoVerdict = {
   namesPlace: number;
   negative: number;
-  city: "delhi" | "other" | "unknown";
+  city: "covered" | "other" | "unknown";
   cityConfidence: number;
 };
 
@@ -23,11 +24,11 @@ const OTHER_CITY_CONFIDENCE = 0.85;
 
 export function shouldExtract(
   v: VideoVerdict,
-): { extract: true } | { extract: false; reason: "no-place" | "negative" | "not-delhi" } {
+): { extract: true } | { extract: false; reason: "no-place" | "negative" | "not-covered" } {
   if (v.namesPlace < NO_PLACE_BELOW) return { extract: false, reason: "no-place" };
   if (v.negative > NEGATIVE_ABOVE) return { extract: false, reason: "negative" };
   if (v.city === "other" && v.cityConfidence >= OTHER_CITY_CONFIDENCE) {
-    return { extract: false, reason: "not-delhi" };
+    return { extract: false, reason: "not-covered" };
   }
   return { extract: true };
 }
@@ -57,8 +58,8 @@ export async function classifyVideo(
           type: "choice",
           instructions: "Which city the food place in the video is in",
           criteria: {
-            delhi: "Delhi, New Delhi, or Delhi NCR (Gurgaon, Noida)",
-            other: "Another city",
+            covered: CITIES.map((c) => [c.name, ...c.aliases].join(", ")).join("; "),
+            other: "A city not in that list",
             unknown: "No city can be determined",
           },
         },

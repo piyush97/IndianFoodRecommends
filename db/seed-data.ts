@@ -7,7 +7,9 @@ export type SeedDish = {
   aliases?: string[];
 };
 
-export const cities = [{ slug: "delhi", name: "Delhi", state: "Delhi" }] as const;
+import { CITIES } from "../lib/cities";
+
+export const cities = CITIES.map(({ slug, name, state }) => ({ slug, name, state }));
 
 export const creators = [
   {
@@ -58,7 +60,33 @@ export const creators = [
     name: "The Urban Guide",
     ytChannelId: "UCycORvCTjr7zn-fxttE81zw",
     igHandle: null,
+  }, // Mumbai (S4-2): recent uploads are mostly Mumbai/Thane food reviews.
+  {
+    slug: "anagha-mirgal",
+    name: "Anagha Mirgal",
+    ytChannelId: "UCgLkCMpT3u-h9XWWzkOofvA",
+    igHandle: null,
   },
+  {
+    slug: "dil-dosti-food",
+    name: "Dil Dosti Food",
+    ytChannelId: "UC6r_Xa5FPbCPEJYXnVj5D5g",
+    igHandle: null,
+  },
+  {
+    slug: "the-mumbai-foodie",
+    name: "The Mumbai Foodie",
+    ytChannelId: "UCe4HdRHk3TDQ9c8RzJyxs0g",
+    igHandle: null,
+  },
+  // Kolkata (S4-2).
+  {
+    slug: "the-lazy-bong",
+    name: "The Lazy Bong",
+    ytChannelId: "UCTjYxU04HjYDb5oPmGWmKCw",
+    igHandle: null,
+  },
+  { slug: "foodka", name: "Foodka", ytChannelId: "UCNvM-A87wgmzGss0qG5aZKQ", igHandle: null },
 ];
 
 export const dishes: SeedDish[] = [

@@ -1,9 +1,11 @@
 import { and, eq, type SQL } from "drizzle-orm";
 import { schema, type Db } from "../../db";
 import type { Platform } from "./links";
+import { CITIES } from "../cities";
 import { rankScore } from "./rank";
 
 export type PickCard = {
+  citySlug: string;
   placeSlug: string;
   placeName: string;
   locality: string | null;
@@ -29,6 +31,7 @@ type Row = {
   platform: Platform;
   externalId: string;
   publishedOn: string | null;
+  citySlug: string;
   creatorSlug: string;
   creatorName: string;
   placeSlug: string;
@@ -67,6 +70,7 @@ async function visibleRows(db: Db, ...filters: SQL[]): Promise<Row[]> {
       platform: s.platform,
       externalId: s.externalId,
       publishedOn: s.publishedOn,
+      citySlug: schema.cities.slug,
       creatorSlug: c.slug,
       creatorName: c.name,
       placeSlug: p.slug,
@@ -84,6 +88,7 @@ async function visibleRows(db: Db, ...filters: SQL[]): Promise<Row[]> {
     .innerJoin(c, eq(c.id, s.creatorId))
     .innerJoin(p, eq(p.id, r.placeId))
     .innerJoin(d, eq(d.id, r.dishId))
+    .innerJoin(schema.cities, eq(schema.cities.id, p.cityId))
     .where(and(eq(r.status, "approved"), eq(c.optedOut, false), ...filters))
     .orderBy(r.id);
 }
@@ -103,6 +108,7 @@ function toCards(rows: Row[], now: Date): PickCard[] {
     const newest = new Date(Math.max(...group.map((g) => pickedAt(g).getTime())));
     const proof = group.find((g) => g.tsSeconds !== null) ?? first;
     return {
+      citySlug: first.citySlug,
       placeSlug: first.placeSlug,
       placeName: first.placeName,
       locality: first.locality,
@@ -127,6 +133,26 @@ function countBy<K extends string>(rows: Row[], key: (r: Row) => K) {
   const counts = new Map<K, number>();
   for (const row of rows) counts.set(key(row), (counts.get(key(row)) ?? 0) + 1);
   return counts;
+}
+
+/** Cities with at least one visible pick, in registry order. */
+export async function listActiveCities(db: Db) {
+  const rows = await visibleRows(db);
+  const counts = new Map<string, { slug: string; name: string; picks: number }>();
+  for (const r of rows) {
+    const entry = counts.get(r.citySlug) ?? { slug: r.citySlug, name: "", picks: 0 };
+    entry.picks++;
+    counts.set(r.citySlug, entry);
+  }
+  const names = new Map(
+    (
+      await db.select({ slug: schema.cities.slug, name: schema.cities.name }).from(schema.cities)
+    ).map((c) => [c.slug, c.name] as const),
+  );
+  const order = CITIES.map((c) => c.slug);
+  return [...counts.values()]
+    .map((c) => ({ ...c, name: names.get(c.slug) ?? c.slug }))
+    .sort((a, b) => order.indexOf(a.slug) - order.indexOf(b.slug));
 }
 
 export async function getHome(db: Db, citySlug: string, now = new Date()) {

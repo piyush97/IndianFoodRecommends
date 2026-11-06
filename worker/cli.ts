@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { db } from "../db";
-import { autoReviewPending, checkPick, geocodeDelhi } from "../lib/auto-review";
+import { autoReviewPending, checkPick, geocodeIndia } from "../lib/auto-review";
 import { classifyVideo, gatedExtract } from "../lib/jev";
 import { extractPicks } from "../lib/llm/extract";
 import { listUploads } from "../lib/youtube";
@@ -30,7 +30,7 @@ async function ingest(): Promise<void> {
     db,
     listUploads: (channelId) => listUploads(channelId),
     check: (video, pick) => checkPick(video, pick, { apiKey }),
-    geocode: geocodeDelhi,
+    geocode: geocodeIndia,
   });
   console.log(JSON.stringify({ autoReview: review }));
   if (review.approved > 0) {

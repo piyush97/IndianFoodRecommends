@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
   openGraph: { siteName: "Indian Food Recommends", locale: "en_IN", type: "website" },
   description:
-    "Where Delhi food vloggers say to eat: places ranked by how many creators picked them, with the video moment.",
+    "Where Indian food vloggers say to eat: places ranked by how many creators picked them, with the video moment.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

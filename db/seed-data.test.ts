@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { cities, creators, dishes } from "./seed-data";
+import { CITIES } from "../lib/cities";
 
 const slugOf = (s: string) =>
   s
@@ -8,8 +9,8 @@ const slugOf = (s: string) =>
     .replace(/^-|-$/g, "");
 
 describe("seed data", () => {
-  it("seeds 8 creators with unique YouTube channel ids", () => {
-    expect(creators).toHaveLength(8);
+  it("seeds 13 creators across three cities with unique YouTube channel ids", () => {
+    expect(creators).toHaveLength(13);
     const ids = creators.map((c) => c.ytChannelId);
     expect(new Set(ids).size).toBe(ids.length);
     for (const id of ids) expect(id).toMatch(/^UC[0-9A-Za-z_-]{22}$/);
@@ -56,5 +57,9 @@ describe("seed data", () => {
 
   it("has a Delhi city with a stable slug", () => {
     expect(cities.map((c) => c.slug)).toContain("delhi");
+  });
+
+  it("seeds every registry city", () => {
+    expect(cities.map((c) => c.slug)).toEqual(CITIES.map((c) => c.slug));
   });
 });

@@ -7,7 +7,13 @@ import type { Upload } from "./youtube";
 const handle = testDb();
 const describeDb = handle ? describe : describe.skip;
 
-const good: PickCheck = { grounded: 0.9, isVenue: 0.9, recommends: 0.9, inDelhi: 0.9 };
+const good: PickCheck = {
+  grounded: 0.9,
+  isVenue: 0.9,
+  recommends: 0.9,
+  city: "delhi",
+  cityConfidence: 0.9,
+};
 
 function upload(videoId: string): Upload {
   return { videoId, publishedAt: new Date(), title: "Delhi tour", description: "Chache Di Hatti" };
@@ -18,7 +24,10 @@ describeDb("autoReviewPending", () => {
 
   beforeEach(async () => {
     await truncateAll(db);
-    await db.insert(schema.cities).values({ slug: "delhi", name: "Delhi" });
+    await db.insert(schema.cities).values([
+      { slug: "delhi", name: "Delhi" },
+      { slug: "mumbai", name: "Mumbai" },
+    ]);
     await db.insert(schema.creators).values({ slug: "a", name: "A", ytChannelId: "UC1" });
     await db.insert(schema.sources).values({ platform: "youtube", externalId: "v1", creatorId: 1 });
   });
@@ -76,13 +85,28 @@ describeDb("autoReviewPending", () => {
     expect(place).toMatchObject({ lat: 28.69, osmId: "approx:loc" });
   });
 
-  it("rejects a Kolkata pick and records why", async () => {
-    await pending({ ...base, city: "Kolkata" });
+  it("files a Mumbai pick under Mumbai and geocodes it there", async () => {
+    await pending({ ...base, city: "Mumbai", place_name: "Bademiya", locality: "Colaba" });
+    const queries: string[] = [];
+    await autoReviewPending({
+      ...deps(),
+      geocode: async (q) => {
+        queries.push(q);
+        return { lat: 18.92, lng: 72.83, osmId: "m" };
+      },
+    });
+    const [place] = await db.select().from(schema.places);
+    expect(place).toMatchObject({ name: "Bademiya", cityId: 2 });
+    expect(queries[0]).toBe("Bademiya, Colaba, Mumbai");
+  });
+
+  it("rejects a Pune pick and records why", async () => {
+    await pending({ ...base, city: "Pune" });
     await autoReviewPending(deps());
     const [rec] = await db.select().from(schema.recommendations);
     expect(rec.status).toBe("rejected");
     expect((rec.extracted as { autoReview: { reason: string } }).autoReview.reason).toBe(
-      "not-delhi",
+      "not-supported-city",
     );
     expect(await db.select().from(schema.places)).toHaveLength(0);
   });

@@ -57,11 +57,7 @@ async function City({ params }: { params: PageProps<"/[city]">["params"] }) {
       </section>
       <section className="flex flex-col gap-3">
         <h2 className="text-xl font-semibold">Most picked places</h2>
-        <PickList
-          cards={data.places}
-          citySlug={data.city.slug}
-          emptyText={`No picks yet for ${data.city.name}.`}
-        />
+        <PickList cards={data.places} emptyText={`No picks yet for ${data.city.name}.`} />
       </section>
     </>
   );

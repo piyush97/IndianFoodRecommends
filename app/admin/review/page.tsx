@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { asc, count, eq } from "drizzle-orm";
 import { db, schema } from "../../../db";
 import { requireAdminPage } from "../../../lib/auth";
+import { cityFromName } from "../../../lib/cities";
 import type { Match } from "../../../lib/matcher";
 import {
   approveFormAction,
@@ -78,18 +79,22 @@ async function ReviewCard({ searchParams }: { searchParams: Search }) {
     );
   }
 
-  const [delhi] = await db.select().from(schema.cities).where(eq(schema.cities.slug, "delhi"));
+  const cities = await db.select().from(schema.cities).orderBy(asc(schema.cities.id));
+  const x0 = (rec.extracted ?? {}) as Extracted;
+  // Default to the city the LLM named when we cover it; the editor can change it.
+  const guessed = cityFromName(x0.city);
+  const city = cities.find((c) => c.slug === guessed?.slug) ?? cities[0];
   const places = await db
     .select({ id: schema.places.id, name: schema.places.name })
     .from(schema.places)
-    .where(eq(schema.places.cityId, delhi.id))
+    .where(eq(schema.places.cityId, city.id))
     .orderBy(asc(schema.places.name));
   const dishes = await db
     .select({ id: schema.dishes.id, name: schema.dishes.name })
     .from(schema.dishes)
     .orderBy(asc(schema.dishes.name));
 
-  const x = (rec.extracted ?? {}) as Extracted;
+  const x = x0;
   const placeGuess = x.suggestions?.places?.[0]?.id;
   const dishGuess = x.suggestions?.dishes?.[0]?.id;
   const start = rec.tsSeconds ? `?start=${rec.tsSeconds}` : "";
@@ -121,8 +126,8 @@ async function ReviewCard({ searchParams }: { searchParams: Search }) {
             <dt className="text-muted">LLM city</dt>
             <dd>
               {x.city ?? "unknown"}
-              {x.city && x.city.toLowerCase() !== "delhi" && (
-                <strong className="ml-2 text-accent">Not Delhi: reject unless wrong</strong>
+              {x.city && !guessed && (
+                <strong className="ml-2 text-accent">City not covered: reject unless wrong</strong>
               )}
             </dd>
             <dt className="text-muted">LLM dishes</dt>
@@ -135,10 +140,19 @@ async function ReviewCard({ searchParams }: { searchParams: Search }) {
         <div className="flex flex-col gap-4">
           <form action={approveFormAction} className="flex flex-col gap-4">
             <input type="hidden" name="id" value={rec.id} />
-            <input type="hidden" name="cityId" value={delhi.id} />
+            <label className={label}>
+              City
+              <select name="cityId" defaultValue={city.id} className={field}>
+                {cities.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </label>
 
             <fieldset className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-line p-4">
-              <legend className="px-1 text-sm font-semibold">Place (Delhi)</legend>
+              <legend className="px-1 text-sm font-semibold">Place ({city.name})</legend>
               <label className={label}>
                 Existing place or new
                 <select name="placeId" defaultValue={placeGuess ?? "new"} className={field}>
@@ -224,7 +238,7 @@ async function ReviewCard({ searchParams }: { searchParams: Search }) {
               <input
                 type="hidden"
                 name="query"
-                value={[x.place_name, x.locality, "Delhi"].filter(Boolean).join(", ")}
+                value={[x.place_name, x.locality, city.name].filter(Boolean).join(", ")}
               />
               <button type="submit" className={`${button} flex-1 border border-line`}>
                 Suggest location
@@ -257,16 +271,16 @@ function ErrorBanner({ message }: { message: string }) {
 
 async function ManualAdd() {
   await requireAdminPage();
-  const [delhi] = await db.select().from(schema.cities).where(eq(schema.cities.slug, "delhi"));
+  const cities = await db.select().from(schema.cities).orderBy(asc(schema.cities.id));
   const creators = await db
     .select({ id: schema.creators.id, name: schema.creators.name })
     .from(schema.creators)
     .orderBy(asc(schema.creators.name));
   const places = await db
-    .select({ id: schema.places.id, name: schema.places.name })
+    .select({ id: schema.places.id, name: schema.places.name, cityId: schema.places.cityId })
     .from(schema.places)
-    .where(eq(schema.places.cityId, delhi.id))
     .orderBy(asc(schema.places.name));
+  const cityName = new Map(cities.map((c) => [c.id, c.name] as const));
   const dishes = await db
     .select({ id: schema.dishes.id, name: schema.dishes.name })
     .from(schema.dishes)
@@ -278,7 +292,16 @@ async function ManualAdd() {
       className="mt-6 flex flex-col gap-3 rounded-[var(--radius-card)] border border-line p-4"
     >
       <h2 className="text-lg font-semibold">Add a pick by hand</h2>
-      <input type="hidden" name="cityId" value={delhi.id} />
+      <label className={label}>
+        City (for a new place)
+        <select name="cityId" defaultValue={cities[0]?.id} className={field}>
+          {cities.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+      </label>
       <label className={label}>
         YouTube or Instagram URL
         <input name="url" type="url" required className={field} />
@@ -299,7 +322,7 @@ async function ManualAdd() {
           <option value="new">New place (fill fields below)</option>
           {places.map((p) => (
             <option key={p.id} value={p.id}>
-              {p.name}
+              {p.name} ({cityName.get(p.cityId)})
             </option>
           ))}
         </select>
