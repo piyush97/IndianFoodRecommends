@@ -1,6 +1,6 @@
 import { sql } from "drizzle-orm";
 import { client, db, schema } from "./index";
-import { cities as cityRows, dishes as dishRows } from "./seed-data";
+import { cities as cityRows, creators as creatorRows, dishes as dishRows } from "./seed-data";
 
 // Idempotent: safe to re-run. Slugs are the conflict keys.
 export async function seed() {
@@ -11,6 +11,11 @@ export async function seed() {
       target: schema.cities.slug,
       set: { name: sql`excluded.name`, state: sql`excluded.state` },
     });
+
+  await db
+    .insert(schema.creators)
+    .values(creatorRows.map((c) => ({ ...c })))
+    .onConflictDoNothing();
 
   const saved = await db
     .insert(schema.dishes)
@@ -30,13 +35,13 @@ export async function seed() {
     await db.insert(schema.dishAliases).values(aliases).onConflictDoNothing();
   }
 
-  return { cities: cityRows.length, dishes: saved.length, aliases: aliases.length };
+  return { cities: cityRows.length, creators: creatorRows.length, dishes: saved.length, aliases: aliases.length };
 }
 
 async function main() {
   const counts = await seed();
   console.log(
-    `seeded ${counts.cities} cities, ${counts.dishes} dishes, ${counts.aliases} dish aliases`,
+    `seeded ${counts.cities} cities, ${counts.creators} creators, ${counts.dishes} dishes, ${counts.aliases} dish aliases`,
   );
   await client.end();
 }

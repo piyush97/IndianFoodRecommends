@@ -17,6 +17,11 @@ describeDb("seed + schema", () => {
     await seed();
     const [row] = await db.select({ n: count() }).from(schema.dishes);
     expect(row.n).toBe(seedDishes.length);
+    const [ayush] = await db
+      .select()
+      .from(schema.creators)
+      .where(eq(schema.creators.slug, "ayush-sapra"));
+    expect(ayush.ytChannelId).toBe("UC2UWtuZR3kH-5C26HVMMB6A");
   });
 
   it("dedupes a recommendation with null place/dish/timestamp", async () => {

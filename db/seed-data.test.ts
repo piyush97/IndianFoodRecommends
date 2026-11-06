@@ -1,10 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { cities, dishes } from "./seed-data";
+import { cities, creators, dishes } from "./seed-data";
 
 const slugOf = (s: string) =>
   s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
 describe("seed data", () => {
+  it("seeds the Ayush Sapra channel", () => {
+    const ayush = creators.find((c) => c.slug === "ayush-sapra");
+    expect(ayush?.ytChannelId).toBe("UC2UWtuZR3kH-5C26HVMMB6A");
+  });
+
   it("seeds at least 30 dishes", () => {
     expect(dishes.length).toBeGreaterThanOrEqual(30);
   });

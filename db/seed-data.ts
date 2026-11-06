@@ -11,6 +11,15 @@ export const cities = [
   { slug: "delhi", name: "Delhi", state: "Delhi" },
 ] as const;
 
+export const creators = [
+  {
+    slug: "ayush-sapra",
+    name: "Aayush Sapra",
+    ytChannelId: "UC2UWtuZR3kH-5C26HVMMB6A",
+    igHandle: "aayushsapra2",
+  },
+];
+
 export const dishes: SeedDish[] = [
   { slug: "chole-bhature", name: "Chole Bhature", cuisine: "Punjabi", aliases: ["chhole bhature", "chana bhatura"] },
   { slug: "butter-chicken", name: "Butter Chicken", cuisine: "Punjabi", aliases: ["murgh makhani"] },
