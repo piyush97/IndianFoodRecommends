@@ -57,7 +57,9 @@ describeDb("createReport", () => {
 
   it("holds the limit under parallel requests from one IP", async () => {
     const results = await Promise.all(
-      Array.from({ length: 20 }, () => createReport(db, { placeId: 1, kind: "other" }, "burst", now)),
+      Array.from({ length: 20 }, () =>
+        createReport(db, { placeId: 1, kind: "other" }, "burst", now),
+      ),
     );
     expect(results.filter((r) => r.ok)).toHaveLength(5);
     expect(await db.select().from(schema.reports)).toHaveLength(5);
