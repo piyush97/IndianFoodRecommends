@@ -5,7 +5,7 @@ import { restaurantLd } from "../../../../../lib/seo/jsonld";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { EmbedFacade } from "../../../../../components/EmbedFacade";
-import { PlaceMapLazy } from "../../../../../components/PlaceMapLazy";
+import { MapOnDemand } from "../../../../../components/PlaceMapLazy";
 import { ReportForm } from "../../../../../components/ReportForm";
 import { Skeleton } from "../../../../../components/Skeleton";
 import { directionsUrl, sourceUrl } from "../../../../../lib/public/links";
@@ -151,7 +151,7 @@ async function Place({ params }: { params: Params }) {
       {place.lat !== null && place.lng !== null && (
         <section className="flex flex-col gap-3">
           <h2 className="text-xl font-semibold">Map</h2>
-          <PlaceMapLazy
+          <MapOnDemand
             citySlug={data.city.slug}
             points={[
               {

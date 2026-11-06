@@ -27,7 +27,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
           ))}
         </nav>
       </header>
-      <main className="flex flex-1 flex-col gap-8 py-8">{children}</main>
+      <main className="flex min-h-[100dvh] flex-1 flex-col gap-8 py-8">{children}</main>
       <footer className="flex flex-col gap-1 border-t border-line py-6 text-sm text-muted">
         <p>Picks come from the food vloggers credited on each page, with a link to their video.</p>
         <p>
