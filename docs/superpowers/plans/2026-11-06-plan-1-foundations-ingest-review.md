@@ -226,39 +226,25 @@ tests/**                      # mirrors lib/ and worker/
 
 **Model:** Sonnet 5.5 (S1-6, S1-7) · **Difficulty:** medium
 
-**Files:** Create `worker/ingest.ts`, `worker/cli.ts`, `ops/ifr-ingest.service`, `ops/ifr-ingest.timer`, `ops/README.md`, `tests/worker/ingest.test.ts`
+**Files:** Create `lib/worker/ingest.ts`, `lib/worker/ingest.test.ts`, `worker/cli.ts`, `ops/ifr-ingest.service`, `ops/ifr-ingest.timer`, `ops/README.md`.
 
 **Interfaces:**
-- Consumes: Task 2 tables + `resetTestDb`, Task 4 `matchPlace/matchDish`, Task 5 `extractPicks`/`ExtractedPick`, Task 6 `listUploads/getSnippets/QuotaExceededError`.
+- Consumes: `Db` from `db/index.ts`, `matchPlace/matchDish`, `listUploads` (RSS), `extractPicks`.
 - Produces:
   ```ts
-  export type IngestDeps = {
-    db: Db;
-    listUploads: typeof listUploads; getSnippets: typeof getSnippets;
-    extract: (i: {title: string; description: string}) => Promise<ExtractedPick[]>;
-    now: () => Date; apiKey: string;
-  };
-  export type IngestSummary = { videos: number; picks: number; errors: number; stoppedByQuota: boolean };
+  export type IngestDeps = { db: Db; listUploads: typeof listUploads;
+    extract: (i: { title: string; description: string }) => Promise<ExtractedPick[]>; now: () => Date };
+  export type IngestSummary = { videos: number; picks: number; errors: number };
   export function runIngest(deps: IngestDeps): Promise<IngestSummary>;
   ```
-  Behavior: for each non-opted-out creator with `yt_channel_id`: `since` = latest `sources.published_on` for that creator (or 90 days ago if none). Skip video IDs already in `sources`. For each new video: insert `sources` row, extract, then insert one `recommendations` row per pick: `status='pending'`, `origin='llm'`, `confidence`, `ts_seconds`, `extracted` jsonb = `{...pick, suggestions: {places: Match[], dishes: Match[]}}`, `place_id/dish_id` NULL. Per-video try/catch increments `errors`. `QuotaExceededError` stops the loop, sets `stoppedByQuota`. Writes one `ingest_runs` row (finish in a finally block). Holds a Postgres advisory lock (`pg_try_advisory_lock(727001)`); if not acquired, returns `{videos:0,picks:0,errors:0,stoppedByQuota:false}` without work.
-  `worker/cli.ts`: `pnpm worker ingest` wires real deps; exits 1 only on unexpected crash.
+  Behavior: one Postgres advisory lock (`727001`) per run; a second concurrent run returns `{0,0,0}`. For each creator not opted out with a channel: `since` = latest `sources.published_on` or 90 days ago; skip video IDs already in `sources`. Per new video insert `sources`, extract, then one `recommendations` row per pick with `status='pending'`, `origin='llm'`, `confidence`, `ts_seconds`, `extracted` = pick + `suggestions{places,dishes}`; `place_id/dish_id` stay NULL. A failing channel feed or a failing extraction bumps `errors` and the run continues. Writes one `ingest_runs` row (`status` `ok`/`failed`, `finished_at`).
 
-- [ ] **Step 1: Write failing tests** with fakes:
-  - 2 videos, 3 picks → 2 sources, 3 pending recommendations, summary matches
-  - run twice → counts unchanged on second run (no duplicates)
-  - one video's `extract` throws `ExtractionError` → other video still ingested, `errors: 1`
-  - `listUploads` throws `QuotaExceededError` after first creator → `stoppedByQuota: true`, earlier rows kept
-  - opted-out creator skipped
-  - existing place "Chache Di Hatti" → pending row's `extracted.suggestions.places[0].id` is that place, `place_id` still NULL
-  - pick with `city: "Mumbai"` is stored pending with `extracted.city === "Mumbai"`
-  - second concurrent `runIngest` while lock held returns zeroed summary
-  - no field of `extracted` or any table contains the video title/description text (assert by searching JSON for the fixture's unique description token)
-- [ ] **Step 2:** Run `pnpm vitest run tests/worker/ingest.test.ts`. Expected: FAIL.
-- [ ] **Step 3:** Implement. Systemd timer `OnCalendar=*-*-* 03:00:00 Asia/Kolkata`, `Persistent=true`, service `WorkingDirectory` repo path, `EnvironmentFile` `.env`, `ExecStart=pnpm worker ingest`.
-- [ ] **Step 4:** Run the test. Expected: PASS.
-- [ ] **Step 5:** `ops/README.md`: install with `systemctl link`, `systemctl enable --now ifr-ingest.timer`, check with `systemctl list-timers`, logs via `journalctl -u ifr-ingest`. Do not enable the timer yet; Task 11 verifies manually first.
-- [ ] **Step 6: Commit** on `feat/ingest`: `feat(worker): daily ingest with dedupe, lock, quota stop`.
+- [x] **Step 1:** Failing tests with fakes: 2 videos → 2 sources + 2 pending rows; second run adds nothing; one bad extraction keeps the other video; one dead feed keeps the other channel; opted-out skipped; existing place suggested with `place_id` still NULL; non-Delhi city stored pending; concurrent run returns zeroed summary; no title/description text in any row.
+- [x] **Step 2:** Run `pnpm vitest run lib/worker/ingest.test.ts`. Expected: FAIL.
+- [x] **Step 3:** Implement, add `recommendations.extracted jsonb` migration, systemd timer at 03:00 IST (`EnvironmentFile=.env`, `ExecStart=pnpm worker ingest`), `pnpm worker` script.
+- [x] **Step 4:** Run the test. Expected: PASS.
+- [x] **Step 5:** `ops/README.md`: `systemctl link`, `enable --now`, `journalctl -u ifr-ingest`. Timer stays disabled until Task 8's 0.85 precision gate.
+- [x] **Step 6: Commit** `feat(worker): daily ingest with dedupe, lock, failure isolation`.
 
 ---
 

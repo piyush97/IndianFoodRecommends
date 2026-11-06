@@ -15,6 +15,13 @@
       "when": 1793965974758,
       "tag": "0001_trgm",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793968211966,
+      "tag": "0002_fine_secret_warriors",
+      "breakpoints": true
     }
   ]
 }

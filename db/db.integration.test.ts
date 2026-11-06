@@ -58,6 +58,8 @@ describeDb("seed + schema", () => {
       )[0].id;
 
     const values = { sourceId, confidence: 0.9 };
+    // Keep the test rerunnable against a long-lived dev database.
+    await db.delete(schema.recommendations).where(eq(schema.recommendations.sourceId, sourceId));
     await db.insert(schema.recommendations).values(values);
     const second = await db
       .insert(schema.recommendations)

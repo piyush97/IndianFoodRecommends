@@ -4,6 +4,7 @@ import {
   date,
   index,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
   real,
@@ -110,6 +111,8 @@ export const recommendations = pgTable(
     status: recStatus("status").notNull().default("pending"),
     origin: recOrigin("origin").notNull().default("llm"),
     confidence: real("confidence"),
+    // Raw LLM pick plus matcher suggestions; the video text never lands here.
+    extracted: jsonb("extracted"),
     reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
     createdAt,
   },
