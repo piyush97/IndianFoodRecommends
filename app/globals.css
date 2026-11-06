@@ -28,8 +28,10 @@
   --text-3xl: 2.375rem;
 }
 
+/* Tailwind 4 ignores @theme inside @media, so dark mode overrides the
+   generated custom properties directly. */
 @media (prefers-color-scheme: dark) {
-  @theme {
+  :root {
     --color-ink: #f5f0e8;
     --color-muted: #a89e94;
     --color-paper: #14110f;

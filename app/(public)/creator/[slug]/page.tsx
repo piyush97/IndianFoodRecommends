@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { PickList } from "../../../../components/PickList";
@@ -8,6 +9,17 @@ type Props = PageProps<"/creator/[slug]">;
 
 const field =
   "min-h-11 rounded-[var(--radius-step)] border border-line bg-paper px-3 focus-visible:outline-2 focus-visible:outline-accent";
+
+export async function generateMetadata({ params }: Pick<Props, "params">): Promise<Metadata> {
+  const { slug } = await params;
+  const data = await cachedCreator(slug);
+  if (!data) return { title: "Not found", robots: { index: false } };
+  return {
+    title: `${data.creator.name}'s food picks in Delhi`,
+    description: `${data.total} Delhi food ${data.total === 1 ? "pick" : "picks"} from ${data.creator.name}, each linked to the video moment.`,
+    alternates: { canonical: `/creator/${data.creator.slug}` },
+  };
+}
 
 export default function CreatorPage({ params, searchParams }: Props) {
   return (
@@ -20,9 +32,12 @@ export default function CreatorPage({ params, searchParams }: Props) {
 async function Creator({ params, searchParams }: Props) {
   const { slug } = await params;
   const { dish } = await searchParams;
-  const dishSlug = typeof dish === "string" && dish !== "" ? dish : undefined;
-  const data = await cachedCreator(slug, dishSlug);
-  if (!data) notFound();
+  const all = await cachedCreator(slug);
+  if (!all) notFound();
+  // Only known dish slugs reach the cache key, so random ?dish= values cannot fill it.
+  const dishSlug =
+    typeof dish === "string" && all.dishes.some((d) => d.slug === dish) ? dish : undefined;
+  const data = dishSlug ? ((await cachedCreator(slug, dishSlug)) ?? all) : all;
   const { creator } = data;
   const active = data.dishes.find((d) => d.slug === dishSlug);
 
@@ -80,6 +95,7 @@ async function Creator({ params, searchParams }: Props) {
       )}
 
       <PickList
+        headingLevel={2}
         cards={data.picks}
         citySlug="delhi"
         emptyText={

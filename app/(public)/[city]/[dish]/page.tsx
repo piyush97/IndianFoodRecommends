@@ -1,4 +1,7 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { JsonLd } from "../../../../components/JsonLd";
+import { dishItemList } from "../../../../lib/seo/jsonld";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { ListMapToggle } from "../../../../components/ListMapToggle";
@@ -8,6 +11,18 @@ import { Skeleton } from "../../../../components/Skeleton";
 import { cachedDish } from "../../data";
 
 type Params = PageProps<"/[city]/[dish]">["params"];
+
+export async function generateMetadata({ params }: PageProps<"/[city]/[dish]">): Promise<Metadata> {
+  const { city, dish } = await params;
+  const data = await cachedDish(city, dish);
+  if (!data) return { title: "Not found", robots: { index: false } };
+  const n = data.places.length;
+  return {
+    title: `${data.dish.name} in ${data.city.name}: where food vloggers eat`,
+    description: `${n} ${n === 1 ? "place" : "places"} for ${data.dish.name} in ${data.city.name}, ranked by how many food vloggers picked them, with the video moment for each.`,
+    alternates: { canonical: `/${data.city.slug}/${data.dish.slug}` },
+  };
+}
 
 export default function DishPage({ params }: PageProps<"/[city]/[dish]">) {
   return (
@@ -26,6 +41,17 @@ async function Dish({ params }: { params: Params }) {
   const creators = data.creatorCount;
   return (
     <>
+      <JsonLd
+        data={dishItemList({
+          city: data.city.name,
+          dish: data.dish.name,
+          path: `/${data.city.slug}/${data.dish.slug}`,
+          places: data.places.map((p) => ({
+            name: p.placeName,
+            path: `/${data.city.slug}/place/${p.placeSlug}`,
+          })),
+        })}
+      />
       <div className="flex flex-col gap-2">
         <Link
           href={`/${data.city.slug}`}
@@ -48,6 +74,7 @@ async function Dish({ params }: { params: Params }) {
         points={mapPoints(data.places)}
         list={
           <PickList
+            headingLevel={2}
             cards={data.places}
             citySlug={data.city.slug}
             emptyText={`No picks yet for ${data.dish.name} in ${data.city.name}.`}

@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
 import { isAdminEmail } from "./admin-email";
@@ -27,4 +28,17 @@ export async function requireAdmin(): Promise<{ email: string }> {
     throw new AuthError("forbidden");
   }
   return { email: email! };
+}
+
+/**
+ * For admin pages. Layout and page render in parallel under Suspense, so a
+ * layout-only check does not stop the page from streaming its data: every
+ * admin page must call this before reading the database.
+ */
+export async function requireAdminPage(): Promise<{ email: string }> {
+  try {
+    return await requireAdmin();
+  } catch {
+    redirect("/api/auth/signin?callbackUrl=/admin/review");
+  }
 }

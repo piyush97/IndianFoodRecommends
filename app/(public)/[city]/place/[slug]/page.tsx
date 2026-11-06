@@ -1,8 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { JsonLd } from "../../../../../components/JsonLd";
+import { restaurantLd } from "../../../../../lib/seo/jsonld";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { EmbedFacade } from "../../../../../components/EmbedFacade";
-import { PlaceMapLazy } from "../../../../../components/PlaceMapLazy";
+import { MapOnDemand } from "../../../../../components/PlaceMapLazy";
 import { ReportForm } from "../../../../../components/ReportForm";
 import { Skeleton } from "../../../../../components/Skeleton";
 import { directionsUrl, sourceUrl } from "../../../../../lib/public/links";
@@ -12,6 +15,21 @@ type Params = PageProps<"/[city]/place/[slug]">["params"];
 
 const action =
   "inline-flex min-h-11 items-center rounded-[var(--radius-step)] border border-line px-3 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+
+export async function generateMetadata({
+  params,
+}: PageProps<"/[city]/place/[slug]">): Promise<Metadata> {
+  const { city, slug } = await params;
+  const data = await cachedPlace(city, slug);
+  if (!data) return { title: "Not found", robots: { index: false } };
+  const creators = new Set(data.proofs.map((p) => p.creator.slug)).size;
+  const where = [data.place.locality, data.city.name].filter(Boolean).join(", ");
+  return {
+    title: `${data.place.name}, ${where}: picked by ${creators} food ${creators === 1 ? "vlogger" : "vloggers"}`,
+    description: `What food vloggers ordered at ${data.place.name}: ${data.dishes.map((d) => d.name).join(", ")}. Watch each video at the moment they eat it.`,
+    alternates: { canonical: `/${data.city.slug}/place/${data.place.slug}` },
+  };
+}
 
 export default function PlacePage({ params }: PageProps<"/[city]/place/[slug]">) {
   return (
@@ -38,6 +56,17 @@ async function Place({ params }: { params: Params }) {
 
   return (
     <>
+      <JsonLd
+        data={restaurantLd({
+          name: place.name,
+          path: `/${data.city.slug}/place/${place.slug}`,
+          locality: place.locality,
+          city: data.city.name,
+          lat: place.lat,
+          lng: place.lng,
+          dishes: data.dishes.map((d) => d.name),
+        })}
+      />
       <section className="flex flex-col gap-2">
         <Link
           href={`/${data.city.slug}`}
@@ -57,7 +86,14 @@ async function Place({ params }: { params: Params }) {
         )}
         {directions && (
           <div>
-            <a href={directions} target="_blank" rel="noopener noreferrer" className={action}>
+            <a
+              href={directions}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={action}
+              data-umami-event="directions"
+              data-umami-event-place={place.slug}
+            >
               Directions
               <span className="sr-only"> to {place.name}, opens Google Maps</span>
             </a>
@@ -122,7 +158,7 @@ async function Place({ params }: { params: Params }) {
       {place.lat !== null && place.lng !== null && (
         <section className="flex flex-col gap-3">
           <h2 className="text-xl font-semibold">Map</h2>
-          <PlaceMapLazy
+          <MapOnDemand
             citySlug={data.city.slug}
             points={[
               {

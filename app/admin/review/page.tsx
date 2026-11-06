@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { asc, count, eq } from "drizzle-orm";
 import { db, schema } from "../../../db";
+import { requireAdminPage } from "../../../lib/auth";
 import type { Match } from "../../../lib/matcher";
 import {
   approveFormAction,
@@ -35,6 +36,7 @@ export default function ReviewPage({ searchParams }: { searchParams: Search }) {
 }
 
 async function ReviewCard({ searchParams }: { searchParams: Search }) {
+  await requireAdminPage();
   const params = await searchParams;
   const one = (key: string) => (typeof params[key] === "string" ? (params[key] as string) : "");
 
@@ -254,6 +256,7 @@ function ErrorBanner({ message }: { message: string }) {
 }
 
 async function ManualAdd() {
+  await requireAdminPage();
   const [delhi] = await db.select().from(schema.cities).where(eq(schema.cities.slug, "delhi"));
   const creators = await db
     .select({ id: schema.creators.id, name: schema.creators.name })

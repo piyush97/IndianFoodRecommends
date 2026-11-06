@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { Skeleton } from "../../../components/Skeleton";
@@ -5,6 +6,8 @@ import { db } from "../../../db";
 import { searchAll } from "../../../lib/public/search";
 
 type Props = PageProps<"/search">;
+
+export const metadata: Metadata = { title: "Search", robots: { index: false, follow: true } };
 
 const link =
   "inline-flex min-h-11 items-center gap-2 underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-accent";
@@ -25,6 +28,9 @@ async function Results({ searchParams }: Pick<Props, "searchParams">) {
 
   return (
     <>
+      <h1 className="text-2xl font-semibold">
+        {query.trim() ? `Results for “${query}”` : "Search"}
+      </h1>
       <form action="/search" role="search" className="flex gap-2">
         <label htmlFor="q" className="sr-only">
           Search dish, place or creator
@@ -52,7 +58,6 @@ async function Results({ searchParams }: Pick<Props, "searchParams">) {
         <p className="text-muted">Nothing found for “{query}”. Try a dish like chole bhature.</p>
       ) : (
         <>
-          <h1 className="text-2xl font-semibold">Results for “{query}”</h1>
           {res.dishes.length > 0 && (
             <section className="flex flex-col gap-2">
               <h2 className="text-xl font-semibold">Dishes</h2>
