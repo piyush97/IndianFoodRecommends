@@ -324,7 +324,7 @@ Note on the spelling-variant test: word-set Jaccard on `chachey`/`chache` is 0.5
   `approveRecommendation`: transaction; creates place/dish if `name` given (unique slug with `-2` suffix on collision, adds the typed name as alias when matching an existing id); sets `status='approved'`, `reviewed_at`, `places.last_verified=today`. `mergePlaces`: moves all recommendations and aliases to `intoId`, adds `from.name` as alias of `into`, deletes `from`. Rejects when `fromId === intoId`.
   `suggestLocation`: waits >= 1000 ms between calls (module-level last-call timestamp), sends `User-Agent`, returns null on empty result, restricts with `countrycodes=in`.
 
-- [ ] **Step 1: Write failing tests (review):**
+- [x] **Step 1: Write failing tests (review):**
   - approve with new place+dish creates rows, recommendation `approved`, `reviewed_at` set
   - approve with `existingId` links without creating a place
   - approve with lat 51.5 → rejects (ZodError), recommendation still `pending`
@@ -334,12 +334,12 @@ Note on the spelling-variant test: word-set Jaccard on `chachey`/`chache` is 0.5
   - reject sets `rejected`
   - `mergePlaces(a, b)` moves recs, adds alias, deletes `a`; `mergePlaces(a, a)` rejects
   - transactional: failure during approve leaves no orphan place
-- [ ] **Step 2: Write failing tests (geocode):** two consecutive calls call `sleep` with >= 1000 total; UA header present; empty array → `null`; request URL has `countrycodes=in`.
-- [ ] **Step 3: Write failing test (actions)** in `tests/lib/review-actions.test.ts`: import the server action module with `requireAdmin` mocked to throw `AuthError`; calling approve/reject/merge actions rejects and DB is unchanged (Review Focus #5).
-- [ ] **Step 4:** Run `pnpm vitest run tests/lib/review.test.ts tests/lib/geocode.test.ts tests/lib/review-actions.test.ts`. Expected: FAIL.
-- [ ] **Step 5:** Implement all functions + actions.
-- [ ] **Step 6:** Re-run the three files. Expected: PASS.
-- [ ] **Step 7: Commit** on `feat/review-ops`: `feat(admin): approve, reject, merge, manual add, geocode suggest`.
+- [x] **Step 2: Write failing tests (geocode):** two consecutive calls call `sleep` with >= 1000 total; UA header present; empty array → `null`; request URL has `countrycodes=in`.
+- [ ] **Step 3 (deferred until Task 9 auth exists): Write failing test (actions)** in `tests/lib/review-actions.test.ts`: import the server action module with `requireAdmin` mocked to throw `AuthError`; calling approve/reject/merge actions rejects and DB is unchanged (Review Focus #5).
+- [x] **Step 4:** Run `pnpm vitest run lib/review.test.ts`. Expected: FAIL. (geocode lives in the same file)
+- [x] **Step 5:** Implemented `lib/review.ts` (approve, reject, merge, geocode). Server actions wait for auth.
+- [x] **Step 6:** Re-run. Expected: PASS.
+- [x] **Step 7: Commit** `feat(admin): approve, reject, merge, geocode suggest`.
 
 ---
 

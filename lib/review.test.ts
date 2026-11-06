@@ -1,0 +1,209 @@
+import { afterAll, beforeEach, describe, expect, it } from "vitest";
+import { eq } from "drizzle-orm";
+import { schema, type Db } from "../db";
+import { testDb, truncateAll } from "../db/test-db";
+import {
+  approveRecommendation,
+  mergePlaces,
+  rejectRecommendation,
+  suggestLocation,
+} from "./review";
+
+const handle = testDb();
+const describeDb = handle ? describe : describe.skip;
+
+describeDb("review operations", () => {
+  const db = handle!.db as Db;
+
+  beforeEach(async () => {
+    await truncateAll(db);
+    await db.insert(schema.cities).values({ slug: "delhi", name: "Delhi", state: "Delhi" });
+    await db
+      .insert(schema.creators)
+      .values({ slug: "ayush", name: "Aayush Sapra", ytChannelId: "UC1" });
+    await db
+      .insert(schema.sources)
+      .values({ platform: "youtube", externalId: "vid1", creatorId: 1 });
+  });
+
+  afterAll(async () => {
+    await handle?.close();
+  });
+
+  async function pendingRec(): Promise<number> {
+    const [rec] = await db
+      .insert(schema.recommendations)
+      .values({ sourceId: 1, confidence: 0.9 })
+      .returning();
+    return rec.id;
+  }
+
+  const validInput = {
+    place: {
+      name: "Chache Di Hatti",
+      locality: "Kamla Nagar",
+      cityId: 1,
+      lat: 28.68,
+      lng: 77.2,
+    },
+    dish: { name: "Chole Bhature" },
+    tsSeconds: 252,
+    note: "Order the chole bhature",
+  };
+
+  it("approves with a new place and dish", async () => {
+    const id = await pendingRec();
+    await approveRecommendation(db, { id, ...validInput }, "editor@example.com");
+    const [rec] = await db.select().from(schema.recommendations);
+    expect(rec.status).toBe("approved");
+    expect(rec.reviewedAt).not.toBeNull();
+    expect(rec.placeId).not.toBeNull();
+    expect(await db.select().from(schema.places)).toHaveLength(1);
+    expect(await db.select().from(schema.dishes)).toHaveLength(1);
+  });
+
+  it("links an existing place without creating one", async () => {
+    const [place] = await db
+      .insert(schema.places)
+      .values({ slug: "chache-di-hatti", name: "Chache Di Hatti", cityId: 1 })
+      .returning();
+    const id = await pendingRec();
+    await approveRecommendation(
+      db,
+      { id, ...validInput, place: { existingId: place.id } },
+      "editor@example.com",
+    );
+    const [rec] = await db.select().from(schema.recommendations);
+    expect(rec.placeId).toBe(place.id);
+    expect(await db.select().from(schema.places)).toHaveLength(1);
+  });
+
+  it("rejects coordinates outside India and leaves the pick pending", async () => {
+    const id = await pendingRec();
+    await expect(
+      approveRecommendation(
+        db,
+        { id, ...validInput, place: { ...validInput.place, lat: 51.5 } },
+        "editor@example.com",
+      ),
+    ).rejects.toThrow();
+    const [rec] = await db.select().from(schema.recommendations);
+    expect(rec.status).toBe("pending");
+    expect(await db.select().from(schema.places)).toHaveLength(0);
+  });
+
+  it("rejects a note longer than 140 characters", async () => {
+    const id = await pendingRec();
+    await expect(
+      approveRecommendation(db, { id, ...validInput, note: "x".repeat(141) }, "e@example.com"),
+    ).rejects.toThrow();
+    expect(await db.select().from(schema.places)).toHaveLength(0);
+  });
+
+  it("refuses to approve the same pick twice", async () => {
+    const id = await pendingRec();
+    await approveRecommendation(db, { id, ...validInput }, "editor@example.com");
+    await expect(
+      approveRecommendation(db, { id, ...validInput }, "editor@example.com"),
+    ).rejects.toThrow(/pending/);
+  });
+
+  it("suffixes slugs that collide", async () => {
+    await approveRecommendation(
+      db,
+      { id: await pendingRec(), ...validInput },
+      "editor@example.com",
+    );
+    await approveRecommendation(
+      db,
+      {
+        id: await pendingRec(),
+        ...validInput,
+        place: { ...validInput.place, name: "Chache Di Hatti!" },
+      },
+      "editor@example.com",
+    );
+    const slugs = (await db.select().from(schema.places)).map((p) => p.slug).sort();
+    expect(slugs).toEqual(["chache-di-hatti", "chache-di-hatti-2"]);
+  });
+
+  it("rejects a pick", async () => {
+    const id = await pendingRec();
+    await rejectRecommendation(db, id);
+    const [rec] = await db.select().from(schema.recommendations);
+    expect(rec.status).toBe("rejected");
+  });
+
+  it("merges one place into another and deletes the source", async () => {
+    const [from] = await db
+      .insert(schema.places)
+      .values({ slug: "chachey-di-hatti", name: "Chachey Di Hatti", cityId: 1 })
+      .returning();
+    const [into] = await db
+      .insert(schema.places)
+      .values({ slug: "chache-di-hatti", name: "Chache Di Hatti", cityId: 1 })
+      .returning();
+    const id = await pendingRec();
+    await db
+      .update(schema.recommendations)
+      .set({ placeId: from.id })
+      .where(eq(schema.recommendations.id, id));
+
+    await mergePlaces(db, from.id, into.id);
+
+    const [rec] = await db.select().from(schema.recommendations);
+    expect(rec.placeId).toBe(into.id);
+    expect((await db.select().from(schema.places)).map((p) => p.id)).toEqual([into.id]);
+    const aliases = await db.select().from(schema.placeAliases);
+    expect(aliases.map((a) => a.alias)).toContain("Chachey Di Hatti");
+  });
+
+  it("refuses to merge a place into itself", async () => {
+    const [place] = await db
+      .insert(schema.places)
+      .values({ slug: "x", name: "X", cityId: 1 })
+      .returning();
+    await expect(mergePlaces(db, place.id, place.id)).rejects.toThrow();
+  });
+});
+
+describe("suggestLocation", () => {
+  it("returns null on an empty result", async () => {
+    const result = await suggestLocation("nowhere", {
+      fetchImpl: async () => new Response("[]"),
+      sleep: async () => {},
+    });
+    expect(result).toBeNull();
+  });
+
+  it("restricts the query to India and sends a user agent", async () => {
+    let seen: { url: string; ua: string | null } | null = null;
+    const result = await suggestLocation("Chache Di Hatti", {
+      ua: "ifr/0.1 (me@example.com)",
+      sleep: async () => {},
+      fetchImpl: async (input, init) => {
+        seen = { url: String(input), ua: new Headers(init?.headers).get("user-agent") };
+        return new Response(
+          JSON.stringify([{ lat: "28.68", lon: "77.2", osm_id: "123", display_name: "Delhi" }]),
+        );
+      },
+    });
+    expect(seen!.url).toContain("countrycodes=in");
+    expect(seen!.ua).toBe("ifr/0.1 (me@example.com)");
+    expect(result).toEqual({ lat: 28.68, lng: 77.2, osmId: "123", displayName: "Delhi" });
+  });
+
+  it("waits at least a second between calls", async () => {
+    let waited = 0;
+    const deps = {
+      ua: "ifr/0.1 (me@example.com)",
+      sleep: async (ms: number) => {
+        waited += ms;
+      },
+      fetchImpl: async () => new Response("[]"),
+    };
+    await suggestLocation("a", deps);
+    await suggestLocation("b", deps);
+    expect(waited).toBeGreaterThanOrEqual(1000);
+  });
+});
