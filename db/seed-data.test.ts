@@ -10,7 +10,7 @@ const slugOf = (s: string) =>
 
 describe("seed data", () => {
   it("seeds creators with unique YouTube channel ids and unique slugs", () => {
-    expect(creators.length).toBeGreaterThanOrEqual(33);
+    expect(creators.length).toBeGreaterThanOrEqual(36);
     expect(new Set(creators.map((c) => c.slug)).size).toBe(creators.length);
     const ids = creators.map((c) => c.ytChannelId);
     expect(new Set(ids).size).toBe(ids.length);

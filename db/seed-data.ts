@@ -199,6 +199,20 @@ export const creators = [
     ytChannelId: "UCAqv9pvn1Fkd_gCRu3-ZASg",
     igHandle: null,
   },
+  // Kolkata and Mumbai coverage (#39).
+  { slug: "foodzpah", name: "FoodZpah", ytChannelId: "UCKieyGPRpMvIMn1b0rbKrqg", igHandle: null },
+  {
+    slug: "golgappa-girl",
+    name: "Golgappa Girl",
+    ytChannelId: "UCnwL537dF3kV8hGVHvvof3Q",
+    igHandle: null,
+  },
+  {
+    slug: "food-venture-folks",
+    name: "Food Venture Folks",
+    ytChannelId: "UCmpl1CVoCCiNlVk4WKY65Vw",
+    igHandle: null,
+  },
 ];
 
 export const dishes: SeedDish[] = [
