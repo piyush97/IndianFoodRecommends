@@ -4,7 +4,8 @@ import { useState } from "react";
 import type { MapPoint } from "./map-points";
 import { PlaceMapLazy as PlaceMap } from "./PlaceMapLazy";
 
-const tab = "min-h-11 px-5 text-sm font-bold uppercase tracking-wide";
+const tab =
+  "focus-visible:outline-offset-[-3px] min-h-11 px-5 text-sm font-bold uppercase tracking-wide";
 
 /** List is the default and the accessible alternative; the map loads only on demand. */
 export function ListMapToggle({
@@ -22,7 +23,7 @@ export function ListMapToggle({
       <div
         role="group"
         aria-label="View"
-        className="inline-flex self-start overflow-hidden rounded-[var(--radius-step)] shadow-[inset_0_0_0_1.5px_var(--color-ink)]"
+        className="inline-flex self-start rounded-[var(--radius-step)] shadow-[inset_0_0_0_1.5px_var(--color-ink)]"
       >
         {(["list", "map"] as const).map((v) => (
           <button

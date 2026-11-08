@@ -5,6 +5,7 @@ import { DishRow } from "../../../components/DishRow";
 import { PageHead } from "../../../components/PageHead";
 import { NearMeList } from "../../../components/NearMeList";
 import { Skeleton } from "../../../components/Skeleton";
+import { CITIES } from "../../../lib/cities";
 import { cachedCity } from "../data";
 
 export async function generateMetadata({ params }: PageProps<"/[city]">): Promise<Metadata> {
@@ -18,7 +19,13 @@ export async function generateMetadata({ params }: PageProps<"/[city]">): Promis
   };
 }
 
-export default function CityPage({ params }: PageProps<"/[city]">) {
+// Allowed to block: params are read before Suspense for the 404 check below.
+export const instant = false;
+
+export default async function CityPage({ params }: PageProps<"/[city]">) {
+  // Static registry check before Suspense: unknown slugs get a real 404 status, no DB at build.
+  const { city } = await params;
+  if (!CITIES.some((c) => c.slug === city)) notFound();
   return (
     <Suspense fallback={<Skeleton />}>
       <City params={params} />

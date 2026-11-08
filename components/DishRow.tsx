@@ -21,7 +21,7 @@ export function DishRow({
   return (
     <nav
       aria-label={`Dishes in ${cityName}`}
-      className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0"
+      className="-mx-4 overflow-x-auto px-4 py-1 sm:mx-0 sm:px-0"
     >
       <ul className="flex w-max gap-x-5 sm:w-auto sm:flex-wrap">
         {shown.map((d) => (

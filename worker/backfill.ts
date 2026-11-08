@@ -13,7 +13,8 @@ import { listArchive, listUploadsWithFallback as listUploads, type Upload } from
 async function main() {
   const apiKey = process.env.TYPESAFE_API_KEY;
   if (!apiKey) throw new Error("TYPESAFE_API_KEY is required: it gates extraction and review");
-  const perChannel = Number(process.argv[2] ?? 60);
+  const perChannel = Number.parseInt(process.argv[2] ?? "60", 10);
+  if (!(perChannel > 0)) throw new Error("perChannel must be a positive integer");
   const only = process.argv.slice(3);
 
   const creators = await db

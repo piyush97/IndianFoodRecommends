@@ -2,6 +2,9 @@
 
 import "maplibre-gl/dist/maplibre-gl.css";
 import * as maplibregl from "maplibre-gl";
+
+// v6 resolves its worker from import.meta.url, which breaks once bundled.
+maplibregl.setWorkerUrl(new URL("maplibre-gl/dist/maplibre-gl-worker.mjs", import.meta.url).href);
 import { useEffect, useRef } from "react";
 import { ROUTE } from "./LidCode";
 import type { MapPoint } from "./map-points";
@@ -53,9 +56,10 @@ export default function PlaceMap({
       // A lid tile in the city's route colour, numbered like its row; dashed when approximate.
       const pin = document.createElement("span");
       pin.textContent = p.rank ? String(p.rank) : "";
-      pin.className = "enamel type-lid grid size-8 place-items-center text-base";
+      pin.className = "enamel type-lid grid size-11 place-items-center text-base";
       pin.style.background = p.approx ? "var(--color-paper)" : route.bg;
       pin.style.color = p.approx ? "var(--color-ink)" : route.fg;
+      pin.setAttribute("role", "button");
       pin.setAttribute("aria-label", `${p.name}${p.approx ? ", approximate location" : ""}`);
       if (p.approx) pin.style.boxShadow = "none";
       if (p.approx) pin.style.border = `2px dashed ${route.bg}`;
