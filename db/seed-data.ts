@@ -113,6 +113,92 @@ export const creators = [
     ytChannelId: "UCM-q0U0F6-oMOFTYPtlsEfA",
     igHandle: null,
   },
+  // Nov 2026: Hyderabad, Bengaluru, Chennai, Lucknow, Jaipur. IDs checked against live channel pages.
+  {
+    slug: "srikanth-food-travel",
+    name: "Srikanth Food & Travel",
+    ytChannelId: "UCB3ulkE6fBsUd4z36eUpheQ",
+    igHandle: null,
+  },
+  {
+    slug: "luv4-food-n-travel",
+    name: "Luv4FoodNTravel",
+    ytChannelId: "UC6wyBRRPT5P-kZ1RV-h3WQA",
+    igHandle: null,
+  },
+  {
+    slug: "pramod-bathija",
+    name: "Pramod Bathija",
+    ytChannelId: "UCKsqD8PX3AZpvIrtueaVvQg",
+    igHandle: null,
+  },
+  {
+    slug: "street-byte",
+    name: "Street Byte",
+    ytChannelId: "UCqA2ZPcBYbWqmKU3iFX2KwA",
+    igHandle: null,
+  },
+  {
+    slug: "food-lovers-tv",
+    name: "Food Lovers TV",
+    ytChannelId: "UC-Lq6oBPTgTXT_K-ylWL6hg",
+    igHandle: null,
+  },
+  {
+    slug: "unbox-karnataka",
+    name: "Unbox Karnataka",
+    ytChannelId: "UCst7dIH10mMvu_PVpXMr7Hw",
+    igHandle: null,
+  },
+  {
+    slug: "rocking-rasheed",
+    name: "Rocking Rasheed",
+    ytChannelId: "UCk5vtg6Kxgd1s20a6_PHZSQ",
+    igHandle: null,
+  },
+  {
+    slug: "the-chennai-foodie",
+    name: "The Chennai Foodie",
+    ytChannelId: "UC0_SrJRdNGxPdXMRFOonU9Q",
+    igHandle: null,
+  },
+  {
+    slug: "foodie-prabu",
+    name: "Foodie Prabu",
+    ytChannelId: "UCB2XQ5q22gU0AWwdN24g15Q",
+    igHandle: null,
+  },
+  {
+    slug: "peppa-foodie",
+    name: "Peppa Foodie",
+    ytChannelId: "UC8wwXAm77RNzVN-cJOy8t8g",
+    igHandle: null,
+  },
+  {
+    slug: "pakoda-boyz",
+    name: "Pakoda Boyz",
+    ytChannelId: "UClz0pLkTqii1UhWHUIxBTOA",
+    igHandle: null,
+  },
+  { slug: "ama-miyan", name: "Ama Miyan", ytChannelId: "UCNU4Kdw5GouCaU340JctOTw", igHandle: null },
+  {
+    slug: "safarkhana",
+    name: "Safarkhana",
+    ytChannelId: "UCwBGnFUkyqGkv2b7K1cx3_A",
+    igHandle: null,
+  },
+  {
+    slug: "jaipur-food-tales",
+    name: "Jaipur Food Tales",
+    ytChannelId: "UCBEY_Z44umpRZEutIUEEVAw",
+    igHandle: null,
+  },
+  {
+    slug: "jaipur-food-xplorer",
+    name: "Jaipur Food Xplorer",
+    ytChannelId: "UCAqv9pvn1Fkd_gCRu3-ZASg",
+    igHandle: null,
+  },
 ];
 
 export const dishes: SeedDish[] = [

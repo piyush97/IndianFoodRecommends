@@ -12,6 +12,11 @@ describe("cityFromName", () => {
     ["Navi Mumbai", "mumbai"],
     ["Kolkata", "kolkata"],
     ["Calcutta", "kolkata"],
+    ["Secunderabad", "hyderabad"],
+    ["Bangalore", "bengaluru"],
+    ["Madras", "chennai"],
+    ["Lucknow", "lucknow"],
+    ["Jaipur", "jaipur"],
   ])("maps %s to %s", (name, slug) => {
     expect(cityFromName(name)?.slug).toBe(slug);
   });

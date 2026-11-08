@@ -8,7 +8,7 @@ web
 
 ## Users
 
-Primary: a local foodie (18-35) in Delhi, Mumbai or Kolkata, on a phone, deciding where to eat this weekend. They trust the food vloggers they already watch more than star ratings, and want the shortlist plus proof: which creator picked the place, what they ordered, and the exact video moment.
+Primary: a local foodie (18-35) in a covered city (Delhi, Mumbai, Kolkata, Hyderabad, Bengaluru, Chennai, Lucknow, Jaipur), on a phone, deciding where to eat this weekend. They trust the food vloggers they already watch more than star ratings, and want the shortlist plus proof: which creator picked the place, what they ordered, and the exact video moment.
 
 Secondary: travellers who want a must-eat list for a city, and fans who browse one creator's picks. An admin (the owner) reviews leftovers in `/admin`.
 

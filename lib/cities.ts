@@ -33,6 +33,36 @@ export const CITIES: readonly City[] = [
     state: "West Bengal",
     aliases: ["calcutta", "howrah", "salt lake", "new town"],
   },
+  {
+    slug: "hyderabad",
+    name: "Hyderabad",
+    state: "Telangana",
+    aliases: ["secunderabad", "cyberabad", "hitec city", "gachibowli", "madhapur", "kondapur"],
+  },
+  {
+    slug: "bengaluru",
+    name: "Bengaluru",
+    state: "Karnataka",
+    aliases: ["bangalore", "bengaluru urban", "bangalore urban"],
+  },
+  {
+    slug: "chennai",
+    name: "Chennai",
+    state: "Tamil Nadu",
+    aliases: ["madras", "tambaram"],
+  },
+  {
+    slug: "lucknow",
+    name: "Lucknow",
+    state: "Uttar Pradesh",
+    aliases: [],
+  },
+  {
+    slug: "jaipur",
+    name: "Jaipur",
+    state: "Rajasthan",
+    aliases: ["pink city"],
+  },
 ];
 
 const BY_NAME = new Map<string, City>(
