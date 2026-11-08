@@ -76,6 +76,7 @@ async function Dish({ params }: { params: Params }) {
         list={
           <NearMeList
             headingLevel={2}
+            citySlug={data.city.slug}
             cards={data.places}
             emptyText={`No picks yet for ${data.dish.name} in ${data.city.name}.`}
           />

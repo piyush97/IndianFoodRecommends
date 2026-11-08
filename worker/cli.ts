@@ -3,6 +3,7 @@ import { and, eq, lt, sql } from "drizzle-orm";
 import { db, schema } from "../db";
 import { autoReviewPending, checkPick, geocodeIndia } from "../lib/auto-review";
 import { classifyVideo, gatedExtract } from "../lib/jev";
+import { fillDiets } from "../lib/diet";
 import { extractPicks } from "../lib/llm/extract";
 import { listArchive, listUploadsWithFallback as listUploads } from "../lib/youtube";
 import { runIngest } from "../lib/worker/ingest";
@@ -21,6 +22,16 @@ async function ingest(): Promise<void> {
   const summary = await runIngest({ db, listUploads, extract: extractor(), now: () => new Date() });
   console.log(JSON.stringify(summary));
   await review();
+  // Labelling is a nicety: a failure must not fail the ingest or fire the alert.
+  await diet().catch((error) => console.error("diet:", error));
+}
+
+/** Labels new dishes veg / non-veg / mixed for the diet filter. */
+async function diet(): Promise<void> {
+  const labelled = await fillDiets(db);
+  console.log(JSON.stringify({ dietLabelled: labelled }));
+  if (labelled > 0)
+    console.log(JSON.stringify({ revalidated: await notifyRevalidate(["public"]) }));
 }
 
 /** Decides every pending pick. Fails the run (and so fires the alert) when LLM picks stay pending over 48 h. */
@@ -72,7 +83,14 @@ async function evaluate(): Promise<void> {
 }
 
 const command = process.argv[2] ?? "ingest";
-const run = command === "eval" ? evaluate : command === "review" ? review : ingest;
+const run =
+  command === "eval"
+    ? evaluate
+    : command === "review"
+      ? review
+      : command === "diet"
+        ? diet
+        : ingest;
 
 run()
   .catch((error) => {

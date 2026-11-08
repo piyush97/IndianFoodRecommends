@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { schema, type Db } from "../../db";
 import { testDb, truncateAll } from "../../db/test-db";
 import {
+  getCity,
   getCreator,
   getDishInCity,
   getDishPicks,
@@ -27,8 +28,8 @@ describeDb("public queries", () => {
       { slug: "gone", name: "Gone", optedOut: true },
     ]);
     await db.insert(schema.dishes).values([
-      { slug: "chole-bhature", name: "Chole Bhature" },
-      { slug: "momos", name: "Momos" },
+      { slug: "chole-bhature", name: "Chole Bhature", diet: "veg" },
+      { slug: "momos", name: "Momos", diet: "non-veg" },
     ]);
     await db.insert(schema.places).values([
       { slug: "a", name: "Alpha", cityId: 1, lat: 28.6, lng: 77.2, osmId: "approx:1" },
@@ -96,6 +97,20 @@ describeDb("public queries", () => {
     ]);
     expect(cards[0].pickedOn).toBe("2026-11-01");
     expect(await getDishPicks(db, [], now)).toEqual([]);
+  });
+
+  it("filters rows by diet, so creator counts only count that diet", async () => {
+    const dishes = ["momos", "chole-bhature"];
+    const veg = await getDishPicks(db, dishes, now, "veg");
+    expect(veg.map((c) => [c.placeSlug, c.creators.length])).toEqual([["a", 2]]);
+    const nonVeg = await getDishPicks(db, dishes, now, "non-veg");
+    expect(nonVeg.map((c) => [c.placeSlug, c.creators.length])).toEqual([["b", 1]]);
+    const city = await getCity(db, "delhi", now, "non-veg");
+    expect(city?.places.map((p) => p.placeSlug)).toEqual(["b"]);
+    expect(city?.dishes.map((d) => d.slug)).toEqual(["momos"]);
+    expect((await getPlaceCards(db, ["a", "b"], now, "veg")).map((c) => c.placeSlug)).toEqual([
+      "a",
+    ]);
   });
 
   it("returns null for a place with no visible picks", async () => {

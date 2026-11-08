@@ -44,3 +44,28 @@ test("unknown pages answer 404 before rendering, real pages 200", async ({ page 
   for (const path of ["/delhi", "/delhi/chole-bhature", "/delhi/place/chache-di-hatti"])
     expect((await page.goto(path))?.status(), path).toBe(200);
 });
+
+test.describe("diet filter", () => {
+  test("keeps veg places and empties the list for non-veg", async ({ page }) => {
+    await page.goto("/delhi?diet=veg");
+    await expect(page.getByRole("link", { name: "Veg", exact: true })).toHaveAttribute(
+      "aria-current",
+      "true",
+    );
+    await expect(page.getByRole("link", { name: "Chache Di Hatti", exact: true })).toBeVisible();
+    await page.getByRole("link", { name: "Non-veg", exact: true }).click();
+    await expect(page).toHaveURL(/\/delhi\?diet=non-veg$/);
+    await expect(page.getByText("No non-veg picks yet for Delhi.")).toBeVisible();
+    await page.getByRole("link", { name: "All", exact: true }).click();
+    await expect(page.getByRole("link", { name: "Chache Di Hatti", exact: true })).toBeVisible();
+  });
+
+  test("filters search results and offers a way back", async ({ page }) => {
+    await page.goto("/search?q=chole&diet=non-veg");
+    await expect(page.getByText("No non-veg picks for “chole”.")).toBeVisible();
+    await page.getByRole("link", { name: "Show all" }).click();
+    await expect(
+      page.getByRole("link", { name: "Chache Di Hatti", exact: true }).first(),
+    ).toBeVisible();
+  });
+});

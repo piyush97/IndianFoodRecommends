@@ -83,6 +83,8 @@ export const dishes = pgTable("dishes", {
   slug: text("slug").notNull().unique(),
   name: text("name").notNull(),
   cuisine: text("cuisine"),
+  /** null = not classified yet; mixed = a thali or platter that can hold both. */
+  diet: text("diet").$type<"veg" | "non-veg" | "mixed">(),
   createdAt,
 });
 
