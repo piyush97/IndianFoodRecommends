@@ -144,6 +144,13 @@ export const dishAliases = pgTable(
   (t) => [unique("dish_aliases_uk").on(t.dishId, t.alias)],
 );
 
+/** Searches that found nothing: query text only, no IP or user id. Shows which dishes and creators to add next. */
+export const searchMisses = pgTable("search_misses", {
+  query: text("query").primaryKey(),
+  hits: integer("hits").notNull().default(1),
+  lastAt: timestamp("last_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const reports = pgTable(
   "reports",
   {
