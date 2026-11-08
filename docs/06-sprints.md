@@ -78,6 +78,25 @@ Model key:
 | S4-4 | Stale data job: flag places unverified > 12 months | 2   | Sonnet         | flagged list in admin        |
 | S4-5 | Creator outreach kit (share link, embed badge)     | 3   | Human + Sonnet | 3 creators contacted         |
 
+## Sprint 5 · Hardening + highest-ROI features (weeks 10-11)
+
+Ranked by return per hour. State at planning (2026-11-08): 40 approved picks, 112 pending, 61 dishes (variants split, e.g. "Desi Ghee Chole Bhature"), 18 creators, no failure alerts on the ingest/backup timers, unknown slugs return 200 + noindex instead of 404.
+
+| ID | Task | Est (h) | Model | Done when |
+|---|---|---|---|---|
+| S5-1 | Alert on ingest/backup failure (systemd `OnFailure=` → email or webhook) | 1 | Sonnet | a forced failing run sends an alert |
+| S5-2 | Re-run auto-review on pending picks every night; drain the 112 | 2 | Sonnet | pending < 20, nothing older than 48 h |
+| S5-3 | Dish canonicalisation: variants become aliases of one dish, admin merge | 3 | Opus | "Desi Ghee Chole Bhature" searches/ranks with Chole Bhature; test |
+| S5-4 | Log zero-result searches (query text only, no IP), admin list | 2 | Sonnet | admin shows top zero-result queries, 7 days |
+| S5-5 | Real 404 status for unknown place/dish/creator slugs + `app/not-found.tsx` | 3 | Opus | `curl -I` unknown slug on prod → 404 |
+| S5-6 | `app/global-error.tsx` + server error logging with route context | 1 | Haiku | thrown test error shows branded page, logged in Vercel |
+| S5-7 | Monthly backup restore drill (restore latest dump to scratch DB, check counts) | 1 | Sonnet | timer runs, drill passes |
+| S5-8 | Share button on place + dish pages (Web Share API, copy-link fallback) | 2 | Sonnet | works on mobile and desktop, keyboard reachable |
+| S5-9 | Search results link to the dish's city page ("All chole bhature in Delhi") | 1 | Haiku | link per city with picks, e2e covers it |
+| S5-10 | Set `NEXT_PUBLIC_OPTOUT_EMAIL`, custom domain + `NEXT_PUBLIC_SITE_URL` in Vercel | 0.5 | Human | about page shows a working opt-out address |
+
+Carried over: #39 (100 approved picks per city), #42 (contact 3 creators).
+
 ## Totals
 
 ~170 engineer-hours. With AI doing most build tasks, human time ≈ 40 h (labels, review, legal, accounts).
