@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { feedUrl, listUploads, parseFeed, type YtFetch } from "./youtube";
+import { feedUrl, listUploads, parseFeed, parseYtDlp, type YtFetch } from "./youtube";
 
 const FEED = `<?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns:yt="http://www.youtube.com/xml/schemas/2015" xmlns:media="http://search.yahoo.com/mrss/" xmlns="http://www.w3.org/2005/Atom">
@@ -74,5 +74,29 @@ describe("listUploads", () => {
     await expect(
       listUploads("UC2UWtuZR3kH-5C26HVMMB6A", { fetchImpl: fetchReturning("nope", 503) }),
     ).rejects.toThrow(/503/);
+  });
+});
+
+describe("parseYtDlp", () => {
+  it("reads yt-dlp JSON lines and skips broken or dateless rows", () => {
+    const lines = [
+      JSON.stringify({
+        id: "old1",
+        upload_date: "20250504",
+        title: "Biryani",
+        description: "Dada Boudi 3:10",
+      }),
+      "not json",
+      JSON.stringify({ id: "nodate", upload_date: null, title: "x", description: "" }),
+      "",
+    ].join("\n");
+    expect(parseYtDlp(lines)).toEqual([
+      {
+        videoId: "old1",
+        publishedAt: new Date("2025-05-04T00:00:00Z"),
+        title: "Biryani",
+        description: "Dada Boudi 3:10",
+      },
+    ]);
   });
 });
