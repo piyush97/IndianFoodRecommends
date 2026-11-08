@@ -77,3 +77,7 @@ sudo systemctl link /root/Projects/IndianFoodRecommends/ops/ifr-restore-drill.{s
 sudo systemctl enable --now ifr-restore-drill.timer
 sudo systemctl start ifr-restore-drill.service   # run now
 ```
+
+## Merging
+
+`ops/merge-pr.sh <pr-number>` waits for CI and merges only if it is green. Use it instead of `gh pr merge`: GitHub rejects branch protection on a private free repo, so nothing else stops a red merge.
