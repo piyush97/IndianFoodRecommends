@@ -5,6 +5,7 @@ import { DishRow } from "../../../components/DishRow";
 import { PageHead } from "../../../components/PageHead";
 import { NearMeList } from "../../../components/NearMeList";
 import { Skeleton } from "../../../components/Skeleton";
+import { CITIES } from "../../../lib/cities";
 import { cachedCity } from "../data";
 
 export async function generateMetadata({ params }: PageProps<"/[city]">): Promise<Metadata> {
@@ -18,7 +19,14 @@ export async function generateMetadata({ params }: PageProps<"/[city]">): Promis
   };
 }
 
-export default function CityPage({ params }: PageProps<"/[city]">) {
+export async function generateStaticParams() {
+  return CITIES.map((c) => ({ city: c.slug }));
+}
+
+// Check existence before the Suspense boundary: notFound() inside a streamed
+// boundary arrives after the 200 status line (soft 404).
+export default async function CityPage({ params }: PageProps<"/[city]">) {
+  if (!(await cachedCity((await params).city))) notFound();
   return (
     <Suspense fallback={<Skeleton />}>
       <City params={params} />

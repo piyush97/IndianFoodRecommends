@@ -21,7 +21,7 @@
   "dependencies": {
     "botid": "^1.5.12",
     "drizzle-orm": "^0.45.4",
-    "maplibre-gl": "5",
+    "maplibre-gl": "^6.17.0",
     "next": "16.4.5",
     "next-auth": "5.0.0-beta.32",
     "postgres": "^4.1.0",
