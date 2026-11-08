@@ -7,6 +7,8 @@ import { JsonLd } from "../../../../../components/JsonLd";
 import { restaurantLd } from "../../../../../lib/seo/jsonld";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { ShareButton } from "../../../../../components/ShareButton";
+import { absoluteUrl } from "../../../../../lib/seo/site";
 import { EmbedFacade } from "../../../../../components/EmbedFacade";
 import { MapOnDemand } from "../../../../../components/PlaceMapLazy";
 import { ReportForm } from "../../../../../components/ReportForm";
@@ -55,6 +57,7 @@ async function Place({ params }: { params: Params }) {
   if (!data) notFound();
   const { place } = data;
   const directions = directionsUrl(place.lat, place.lng);
+  const vloggers = new Set(data.proofs.map((p) => p.creator.slug)).size;
 
   return (
     <>
@@ -94,8 +97,8 @@ async function Place({ params }: { params: Params }) {
             Approximate location (neighbourhood). Check the video for the exact shop.
           </p>
         )}
-        {directions && (
-          <div>
+        <div className="flex flex-wrap items-center gap-2">
+          {directions && (
             <a
               href={directions}
               target="_blank"
@@ -108,8 +111,14 @@ async function Place({ params }: { params: Params }) {
               Directions
               <span className="sr-only"> to {place.name}, opens Google Maps</span>
             </a>
-          </div>
-        )}
+          )}
+          <ShareButton
+            url={absoluteUrl(`/${data.city.slug}/place/${place.slug}`)}
+            title={place.name}
+            text={`${place.name}, ${data.city.name}: picked by ${vloggers} food ${vloggers === 1 ? "vlogger" : "vloggers"}`}
+            slug={place.slug}
+          />
+        </div>
       </section>
 
       <section className="flex flex-col gap-3">

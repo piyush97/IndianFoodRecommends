@@ -4,6 +4,8 @@ import { JsonLd } from "../../../../components/JsonLd";
 import { dishItemList } from "../../../../lib/seo/jsonld";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { ShareButton } from "../../../../components/ShareButton";
+import { absoluteUrl } from "../../../../lib/seo/site";
 import { ListMapToggle } from "../../../../components/ListMapToggle";
 import { mapPoints } from "../../../../components/map-points";
 import { NearMeList } from "../../../../components/NearMeList";
@@ -60,7 +62,14 @@ async function Dish({ params }: { params: Params }) {
             ? `${places} ${places === 1 ? "place" : "places"} picked by ${creators} food ${creators === 1 ? "vlogger" : "vloggers"}`
             : undefined
         }
-      />
+      >
+        <ShareButton
+          url={absoluteUrl(`/${data.city.slug}/${data.dish.slug}`)}
+          title={`${data.dish.name} in ${data.city.name}`}
+          text={`${data.dish.name} in ${data.city.name}: ${places} ${places === 1 ? "place" : "places"}, picked by ${creators} food ${creators === 1 ? "vlogger" : "vloggers"}`}
+          slug={data.dish.slug}
+        />
+      </PageHead>
       <ListMapToggle
         citySlug={data.city.slug}
         points={mapPoints(data.places)}
