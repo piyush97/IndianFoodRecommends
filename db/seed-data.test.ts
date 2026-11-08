@@ -9,8 +9,9 @@ const slugOf = (s: string) =>
     .replace(/^-|-$/g, "");
 
 describe("seed data", () => {
-  it("seeds 13 creators across three cities with unique YouTube channel ids", () => {
-    expect(creators).toHaveLength(18);
+  it("seeds creators with unique YouTube channel ids and unique slugs", () => {
+    expect(creators.length).toBeGreaterThanOrEqual(33);
+    expect(new Set(creators.map((c) => c.slug)).size).toBe(creators.length);
     const ids = creators.map((c) => c.ytChannelId);
     expect(new Set(ids).size).toBe(ids.length);
     for (const id of ids) expect(id).toMatch(/^UC[0-9A-Za-z_-]{22}$/);
