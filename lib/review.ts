@@ -212,6 +212,37 @@ export async function mergePlaces(db: Db, fromId: number, intoId: number): Promi
   });
 }
 
+/** Folds a duplicate dish into the one that stays; its name becomes an alias so searches still find it. */
+export async function mergeDishes(db: Db, fromId: number, intoId: number): Promise<void> {
+  if (fromId === intoId) throw new Error("cannot merge a dish into itself");
+  await db.transaction(async (tx) => {
+    const [from] = await tx.select().from(schema.dishes).where(eq(schema.dishes.id, fromId));
+    const [into] = await tx.select().from(schema.dishes).where(eq(schema.dishes.id, intoId));
+    if (!from || !into) throw new Error("dish not found");
+
+    // Same video, place and timestamp already on the kept dish: moving it would break recs_dedupe_uk.
+    await tx.execute(sql`
+      delete from recommendations f using recommendations i
+      where f.dish_id = ${fromId} and i.dish_id = ${intoId}
+        and f.source_id = i.source_id and f.place_id = i.place_id
+        and coalesce(f.ts_seconds, -1) = coalesce(i.ts_seconds, -1)
+    `);
+    await tx
+      .update(schema.recommendations)
+      .set({ dishId: intoId })
+      .where(eq(schema.recommendations.dishId, fromId));
+
+    const aliases = await tx
+      .select()
+      .from(schema.dishAliases)
+      .where(eq(schema.dishAliases.dishId, fromId));
+    for (const alias of [...aliases.map((a) => a.alias), from.name]) {
+      await tx.insert(schema.dishAliases).values({ dishId: intoId, alias }).onConflictDoNothing();
+    }
+    await tx.delete(schema.dishes).where(eq(schema.dishes.id, fromId));
+  });
+}
+
 export type GeocodeDeps = {
   fetchImpl?: typeof fetch;
   sleep?: (ms: number) => Promise<void>;

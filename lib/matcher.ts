@@ -1,6 +1,6 @@
 import { sql } from "drizzle-orm";
 import type { Db } from "../db";
-import { normalizeName } from "./text";
+import { canonicalDishName, normalizeName } from "./text";
 
 export type Match = { id: number; name: string; score: number; via: "name" | "alias" };
 
@@ -60,5 +60,5 @@ export function matchPlace(db: Db, name: string, cityId: number): Promise<Match[
 }
 
 export function matchDish(db: Db, name: string): Promise<Match[]> {
-  return bestMatches(db, DISHES, name);
+  return bestMatches(db, DISHES, canonicalDishName(name));
 }

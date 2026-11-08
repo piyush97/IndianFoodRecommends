@@ -4,7 +4,7 @@ import { CITIES, cityBySlug, cityFromName, type City } from "./cities";
 import type { ExtractedPick } from "./llm/extract";
 import type { Match } from "./matcher";
 import { insertWithSlug, suggestLocation } from "./review";
-import { normalizeName, slugify } from "./text";
+import { canonicalDishName, normalizeName, slugify } from "./text";
 import type { Upload } from "./youtube";
 
 /**
@@ -356,6 +356,7 @@ async function publish(
     ? pick.suggestions?.places?.find((m) => m.score >= REUSE_MATCH_SCORE)
     : undefined;
   const dishMatch = pick.suggestions?.dishes?.find((m) => m.score >= REUSE_MATCH_SCORE);
+  const dishName = canonicalDishName(pick.dishes[0]);
 
   // Nominatim outside the transaction: it sleeps 1 s between calls.
   const location = placeMatch ? null : await locate(deps.geocode, pick, city);
@@ -380,7 +381,7 @@ async function publish(
         : await tx
             .select({ id: schema.dishes.id })
             .from(schema.dishes)
-            .where(sql`lower(${schema.dishes.name}) = ${pick.dishes[0].trim().toLowerCase()}`)
+            .where(sql`lower(${schema.dishes.name}) = ${dishName.toLowerCase()}`)
             .limit(1);
 
       const placeId =
@@ -415,12 +416,12 @@ async function publish(
           async (slug) => {
             const [row] = await tx
               .insert(schema.dishes)
-              .values({ slug, name: pick.dishes[0].trim() })
+              .values({ slug, name: dishName })
               .onConflictDoNothing()
               .returning();
             return row;
           },
-          slugify(pick.dishes[0]),
+          slugify(dishName),
         ));
 
       if (placeMatch && normalizeName(placeMatch.name) !== normalizeName(pick.place_name)) {

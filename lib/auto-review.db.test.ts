@@ -71,6 +71,15 @@ describeDb("autoReviewPending", () => {
     expect(place).toMatchObject({ name: "Chache Di Hatti", lat: 28.68, cityId: 1 });
   });
 
+  it("files a qualified dish name under the plain dish instead of creating a variant", async () => {
+    await db.insert(schema.dishes).values({ slug: "chole-bhature", name: "Chole Bhature" });
+    await pending({ ...base, dishes: ["Desi Ghee Chole Bhature"] });
+    expect(await autoReviewPending(deps())).toEqual({ approved: 1, rejected: 0, skipped: 0 });
+    expect((await db.select().from(schema.dishes)).map((d) => d.name)).toEqual(["Chole Bhature"]);
+    const [rec] = await db.select().from(schema.recommendations);
+    expect(rec.dishId).toBe(1);
+  });
+
   it("falls back to the locality centre when the shop itself is not on the map", async () => {
     await pending(base);
     const queries: string[] = [];
