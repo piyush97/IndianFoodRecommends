@@ -20,6 +20,13 @@ const good: PickCheck = {
 };
 
 describe("decidePick", () => {
+  it.each(["Street Food", "breakfast", "Non-Veg", "fish"])("rejects generic dish %s", (dish) => {
+    expect(decidePick({ ...pick, dishes: [dish] }, good)).toEqual({
+      approve: false,
+      reason: "generic-dish",
+    });
+  });
+
   it("approves a grounded, positive Delhi pick", () => {
     expect(decidePick(pick, good)).toEqual({ approve: true, city: "delhi" });
   });

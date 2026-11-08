@@ -36,6 +36,7 @@ export type Decision =
         | "low-confidence"
         | "city-mismatch"
         | "dish-not-grounded"
+        | "generic-dish"
         | "duplicate";
     };
 
@@ -45,6 +46,20 @@ const MIN_VENUE = 0.6;
 const MIN_RECOMMENDS = 0.6;
 const MIN_CITY_WHEN_UNSTATED = 0.8;
 const REUSE_MATCH_SCORE = 0.8;
+/** A category or a meal, not a dish someone can order. */
+const GENERIC_DISHES = new Set([
+  "street food",
+  "food",
+  "breakfast",
+  "lunch",
+  "dinner",
+  "snacks",
+  "meals",
+  "fish",
+  "seafood",
+  "non veg",
+  "veg",
+]);
 
 type Reviewable = ExtractedPick & { submitted?: boolean };
 
@@ -69,6 +84,8 @@ export function decidePick(pick: Reviewable, check: PickCheck): Decision {
   if (pick.submitted && check.dishGrounded < MIN_GROUNDED) {
     return { approve: false, reason: "dish-not-grounded" };
   }
+  if (GENERIC_DISHES.has(normalizeName(canonicalDishName(pick.dishes[0] ?? ""))))
+    return { approve: false, reason: "generic-dish" };
   if (check.isVenue < MIN_VENUE) return { approve: false, reason: "not-a-venue" };
   if (check.recommends < MIN_RECOMMENDS) return { approve: false, reason: "not-recommended" };
   return { approve: true, city: city.slug };
