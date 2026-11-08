@@ -17,6 +17,7 @@ const card = (slug: string, lat: number | null, lng: number | null): PickCard =>
   dishes: [],
   proof: { platform: "youtube", externalId: "x", tsSeconds: null, creator: "c" },
   score: 0,
+  pickedOn: "2026-01-01",
 });
 
 describe("haversineKm", () => {
