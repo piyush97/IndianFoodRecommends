@@ -1,5 +1,6 @@
 import { cacheLife, cacheTag } from "next/cache";
 import { db } from "../../db";
+import type { DietFilter } from "../../lib/diet";
 import {
   getCity,
   getCreator,
@@ -26,11 +27,11 @@ export async function cachedHome(city: string) {
   return getHome(db, city);
 }
 
-export async function cachedCity(city: string) {
+export async function cachedCity(city: string, diet?: DietFilter) {
   "use cache";
   cacheLife("hours");
   cacheTag("public", `city:${city}`);
-  return getCity(db, city);
+  return getCity(db, city, undefined, diet);
 }
 
 export async function cachedDish(city: string, dish: string) {

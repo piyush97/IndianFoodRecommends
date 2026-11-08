@@ -22,7 +22,7 @@ async function main(): Promise<void> {
       .returning();
     const [dish] = await db
       .insert(schema.dishes)
-      .values({ slug: "chole-bhature", name: "Chole Bhature" })
+      .values({ slug: "chole-bhature", name: "Chole Bhature", diet: "veg" })
       .returning();
     await db.insert(schema.dishAliases).values({ dishId: dish.id, alias: "chole bature" });
     const [place] = await db

@@ -2,9 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { after } from "next/server";
 import { Suspense } from "react";
+import { DietFilter } from "../../../components/DietFilter";
+import { FilterGroup, Segment } from "../../../components/FilterGroup";
 import { PickList } from "../../../components/PickList";
 import { Skeleton } from "../../../components/Skeleton";
 import { db } from "../../../db";
+import { parseDiet, type DietFilter as Diet } from "../../../lib/diet";
 import { CITIES } from "../../../lib/cities";
 import { getDishPicks, getPlaceCards, type PickCard } from "../../../lib/public/queries";
 import { searchAll } from "../../../lib/public/search";
@@ -18,8 +21,6 @@ export const metadata: Metadata = { title: "Search", robots: { index: false, fol
 
 const link =
   "flex min-h-12 items-center justify-between gap-3 border-b border-line py-2 font-semibold no-underline hover:underline";
-const segment =
-  "inline-flex min-h-11 items-center gap-1.5 px-2.5 text-sm font-bold whitespace-nowrap uppercase tracking-wide no-underline focus-visible:outline-offset-[-3px]";
 
 export default function SearchPage({ searchParams }: Props) {
   return (
@@ -33,12 +34,13 @@ function one(v: string | string[] | undefined) {
   return typeof v === "string" ? v : "";
 }
 
-type Filters = { q: string; city: string; dish: string; sort: Sort };
+type Filters = { q: string; city: string; dish: string; sort: Sort; diet?: Diet };
 
-function searchHref({ q, city, dish, sort }: Filters) {
+function searchHref({ q, city, dish, sort, diet }: Filters) {
   const params = new URLSearchParams({ q });
   if (city) params.set("city", city);
   if (dish) params.set("dish", dish);
+  if (diet) params.set("diet", diet);
   if (sort !== "creators") params.set("sort", sort);
   return `/search?${params}`;
 }
@@ -53,6 +55,7 @@ async function Results({ searchParams }: Pick<Props, "searchParams">) {
   const query = one(params.q).slice(0, 100);
   const city = CITIES.some((c) => c.slug === one(params.city)) ? one(params.city) : "";
   const sort: Sort = one(params.sort) === "newest" ? "newest" : "creators";
+  const diet = parseDiet(one(params.diet));
 
   if (!query.trim()) return <EmptyQuery />;
 
@@ -63,12 +66,14 @@ async function Results({ searchParams }: Pick<Props, "searchParams">) {
   }));
   const dishSlugs = dishes.map((d) => d.slug);
   const dish = dishSlugs.includes(one(params.dish)) ? one(params.dish) : "";
-  const f: Filters = { q: query, city, dish, sort };
+  const f: Filters = { q: query, city, dish, sort, diet };
   const [allDishCards, allPlaceCards] = await Promise.all([
-    getDishPicks(db, dishSlugs),
+    getDishPicks(db, dishSlugs, undefined, diet),
     getPlaceCards(
       db,
       res.places.map((p) => p.slug),
+      undefined,
+      diet,
     ),
   ]);
 
@@ -83,7 +88,8 @@ async function Results({ searchParams }: Pick<Props, "searchParams">) {
   for (const c of [...allDishCards, ...placeOnly])
     perCity.set(c.citySlug, (perCity.get(c.citySlug) ?? 0) + 1);
   const total = allDishCards.length + placeOnly.length;
-  if (total === 0 && res.creators.length === 0) after(() => logMiss(db, query));
+  // A diet filter can empty the list without the query being a miss.
+  if (!diet && total === 0 && res.creators.length === 0) after(() => logMiss(db, query));
 
   const inCity = (c: PickCard) => !city || c.citySlug === city;
   const dishName = dishes.find((d) => d.slug === dish)?.name;
@@ -95,6 +101,8 @@ async function Results({ searchParams }: Pick<Props, "searchParams">) {
       allDishCards.filter((c) => inCity(c) && c.dishes.includes(d.name)).length,
     ]),
   );
+  // With a diet filter, hide dishes of the other diet (0 picks) unless already selected.
+  const dishOptions = dishes.filter((d) => !diet || perDish.get(d.slug)! > 0 || d.slug === dish);
   const dishCards = sortCards(
     allDishCards.filter((c) => inCity(c) && inDish(c)),
     sort,
@@ -116,7 +124,7 @@ async function Results({ searchParams }: Pick<Props, "searchParams">) {
     <>
       <h1 className="type-lid text-[2.2rem]">Results for “{query}”</h1>
 
-      {total === 0 && res.creators.length === 0 ? (
+      {!diet && total === 0 && res.creators.length === 0 ? (
         <p className="border-y border-line py-6 text-muted" role="status">
           Nothing found for “{query}”. Check the spelling, or try a dish like{" "}
           <Link href="/search?q=chole+bhature" className="font-semibold text-ink underline">
@@ -126,7 +134,7 @@ async function Results({ searchParams }: Pick<Props, "searchParams">) {
         </p>
       ) : (
         <>
-          {total > 0 && (
+          {(total > 0 || diet) && (
             <div className="flex flex-col gap-3">
               <FilterGroup label="City">
                 <Segment href={searchHref({ ...f, city: "" })} active={!city}>
@@ -142,12 +150,13 @@ async function Results({ searchParams }: Pick<Props, "searchParams">) {
                   </Segment>
                 ))}
               </FilterGroup>
-              {dishes.length > 1 && (
+              <DietFilter current={diet} href={(d) => searchHref({ ...f, diet: d })} />
+              {dishOptions.length > 1 && (
                 <FilterGroup label="Dish">
                   <Segment href={searchHref({ ...f, dish: "" })} active={!dish}>
                     All
                   </Segment>
-                  {dishes.map((d) => (
+                  {dishOptions.map((d) => (
                     <Segment
                       key={d.slug}
                       href={searchHref({ ...f, dish: d.slug })}
@@ -174,7 +183,18 @@ async function Results({ searchParams }: Pick<Props, "searchParams">) {
             </div>
           )}
 
-          {dishes.length > 0 && (
+          {diet && total === 0 && (
+            <p className="border-y border-line py-6 text-muted" role="status">
+              No {diet} picks for “{query}”.{" "}
+              <Link
+                href={searchHref({ ...f, diet: undefined })}
+                className="font-semibold text-ink underline"
+              >
+                Show all
+              </Link>
+            </p>
+          )}
+          {dishes.length > 0 && !(diet && total === 0) && (
             <section className="flex flex-col gap-2">
               <div>
                 <h2 className="type-lid text-[1.75rem]">
@@ -261,47 +281,6 @@ async function EmptyQuery() {
         </section>
       )}
     </>
-  );
-}
-
-function FilterGroup({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex flex-col gap-1">
-      <span className="text-sm text-muted" aria-hidden="true">
-        {label}
-      </span>
-      <nav
-        aria-label={`Filter by ${label.toLowerCase()}`}
-        className="-mx-4 overflow-x-auto px-4 py-1 sm:mx-0 sm:px-0"
-      >
-        <ul className="inline-flex rounded-[var(--radius-step)] shadow-[inset_0_0_0_1.5px_var(--color-ink)]">
-          {children}
-        </ul>
-      </nav>
-    </div>
-  );
-}
-
-function Segment({
-  href,
-  active,
-  children,
-}: {
-  href: string;
-  active: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <li className="flex">
-      <Link
-        href={href}
-        aria-current={active ? "true" : undefined}
-        scroll={false}
-        className={`${segment} ${active ? "bg-ink text-paper" : "text-ink hover:bg-cloth"}`}
-      >
-        {children}
-      </Link>
-    </li>
   );
 }
 

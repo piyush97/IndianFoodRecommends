@@ -23,3 +23,34 @@ test("explains when location is blocked", async ({ browser }) => {
   await expect(page.getByText("Location is off, showing most picked first.")).toBeVisible();
   await context.close();
 });
+
+test.describe("custom location", () => {
+  test("sorts from a typed area and says where the text went", async ({ page }) => {
+    await page.route("**/api/geocode?*", (route) =>
+      route.fulfill({ json: { lat: 28.61, lng: 77.2, label: "Connaught Place" } }),
+    );
+    await page.goto("/delhi/chole-bhature");
+    await page.getByLabel("Or sort from an area or landmark").fill("Connaught Place");
+    await page.getByRole("button", { name: "Sort from here" }).click();
+    await expect(
+      page.getByText(
+        "Nearest first to “Connaught Place”. The text you typed was sent to OpenStreetMap",
+      ),
+    ).toBeVisible();
+    await expect(page.getByRole("link", { name: "Chache Di Hatti", exact: true })).toBeVisible();
+    await page.getByRole("button", { name: "Sort by most picked" }).click();
+    await expect(page.getByText("Nearest first to")).toHaveCount(0);
+  });
+
+  test("shows the server message when the area is not found", async ({ page }) => {
+    await page.route("**/api/geocode?*", (route) =>
+      route.fulfill({ status: 404, json: { error: "Could not find that place in Delhi." } }),
+    );
+    await page.goto("/delhi/chole-bhature");
+    await page.getByLabel("Or sort from an area or landmark").fill("Nowhere Nagar");
+    await page.getByRole("button", { name: "Sort from here" }).click();
+    await expect(
+      page.getByText("Could not find that place in Delhi. Showing most picked first."),
+    ).toBeVisible();
+  });
+});

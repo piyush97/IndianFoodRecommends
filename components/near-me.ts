@@ -1,6 +1,6 @@
 import type { PickCard } from "../lib/public/queries";
 
-type Point = { lat: number; lng: number };
+export type Point = { lat: number; lng: number };
 
 const EARTH_KM = 6371;
 const rad = (deg: number) => (deg * Math.PI) / 180;

@@ -3,6 +3,7 @@ import { schema, type Db } from "../../db";
 import type { Platform } from "./links";
 import { CITIES } from "../cities";
 import { rankScore } from "./rank";
+import type { DietFilter } from "../diet";
 
 export type PickCard = {
   citySlug: string;
@@ -54,6 +55,8 @@ async function findCity(db: Db, slug: string): Promise<(City & { id: number }) |
     .where(eq(schema.cities.slug, slug));
   return city ?? null;
 }
+
+const dietWhere = (diet?: DietFilter): SQL[] => (diet ? [eq(schema.dishes.diet, diet)] : []);
 
 async function visibleRows(db: Db, ...filters: SQL[]): Promise<Row[]> {
   const r = schema.recommendations;
@@ -158,10 +161,10 @@ export async function listActiveCities(db: Db) {
     .sort((a, b) => order.indexOf(a.slug) - order.indexOf(b.slug));
 }
 
-export async function getHome(db: Db, citySlug: string, now = new Date()) {
+export async function getHome(db: Db, citySlug: string, now = new Date(), diet?: DietFilter) {
   const city = await findCity(db, citySlug);
   if (!city) return null;
-  const rows = await visibleRows(db, eq(schema.places.cityId, city.id));
+  const rows = await visibleRows(db, eq(schema.places.cityId, city.id), ...dietWhere(diet));
 
   const dishNames = new Map(rows.map((r) => [r.dishSlug, r.dishName]));
   const creatorNames = new Map(rows.map((r) => [r.creatorSlug, r.creatorName]));
@@ -189,11 +192,11 @@ export async function getHome(db: Db, citySlug: string, now = new Date()) {
   };
 }
 
-export async function getCity(db: Db, citySlug: string, now = new Date()) {
-  const home = await getHome(db, citySlug, now);
+export async function getCity(db: Db, citySlug: string, now = new Date(), diet?: DietFilter) {
+  const home = await getHome(db, citySlug, now, diet);
   if (!home) return null;
   const city = (await findCity(db, citySlug))!;
-  const rows = await visibleRows(db, eq(schema.places.cityId, city.id));
+  const rows = await visibleRows(db, eq(schema.places.cityId, city.id), ...dietWhere(diet));
   return { city: home.city, dishes: home.dishes, places: toCards(rows, now) };
 }
 
@@ -222,15 +225,28 @@ export async function getDishInCity(db: Db, citySlug: string, dishSlug: string, 
  * Places picked for any of these dishes (search merges "Chole Bhature" with
  * "Desi Ghee Chole Bhature"), ranked by distinct creators across them.
  */
-export async function getDishPicks(db: Db, dishSlugs: string[], now = new Date()) {
+export async function getDishPicks(
+  db: Db,
+  dishSlugs: string[],
+  now = new Date(),
+  diet?: DietFilter,
+) {
   if (dishSlugs.length === 0) return [];
-  return toCards(await visibleRows(db, inArray(schema.dishes.slug, dishSlugs)), now);
+  return toCards(
+    await visibleRows(db, inArray(schema.dishes.slug, dishSlugs), ...dietWhere(diet)),
+    now,
+  );
 }
 
 /** Ranked cards for the given places (any city); hidden or unknown slugs drop out. */
-export async function getPlaceCards(db: Db, placeSlugs: string[], now = new Date()) {
+export async function getPlaceCards(
+  db: Db,
+  placeSlugs: string[],
+  now = new Date(),
+  diet?: DietFilter,
+) {
   if (placeSlugs.length === 0) return [];
-  const rows = await visibleRows(db, inArray(schema.places.slug, placeSlugs));
+  const rows = await visibleRows(db, inArray(schema.places.slug, placeSlugs), ...dietWhere(diet));
   return toCards(rows, now);
 }
 
