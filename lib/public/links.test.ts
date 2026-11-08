@@ -1,5 +1,33 @@
 import { describe, expect, it } from "vitest";
-import { directionsUrl, formatTs, sourceUrl, youtubeEmbedUrl } from "./links";
+import {
+  directionsUrl,
+  formatTs,
+  googleMapsUrl,
+  sourceUrl,
+  swiggyUrl,
+  youtubeEmbedUrl,
+  zomatoUrl,
+} from "./links";
+
+describe("app links", () => {
+  it("searches Google Maps by name, exact with a place ID", () => {
+    expect(googleMapsUrl("Chache Di Hatti", "Kamla Nagar, Delhi")).toBe(
+      "https://www.google.com/maps/search/?api=1&query=Chache%20Di%20Hatti%2C%20Kamla%20Nagar%2C%20Delhi",
+    );
+    expect(googleMapsUrl("A&B", "Delhi", "ChIJ1")).toMatch(
+      /query=A%26B%2C%20Delhi&query_place_id=ChIJ1$/,
+    );
+  });
+
+  it("finds the Zomato page through a site search and searches Swiggy by name", () => {
+    expect(zomatoUrl("Chache Di Hatti", "Delhi")).toBe(
+      "https://www.google.com/search?q=Chache%20Di%20Hatti%20Delhi%20site%3Azomato.com",
+    );
+    expect(swiggyUrl("Chache Di Hatti")).toBe(
+      "https://www.swiggy.com/search?query=Chache%20Di%20Hatti",
+    );
+  });
+});
 
 describe("directionsUrl", () => {
   it("is null without coordinates", () => {

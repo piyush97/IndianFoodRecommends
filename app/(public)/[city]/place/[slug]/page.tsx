@@ -13,7 +13,14 @@ import { EmbedFacade } from "../../../../../components/EmbedFacade";
 import { MapOnDemand } from "../../../../../components/PlaceMapLazy";
 import { ReportForm } from "../../../../../components/ReportForm";
 import { Skeleton } from "../../../../../components/Skeleton";
-import { directionsUrl, sourceUrl } from "../../../../../lib/public/links";
+import {
+  directionsUrl,
+  googleMapsUrl,
+  sourceUrl,
+  swiggyUrl,
+  zomatoUrl,
+} from "../../../../../lib/public/links";
+import { GoogleRating } from "../../../../../components/GoogleRating";
 import { cachedPlace } from "../../../data";
 
 type Params = PageProps<"/[city]/place/[slug]">["params"];
@@ -58,6 +65,20 @@ async function Place({ params }: { params: Params }) {
   const { place } = data;
   const directions = directionsUrl(place.lat, place.lng);
   const vloggers = new Set(data.proofs.map((p) => p.creator.slug)).size;
+  const where = [place.locality, data.city.name].filter(Boolean).join(", ");
+  const findOn = [
+    {
+      label: "Google Maps",
+      href: googleMapsUrl(place.name, where, place.googlePlaceId),
+      note: "opens Google Maps",
+    },
+    {
+      label: "Zomato",
+      href: zomatoUrl(place.name, data.city.name),
+      note: "opens a Google search for its Zomato page",
+    },
+    { label: "Swiggy", href: swiggyUrl(place.name), note: "opens Swiggy search" },
+  ];
 
   return (
     <>
@@ -119,6 +140,27 @@ async function Place({ params }: { params: Params }) {
             slug={place.slug}
           />
         </div>
+        {process.env.GOOGLE_MAPS_API_KEY && <GoogleRating placeSlug={place.slug} />}
+        <nav aria-label={`Find ${place.name} on other apps`} className="flex flex-col gap-1">
+          <span className="text-sm text-muted">Find it on</span>
+          <div className="flex flex-wrap gap-2">
+            {findOn.map((l) => (
+              <a
+                key={l.label}
+                href={l.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={action}
+                data-umami-event="find-on"
+                data-umami-event-app={l.label}
+                data-umami-event-place={place.slug}
+              >
+                {l.label}
+                <span className="sr-only">, {l.note}</span>
+              </a>
+            ))}
+          </div>
+        </nav>
       </section>
 
       <section className="flex flex-col gap-3">

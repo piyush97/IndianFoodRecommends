@@ -5,6 +5,24 @@ export function directionsUrl(lat: number | null, lng: number | null): string | 
   return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
 }
 
+const q = (s: string) => encodeURIComponent(s);
+
+/** Google Maps search for the shop by name; exact when we hold its Google place ID. */
+export function googleMapsUrl(name: string, where: string, placeId?: string | null): string {
+  const base = `https://www.google.com/maps/search/?api=1&query=${q(`${name}, ${where}`)}`;
+  return placeId ? `${base}&query_place_id=${q(placeId)}` : base;
+}
+
+/** Zomato has no search URL, so this is a Google search limited to zomato.com. */
+export function zomatoUrl(name: string, city: string): string {
+  return `https://www.google.com/search?q=${q(`${name} ${city} site:zomato.com`)}`;
+}
+
+/** Swiggy's own search; Swiggy asks for a delivery location if it has none. */
+export function swiggyUrl(name: string): string {
+  return `https://www.swiggy.com/search?query=${q(name)}`;
+}
+
 export function youtubeEmbedUrl(videoId: string, ts: number | null): string {
   const base = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}`;
   return ts ? `${base}?start=${ts}` : base;

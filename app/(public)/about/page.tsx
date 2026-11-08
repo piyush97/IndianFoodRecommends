@@ -58,6 +58,19 @@ export default function About() {
           We do not use cookies or accounts. If you report a problem with a place, we keep a one-way
           hash of your IP address for a short time to stop spam, not the address itself.
         </p>
+        <p>
+          If you type an area to sort places by distance, that text is sent to OpenStreetMap search.
+          Your device location never leaves your browser. Star ratings come live from Google Maps
+          and are not stored here;{" "}
+          <a href="https://policies.google.com/terms" className="underline">
+            Google&apos;s terms
+          </a>{" "}
+          and{" "}
+          <a href="https://policies.google.com/privacy" className="underline">
+            privacy policy
+          </a>{" "}
+          apply to them. The Zomato and Swiggy buttons are plain searches; we have no tie to either.
+        </p>
       </section>
 
       <section className="flex flex-col gap-2">
