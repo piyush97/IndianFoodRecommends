@@ -4,7 +4,6 @@ import { Suspense } from "react";
 import { ROUTE } from "../../components/LidCode";
 import { DishRow } from "../../components/DishRow";
 import { PickList } from "../../components/PickList";
-import { SearchBar } from "../../components/SearchBar";
 import { Skeleton } from "../../components/Skeleton";
 import { cachedCities, cachedHome } from "./data";
 
@@ -16,7 +15,6 @@ export default function Home() {
         <p className="max-w-prose text-muted">
           Ranked by how many creators picked each place, with the video moment.
         </p>
-        <SearchBar />
       </section>
       <Suspense fallback={<Skeleton />}>
         <HomeLists />

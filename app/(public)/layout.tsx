@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { HeaderSearch } from "../../components/HeaderSearch";
 import { ROUTE } from "../../components/LidCode";
+import { SearchBar } from "../../components/SearchBar";
 import { CITIES } from "../../lib/cities";
 import { cachedCities } from "./data";
 
@@ -24,6 +26,9 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
             Suggest a pick
           </Link>
         </div>
+        <Suspense fallback={<SearchBar />}>
+          <HeaderSearch />
+        </Suspense>
         <Suspense fallback={<CityTabs active={new Set()} />}>
           <CityNav />
         </Suspense>

@@ -14,7 +14,7 @@ test("a visitor can suggest a pick without CSP violations", async ({ page }) => 
   await page.getByRole("combobox", { name: "Creator" }).selectOption({ label: "E2E Creator" });
   await page.getByRole("combobox", { name: "City" }).selectOption({ label: "Delhi" });
   await page.getByLabel("Place name").fill("Sita Ram Diwan Chand");
-  await page.getByLabel("Dish").fill("Chole Bhature");
+  await page.getByLabel("Dish", { exact: true }).fill("Chole Bhature");
   await page.getByLabel("Timestamp (optional)").fill("2:30");
   await page.getByRole("button", { name: "Send for review" }).click();
   await expect(page.getByRole("status")).toHaveText(

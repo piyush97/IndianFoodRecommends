@@ -16,6 +16,8 @@ export type PickCard = {
   dishes: string[];
   proof: { platform: Platform; externalId: string; tsSeconds: number | null; creator: string };
   score: number;
+  /** Newest pick date for this place, YYYY-MM-DD. */
+  pickedOn: string;
 };
 
 type City = { slug: string; name: string };
@@ -124,6 +126,7 @@ function toCards(rows: Row[], now: Date): PickCard[] {
         creator: proof.creatorName,
       },
       score: rankScore(creators.size, newest, now),
+      pickedOn: newest.toISOString().slice(0, 10),
     };
   });
   return cards.sort((a, b) => b.score - a.score || a.placeName.localeCompare(b.placeName));
@@ -213,6 +216,15 @@ export async function getDishInCity(db: Db, citySlug: string, dishSlug: string, 
     places: toCards(rows, now),
     creatorCount: new Set(rows.map((r) => r.creatorSlug)).size,
   };
+}
+
+/**
+ * Places picked for any of these dishes (search merges "Chole Bhature" with
+ * "Desi Ghee Chole Bhature"), ranked by distinct creators across them.
+ */
+export async function getDishPicks(db: Db, dishSlugs: string[], now = new Date()) {
+  if (dishSlugs.length === 0) return [];
+  return toCards(await visibleRows(db, inArray(schema.dishes.slug, dishSlugs)), now);
 }
 
 /** Ranked cards for the given places (any city); hidden or unknown slugs drop out. */

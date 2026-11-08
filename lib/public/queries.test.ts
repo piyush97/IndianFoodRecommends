@@ -4,6 +4,7 @@ import { testDb, truncateAll } from "../../db/test-db";
 import {
   getCreator,
   getDishInCity,
+  getDishPicks,
   getHome,
   getPlace,
   getPlaceCards,
@@ -84,6 +85,17 @@ describeDb("public queries", () => {
     const cards = await getPlaceCards(db, ["b", "a", "d", "nope"], now);
     expect(cards.map((c) => c.placeSlug)).toEqual(["a", "b"]);
     expect(cards[0]).toMatchObject({ citySlug: "delhi", proof: { externalId: "v1" } });
+  });
+
+  it("merges dish variants and ranks the place more creators picked first", async () => {
+    const cards = await getDishPicks(db, ["momos", "chole-bhature"], now);
+    // Alpha: One + Two (2 creators) beats Bravo: Two only, though Bravo shares a creator.
+    expect(cards.map((c) => [c.placeSlug, c.creators.length])).toEqual([
+      ["a", 2],
+      ["b", 1],
+    ]);
+    expect(cards[0].pickedOn).toBe("2026-11-01");
+    expect(await getDishPicks(db, [], now)).toEqual([]);
   });
 
   it("returns null for a place with no visible picks", async () => {
