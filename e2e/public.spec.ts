@@ -34,3 +34,13 @@ test("no horizontal overflow at 360px", async ({ page }) => {
     expect(width, path).toBeLessThanOrEqual(360);
   }
 });
+
+test("unknown pages answer 404 before rendering, real pages 200", async ({ page }) => {
+  for (const path of ["/pune", "/delhi/pizza", "/delhi/place/nope", "/creator/nobody"]) {
+    const res = await page.goto(path);
+    expect(res?.status(), path).toBe(404);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Page not found");
+  }
+  for (const path of ["/delhi", "/delhi/chole-bhature", "/delhi/place/chache-di-hatti"])
+    expect((await page.goto(path))?.status(), path).toBe(200);
+});
