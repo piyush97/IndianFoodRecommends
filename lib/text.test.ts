@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeName, slugify } from "./text";
+import { canonicalDishName, normalizeName, slugify } from "./text";
 
 describe("slugify", () => {
   it("lowercases words and joins them with hyphens", () => {
@@ -22,5 +22,21 @@ describe("normalizeName", () => {
 
   it("keeps Devanagari characters and only folds whitespace", () => {
     expect(normalizeName("चाचे दी हट्टी")).toBe("चाचे दी हट्टी");
+  });
+});
+
+describe("canonicalDishName", () => {
+  it("drops serving qualifiers", () => {
+    expect(canonicalDishName("Desi Ghee Chole Bhature")).toBe("Chole Bhature");
+    expect(canonicalDishName("  Famous   Butter Chicken ")).toBe("Butter Chicken");
+  });
+
+  it("keeps names that would shrink to one word", () => {
+    expect(canonicalDishName("Ghee Roast")).toBe("Ghee Roast");
+    expect(canonicalDishName("Special Thali")).toBe("Special Thali");
+  });
+
+  it("leaves other dishes alone", () => {
+    expect(canonicalDishName("Rabdi Gulab Jamun")).toBe("Rabdi Gulab Jamun");
   });
 });

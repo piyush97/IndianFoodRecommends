@@ -8,6 +8,7 @@ import { requireAdmin } from "../../../lib/auth";
 import {
   addManualRecommendation,
   approveRecommendation,
+  mergeDishes,
   mergePlaces,
   rejectRecommendation,
   suggestLocation,
@@ -36,6 +37,13 @@ export async function mergeAction(fromId: number, intoId: number): Promise<void>
   await requireAdmin();
   await mergePlaces(db, Id.parse(fromId), Id.parse(intoId));
   revalidatePath("/admin/review");
+  revalidateTag("public", "max");
+}
+
+export async function mergeDishAction(fromId: number, intoId: number): Promise<void> {
+  await requireAdmin();
+  await mergeDishes(db, Id.parse(fromId), Id.parse(intoId));
+  revalidatePath("/admin/dishes");
   revalidateTag("public", "max");
 }
 
