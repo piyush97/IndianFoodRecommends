@@ -24,11 +24,7 @@ export function MapOnDemand({ points, citySlug }: { points: MapPoint[]; citySlug
   const [show, setShow] = useState(false);
   if (show) return <PlaceMapLazy points={points} citySlug={citySlug} height={HEIGHT} />;
   return (
-    <button
-      type="button"
-      onClick={() => setShow(true)}
-      className="min-h-11 self-start rounded-[var(--radius-step)] border border-line px-4 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-    >
+    <button type="button" onClick={() => setShow(true)} className="btn btn-line self-start">
       Show map
     </button>
   );

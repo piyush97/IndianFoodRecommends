@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { ROUTE } from "../../components/LidCode";
+import { DishRow } from "../../components/DishRow";
 import { PickList } from "../../components/PickList";
+import { SearchBar } from "../../components/SearchBar";
 import { Skeleton } from "../../components/Skeleton";
 import { cachedCities, cachedHome } from "./data";
 
@@ -9,28 +12,11 @@ export default function Home() {
   return (
     <>
       <section className="flex flex-col gap-4">
-        <h1 className="text-3xl font-semibold tracking-tight">
-          Where Indian food vloggers say to eat
-        </h1>
-        <form action="/search" className="flex gap-2" role="search">
-          <label htmlFor="q" className="sr-only">
-            Search dish, place or creator
-          </label>
-          <input
-            id="q"
-            name="q"
-            type="search"
-            placeholder="Dish, place or creator"
-            maxLength={100}
-            className="min-h-11 flex-1 rounded-[var(--radius-step)] border border-line bg-paper px-3 focus-visible:outline-2 focus-visible:outline-accent"
-          />
-          <button
-            type="submit"
-            className="min-h-11 rounded-[var(--radius-step)] bg-accent px-4 font-medium text-paper focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-          >
-            Search
-          </button>
-        </form>
+        <h1 className="type-lid text-[2.75rem] sm:text-[3.6rem]">Where food vloggers say to eat</h1>
+        <p className="max-w-prose text-muted">
+          Ranked by how many creators picked each place, with the video moment.
+        </p>
+        <SearchBar />
       </section>
       <Suspense fallback={<Skeleton />}>
         <HomeLists />
@@ -38,9 +24,6 @@ export default function Home() {
     </>
   );
 }
-
-const chip =
-  "inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-step)] border border-line px-3 focus-visible:outline-2 focus-visible:outline-accent";
 
 async function HomeLists() {
   // Request time only: builds never need the database; the data stays cached for hours.
@@ -55,43 +38,48 @@ async function HomeLists() {
     <>
       {homes.map((home) => (
         <section key={home.city.slug} className="flex flex-col gap-3">
-          <h2 className="text-xl font-semibold">
-            <Link href={`/${home.city.slug}`} className="underline underline-offset-4">
-              {home.city.name}
-            </Link>
-          </h2>
-          <ul className="flex flex-wrap gap-2">
-            {home.dishes.slice(0, 8).map((d) => (
-              <li key={d.slug}>
-                <Link href={`/${home.city.slug}/${d.slug}`} className={chip}>
-                  {d.name}
-                  <span className="text-sm text-muted">
-                    {d.picks} {d.picks === 1 ? "pick" : "picks"}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <h3 className="text-lg font-semibold">Recently added in {home.city.name}</h3>
+          <div className="flex items-end justify-between gap-3">
+            <h2 className="type-lid text-[2rem]">
+              <Link href={`/${home.city.slug}`} className="no-underline hover:underline">
+                {home.city.name}
+              </Link>
+            </h2>
+            <p
+              className="text-sm font-bold"
+              style={{
+                color:
+                  home.city.slug === "kolkata" ? "var(--color-ink)" : ROUTE[home.city.slug]?.bg,
+              }}
+            >
+              {home.dishes.reduce((n, d) => n + d.picks, 0)} picks
+            </p>
+          </div>
           <PickList
-            cards={home.recent.slice(0, 4)}
-            numbered={false}
+            cards={home.top.slice(0, 3)}
+            headingLevel={3}
             emptyText={`No picks yet for ${home.city.name}.`}
+          />
+          <DishRow
+            citySlug={home.city.slug}
+            cityName={home.city.name}
+            dishes={home.dishes}
+            limit={10}
+            showAll
           />
         </section>
       ))}
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-xl font-semibold">Creators</h2>
-        <ul className="flex flex-col gap-1">
+        <h2 className="type-lid border-b-2 border-ink pb-2 text-[2rem]">Creators</h2>
+        <ul className="grid grid-cols-1 sm:grid-cols-2">
           {mergeCreators(homes).map((c) => (
-            <li key={c.slug}>
+            <li key={c.slug} className="border-b border-line">
               <Link
                 href={`/creator/${c.slug}`}
-                className="inline-flex min-h-11 items-center gap-2 underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-accent"
+                className="flex min-h-12 items-center justify-between gap-3 py-2 pr-2 font-semibold no-underline hover:underline"
               >
                 {c.name}
-                <span className="text-sm text-muted">
+                <span className="text-sm font-normal text-muted tabular-nums">
                   {c.picks} {c.picks === 1 ? "pick" : "picks"}
                 </span>
               </Link>

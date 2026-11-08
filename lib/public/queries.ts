@@ -1,4 +1,4 @@
-import { and, eq, type SQL } from "drizzle-orm";
+import { and, eq, inArray, type SQL } from "drizzle-orm";
 import { schema, type Db } from "../../db";
 import type { Platform } from "./links";
 import { CITIES } from "../cities";
@@ -173,10 +173,17 @@ export async function getHome(db: Db, citySlug: string, now = new Date()) {
     (a, b) => (b.reviewedAt ?? b.createdAt).getTime() - (a.reviewedAt ?? a.createdAt).getTime(),
   );
   const recentPlaces = [...new Set(latestFirst.map((r) => r.placeSlug))].slice(0, 6);
-  const cards = new Map(toCards(rows, now).map((c) => [c.placeSlug, c]));
+  const ranked = toCards(rows, now);
+  const cards = new Map(ranked.map((c) => [c.placeSlug, c]));
   const recent = recentPlaces.map((slug) => cards.get(slug)!);
 
-  return { city: { slug: city.slug, name: city.name }, dishes, creators, recent };
+  return {
+    city: { slug: city.slug, name: city.name },
+    dishes,
+    creators,
+    recent,
+    top: ranked.slice(0, 6),
+  };
 }
 
 export async function getCity(db: Db, citySlug: string, now = new Date()) {
@@ -206,6 +213,13 @@ export async function getDishInCity(db: Db, citySlug: string, dishSlug: string, 
     places: toCards(rows, now),
     creatorCount: new Set(rows.map((r) => r.creatorSlug)).size,
   };
+}
+
+/** Ranked cards for the given places (any city); hidden or unknown slugs drop out. */
+export async function getPlaceCards(db: Db, placeSlugs: string[], now = new Date()) {
+  if (placeSlugs.length === 0) return [];
+  const rows = await visibleRows(db, inArray(schema.places.slug, placeSlugs));
+  return toCards(rows, now);
 }
 
 export async function getPlace(db: Db, citySlug: string, placeSlug: string) {

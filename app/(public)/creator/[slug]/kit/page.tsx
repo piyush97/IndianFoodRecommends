@@ -30,26 +30,24 @@ async function Kit({ params }: Pick<PageProps<"/creator/[slug]/kit">, "params">)
 
   return (
     <section className="flex max-w-prose flex-col gap-6">
-      <h1 className="text-3xl font-semibold tracking-tight">Share kit for {data.creator.name}</h1>
+      <h1 className="type-lid text-[2.6rem] sm:text-[3.2rem]">Share kit for {data.creator.name}</h1>
       <p>
         Your {data.total} {data.total === 1 ? "pick is" : "picks are"} listed with a link back to
         each video. Use these to point your audience to the list.
       </p>
 
       <div className="flex flex-col gap-2">
-        <h2 className="text-xl font-semibold">Link to your page</h2>
+        <h2 className="type-lid border-b-2 border-ink pb-2 text-[1.75rem]">Link to your page</h2>
         <label className="flex flex-col gap-1 text-sm font-medium">
           Page URL
-          <input
-            readOnly
-            value={page}
-            className="min-h-11 rounded-[var(--radius-step)] border border-line bg-paper px-3 font-normal"
-          />
+          <input readOnly value={page} className="field font-normal" />
         </label>
       </div>
 
       <div className="flex flex-col gap-2">
-        <h2 className="text-xl font-semibold">Badge for your website</h2>
+        <h2 className="type-lid border-b-2 border-ink pb-2 text-[1.75rem]">
+          Badge for your website
+        </h2>
         {/* eslint-disable-next-line @next/next/no-img-element -- the badge is the SVG creators embed */}
         <img
           src={`/creator/${slug}/badge`}
@@ -62,7 +60,7 @@ async function Kit({ params }: Pick<PageProps<"/creator/[slug]/kit">, "params">)
             readOnly
             rows={4}
             value={snippet}
-            className="rounded-[var(--radius-step)] border border-line bg-paper px-3 py-2 font-mono text-sm font-normal"
+            className="field py-2 font-mono text-sm font-normal"
           />
         </label>
       </div>

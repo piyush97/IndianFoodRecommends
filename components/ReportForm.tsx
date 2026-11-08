@@ -41,16 +41,30 @@ export function ReportForm({ placeId, placeName }: { placeId: number; placeName:
   }
 
   return (
-    <details className="rounded-[var(--radius-card)] border border-line p-4">
-      <summary className="min-h-11 cursor-pointer content-center font-medium focus-visible:outline-2 focus-visible:outline-accent">
+    <details className="group border-y border-line">
+      <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 py-2 font-semibold [&::-webkit-details-marker]:hidden">
         Report a problem with {placeName}
+        <svg
+          aria-hidden="true"
+          width="14"
+          height="14"
+          viewBox="0 0 14 14"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="transition-transform duration-200 group-open:rotate-180"
+        >
+          <path d="m3 5 4 4 4-4" />
+        </svg>
       </summary>
       {status === "done" ? (
         <p role="status" className="mt-3">
           Thanks, we will check this place.
         </p>
       ) : (
-        <form onSubmit={submit} className="mt-3 flex flex-col gap-3">
+        <form onSubmit={submit} className="flex flex-col gap-3 pb-4">
           <fieldset className="flex flex-col gap-1">
             <legend className="mb-1 text-sm font-medium">What is wrong?</legend>
             {KINDS.map(([value, label], i) => (
@@ -62,18 +76,9 @@ export function ReportForm({ placeId, placeName }: { placeId: number; placeName:
           </fieldset>
           <label className="flex flex-col gap-1 text-sm font-medium">
             Details (optional)
-            <textarea
-              name="message"
-              maxLength={500}
-              rows={3}
-              className="rounded-[var(--radius-step)] border border-line bg-paper px-3 py-2 font-normal focus-visible:outline-2 focus-visible:outline-accent"
-            />
+            <textarea name="message" maxLength={500} rows={3} className="field py-2 font-normal" />
           </label>
-          <button
-            type="submit"
-            disabled={status === "sending"}
-            className="min-h-11 self-start rounded-[var(--radius-step)] bg-accent px-4 font-medium text-paper focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-60"
-          >
+          <button type="submit" disabled={status === "sending"} className="btn btn-ink self-start">
             {status === "sending" ? "Sending…" : "Send report"}
           </button>
           <p aria-live="polite" className="text-sm">

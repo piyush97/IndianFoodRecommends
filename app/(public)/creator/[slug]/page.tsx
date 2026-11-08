@@ -8,8 +8,7 @@ import { cachedCreator } from "../../data";
 
 type Props = PageProps<"/creator/[slug]">;
 
-const field =
-  "min-h-11 rounded-[var(--radius-step)] border border-line bg-paper px-3 focus-visible:outline-2 focus-visible:outline-accent";
+const field = "min-h-11 rounded-[var(--radius-step)] border border-line bg-paper px-3 ";
 
 export async function generateMetadata({ params }: Pick<Props, "params">): Promise<Metadata> {
   const { slug } = await params;
@@ -45,7 +44,7 @@ async function Creator({ params, searchParams }: Props) {
   return (
     <>
       <section className="flex flex-col gap-2">
-        <h1 className="text-3xl font-semibold tracking-tight">{creator.name}</h1>
+        <h1 className="type-lid text-[2.6rem] sm:text-[3.2rem]">{creator.name}</h1>
         <p className="text-muted">
           {data.total} {data.total === 1 ? "pick" : "picks"}
         </p>
@@ -55,7 +54,7 @@ async function Creator({ params, searchParams }: Props) {
               href={`https://www.youtube.com/channel/${creator.ytChannelId}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex min-h-11 items-center rounded-[var(--radius-step)] border border-line px-3 focus-visible:outline-2 focus-visible:outline-accent"
+              className="btn btn-line"
             >
               YouTube channel<span className="sr-only">, opens YouTube</span>
             </a>
@@ -65,15 +64,12 @@ async function Creator({ params, searchParams }: Props) {
               href={`https://www.instagram.com/${creator.igHandle}/`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex min-h-11 items-center rounded-[var(--radius-step)] border border-line px-3 focus-visible:outline-2 focus-visible:outline-accent"
+              className="btn btn-line"
             >
               Instagram<span className="sr-only">, opens Instagram</span>
             </a>
           )}
-          <Link
-            href={`/creator/${creator.slug}/kit`}
-            className="inline-flex min-h-11 items-center rounded-[var(--radius-step)] border border-line px-3 focus-visible:outline-2 focus-visible:outline-accent"
-          >
+          <Link href={`/creator/${creator.slug}/kit`} className="btn btn-line">
             Creator share kit
           </Link>
         </div>
@@ -92,10 +88,7 @@ async function Creator({ params, searchParams }: Props) {
               ))}
             </select>
           </label>
-          <button
-            type="submit"
-            className="min-h-11 rounded-[var(--radius-step)] border border-line px-4 text-sm font-medium focus-visible:outline-2 focus-visible:outline-accent"
-          >
+          <button type="submit" className="btn btn-line">
             Filter
           </button>
         </form>

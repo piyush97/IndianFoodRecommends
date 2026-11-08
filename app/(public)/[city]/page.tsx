@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { DishRow } from "../../../components/DishRow";
+import { PageHead } from "../../../components/PageHead";
 import { NearMeList } from "../../../components/NearMeList";
 import { Skeleton } from "../../../components/Skeleton";
+import { CITIES } from "../../../lib/cities";
 import { cachedCity } from "../data";
 
 export async function generateMetadata({ params }: PageProps<"/[city]">): Promise<Metadata> {
@@ -17,7 +19,13 @@ export async function generateMetadata({ params }: PageProps<"/[city]">): Promis
   };
 }
 
-export default function CityPage({ params }: PageProps<"/[city]">) {
+// Allowed to block: params are read before Suspense for the 404 check below.
+export const instant = false;
+
+export default async function CityPage({ params }: PageProps<"/[city]">) {
+  // Static registry check before Suspense: unknown slugs get a real 404 status, no DB at build.
+  const { city } = await params;
+  if (!CITIES.some((c) => c.slug === city)) notFound();
   return (
     <Suspense fallback={<Skeleton />}>
       <City params={params} />
@@ -32,33 +40,20 @@ async function City({ params }: { params: PageProps<"/[city]">["params"] }) {
 
   return (
     <>
-      <h1 className="text-3xl font-semibold tracking-tight">
-        Food vlogger picks in {data.city.name}
-      </h1>
+      <PageHead
+        title={`Food vlogger picks in ${data.city.name}`}
+        sub={`${data.places.length} ${data.places.length === 1 ? "place" : "places"}, ranked by how many creators picked each one`}
+      />
       <section className="flex flex-col gap-3">
-        <h2 className="text-xl font-semibold">By dish</h2>
-        {data.dishes.length === 0 ? (
-          <p className="text-muted">No picks yet for {data.city.name}.</p>
-        ) : (
-          <ul className="flex flex-wrap gap-2">
-            {data.dishes.map((d) => (
-              <li key={d.slug}>
-                <Link
-                  href={`/${data.city.slug}/${d.slug}`}
-                  className="inline-flex min-h-11 items-center gap-2 rounded-[var(--radius-step)] border border-line px-3 focus-visible:outline-2 focus-visible:outline-accent"
-                >
-                  {d.name}
-                  <span className="text-sm text-muted">{d.picks}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-      <section className="flex flex-col gap-3">
-        <h2 className="text-xl font-semibold">Most picked places</h2>
+        <h2 className="type-lid border-b-2 border-ink pb-2 text-[1.75rem]">Most picked places</h2>
         <NearMeList cards={data.places} emptyText={`No picks yet for ${data.city.name}.`} />
       </section>
+      {data.dishes.length > 0 && (
+        <section className="flex flex-col gap-2">
+          <h2 className="type-lid border-b-2 border-ink pb-2 text-[1.75rem]">By dish</h2>
+          <DishRow citySlug={data.city.slug} cityName={data.city.name} dishes={data.dishes} />
+        </section>
+      )}
     </>
   );
 }

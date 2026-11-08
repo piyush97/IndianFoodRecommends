@@ -3,7 +3,7 @@ import { db } from "../db";
 import { autoReviewPending, checkPick, geocodeIndia } from "../lib/auto-review";
 import { classifyVideo, gatedExtract } from "../lib/jev";
 import { extractPicks } from "../lib/llm/extract";
-import { listUploads } from "../lib/youtube";
+import { listUploadsWithFallback as listUploads } from "../lib/youtube";
 import { runIngest } from "../lib/worker/ingest";
 import { runEval, type Labelled } from "../lib/worker/eval";
 import { notifyRevalidate } from "../lib/revalidate-client";

@@ -7,4 +7,5 @@ Wants=network-online.target
 Type=oneshot
 WorkingDirectory=/root/Projects/IndianFoodRecommends
 EnvironmentFile=/root/Projects/IndianFoodRecommends/.env
+Environment=YTDLP_BIN=/root/.local/bin/yt-dlp
 ExecStart=/usr/bin/env pnpm worker ingest

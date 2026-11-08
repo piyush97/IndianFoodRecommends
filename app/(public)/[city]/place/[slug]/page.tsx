@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { LidCode } from "../../../../../components/LidCode";
+import { PageHead } from "../../../../../components/PageHead";
+import { ArrowIcon } from "../../../../../components/PickList";
 import { JsonLd } from "../../../../../components/JsonLd";
 import { restaurantLd } from "../../../../../lib/seo/jsonld";
 import { notFound } from "next/navigation";
@@ -13,8 +16,7 @@ import { cachedPlace } from "../../../data";
 
 type Params = PageProps<"/[city]/place/[slug]">["params"];
 
-const action =
-  "inline-flex min-h-11 items-center rounded-[var(--radius-step)] border border-line px-3 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+const action = "btn btn-line";
 
 export async function generateMetadata({
   params,
@@ -67,18 +69,26 @@ async function Place({ params }: { params: Params }) {
           dishes: data.dishes.map((d) => d.name),
         })}
       />
-      <section className="flex flex-col gap-2">
-        <Link
-          href={`/${data.city.slug}`}
-          className="min-h-11 content-center text-sm underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-accent"
-        >
-          ← {data.city.name}
-        </Link>
-        <h1 className="text-3xl font-semibold tracking-tight">{place.name}</h1>
-        <p className="text-muted">
-          {[place.locality, data.city.name].filter(Boolean).join(", ")}
-          {place.lastVerified && ` · Last verified ${monthYear(place.lastVerified)}`}
-        </p>
+      <section className="flex flex-col gap-3">
+        <div className="flex items-start justify-between gap-4">
+          <PageHead
+            back={{ href: `/${data.city.slug}`, label: data.city.name }}
+            title={place.name}
+            sub={
+              <>
+                {[place.locality, data.city.name].filter(Boolean).join(", ")}
+                {place.lastVerified && ` · Last verified ${monthYear(place.lastVerified)}`}
+              </>
+            }
+          />
+          <div className="mt-14">
+            <LidCode
+              citySlug={data.city.slug}
+              creators={new Set(data.proofs.map((p) => p.creator.slug)).size}
+              size="lg"
+            />
+          </div>
+        </div>
         {place.approx && (
           <p className="text-sm text-muted">
             Approximate location (neighbourhood). Check the video for the exact shop.
@@ -94,6 +104,7 @@ async function Place({ params }: { params: Params }) {
               data-umami-event="directions"
               data-umami-event-place={place.slug}
             >
+              <ArrowIcon />
               Directions
               <span className="sr-only"> to {place.name}, opens Google Maps</span>
             </a>
@@ -102,16 +113,18 @@ async function Place({ params }: { params: Params }) {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-xl font-semibold">What creators ordered</h2>
-        <ul className="flex flex-col gap-1">
+        <h2 className="type-lid border-b-2 border-ink pb-2 text-[1.75rem]">
+          What creators ordered
+        </h2>
+        <ul>
           {data.dishes.map((d) => (
-            <li key={d.slug}>
+            <li key={d.slug} className="border-b border-line">
               <Link
                 href={`/${data.city.slug}/${d.slug}`}
-                className="inline-flex min-h-11 items-center gap-2 underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-accent"
+                className="flex min-h-12 items-center justify-between gap-3 py-2 font-semibold no-underline hover:underline"
               >
                 {d.name}
-                <span className="text-sm text-muted">
+                <span className="text-sm font-normal text-muted tabular-nums">
                   {d.creators} {d.creators === 1 ? "creator" : "creators"}
                 </span>
               </Link>
@@ -121,7 +134,7 @@ async function Place({ params }: { params: Params }) {
       </section>
 
       <section className="flex flex-col gap-4">
-        <h2 className="text-xl font-semibold">Proof</h2>
+        <h2 className="type-lid border-b-2 border-ink pb-2 text-[1.75rem]">Proof</h2>
         <ul className="flex flex-col gap-6">
           {data.proofs.map((p) => (
             <li key={`${p.platform}-${p.externalId}-${p.dish}`} className="flex flex-col gap-2">
@@ -132,10 +145,7 @@ async function Place({ params }: { params: Params }) {
                 creator={p.creator.name}
               />
               <p className="text-sm">
-                <Link
-                  href={`/creator/${p.creator.slug}`}
-                  className="font-medium underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-accent"
-                >
+                <Link href={`/creator/${p.creator.slug}`} className="font-semibold underline">
                   {p.creator.name}
                 </Link>{" "}
                 · {p.dish}
@@ -144,7 +154,7 @@ async function Place({ params }: { params: Params }) {
                   href={sourceUrl(p.platform, p.externalId, p.tsSeconds)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-accent"
+                  className="underline"
                 >
                   Open original
                 </a>
@@ -157,7 +167,7 @@ async function Place({ params }: { params: Params }) {
 
       {place.lat !== null && place.lng !== null && (
         <section className="flex flex-col gap-3">
-          <h2 className="text-xl font-semibold">Map</h2>
+          <h2 className="type-lid border-b-2 border-ink pb-2 text-[1.75rem]">Map</h2>
           <MapOnDemand
             citySlug={data.city.slug}
             points={[

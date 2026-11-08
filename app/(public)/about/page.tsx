@@ -14,19 +14,19 @@ export default function About() {
   const optOut = process.env.NEXT_PUBLIC_OPTOUT_EMAIL;
   return (
     <article className="flex max-w-prose flex-col gap-6">
-      <h1 className="text-3xl font-semibold tracking-tight">About Indian Food Recommends</h1>
+      <h1 className="type-lid text-[2.6rem] sm:text-[3.2rem]">About Indian Food Recommends</h1>
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-xl font-semibold">What this site is</h2>
+        <h2 className="type-lid border-b-2 border-ink pb-2 text-[1.75rem]">What this site is</h2>
         <p>
-          One place to see which Delhi food spots food vloggers recommend, which dish they ordered,
-          and the exact moment in their video. Every pick links back to the creator&apos;s original
-          video.
+          One place to see which food spots in Delhi, Mumbai and Kolkata food vloggers recommend,
+          which dish they ordered, and the exact moment in their video. Every pick links back to the
+          creator&apos;s original video.
         </p>
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-xl font-semibold">How picks are chosen</h2>
+        <h2 className="type-lid border-b-2 border-ink pb-2 text-[1.75rem]">How picks are chosen</h2>
         <ol className="list-decimal pl-6">
           <li>Each day we read the public upload feed of the creators we follow.</li>
           <li>
@@ -35,7 +35,7 @@ export default function About() {
           </li>
           <li>
             A second model checks every pick: is the place named in the video, is it a shop rather
-            than a dish, does the video recommend it, and is it in Delhi.
+            than a dish, does the video recommend it, and is it in a city we cover.
           </li>
           <li>
             Picks that pass are published. Picks that fail are kept out, with the reason recorded.
@@ -48,7 +48,7 @@ export default function About() {
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-xl font-semibold">What we store</h2>
+        <h2 className="type-lid border-b-2 border-ink pb-2 text-[1.75rem]">What we store</h2>
         <p>
           The video ID, the creator, the place, the dish and the timestamp. We do not copy video
           titles, descriptions or transcripts. Any note on a pick is written in our own words.
@@ -61,7 +61,9 @@ export default function About() {
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-xl font-semibold">Creators: removing your picks</h2>
+        <h2 className="type-lid border-b-2 border-ink pb-2 text-[1.75rem]">
+          Creators: removing your picks
+        </h2>
         <p>
           If you are a creator and do not want your videos listed, we remove all your picks within{" "}
           {OPT_OUT_DAYS} days of your request.
@@ -80,7 +82,7 @@ export default function About() {
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-xl font-semibold">Something wrong?</h2>
+        <h2 className="type-lid border-b-2 border-ink pb-2 text-[1.75rem]">Something wrong?</h2>
         <p>
           Every place page has a <strong>Report a problem</strong> form for closed, moved or wrong
           places. Start from the{" "}

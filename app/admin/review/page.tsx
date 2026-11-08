@@ -112,7 +112,7 @@ async function ReviewCard({ searchParams }: { searchParams: Search }) {
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="flex flex-col gap-3">
           <iframe
-            className="aspect-video w-full rounded-[var(--radius-card)] border border-line"
+            className="aspect-video w-full rounded-[var(--radius-step)] border border-line"
             src={`https://www.youtube-nocookie.com/embed/${encodeURIComponent(rec.videoId)}${start}`}
             title={`Video by ${rec.creator}`}
             allow="encrypted-media; picture-in-picture"
@@ -151,7 +151,7 @@ async function ReviewCard({ searchParams }: { searchParams: Search }) {
               </select>
             </label>
 
-            <fieldset className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-line p-4">
+            <fieldset className="flex flex-col gap-3 rounded-[var(--radius-step)] border border-line p-4">
               <legend className="px-1 text-sm font-semibold">Place ({city.name})</legend>
               <label className={label}>
                 Existing place or new
@@ -195,7 +195,7 @@ async function ReviewCard({ searchParams }: { searchParams: Search }) {
               {one("found") && <p className="text-sm text-muted">OpenStreetMap: {one("found")}</p>}
             </fieldset>
 
-            <fieldset className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-line p-4">
+            <fieldset className="flex flex-col gap-3 rounded-[var(--radius-step)] border border-line p-4">
               <legend className="px-1 text-sm font-semibold">Dish</legend>
               <label className={label}>
                 Existing dish or new
@@ -289,7 +289,7 @@ async function ManualAdd() {
   return (
     <form
       action={manualAddFormAction}
-      className="mt-6 flex flex-col gap-3 rounded-[var(--radius-card)] border border-line p-4"
+      className="mt-6 flex flex-col gap-3 rounded-[var(--radius-step)] border border-line p-4"
     >
       <h2 className="text-lg font-semibold">Add a pick by hand</h2>
       <label className={label}>

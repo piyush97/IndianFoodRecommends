@@ -5,7 +5,7 @@ import type { MapPoint } from "./map-points";
 import { PlaceMapLazy as PlaceMap } from "./PlaceMapLazy";
 
 const tab =
-  "min-h-11 rounded-[var(--radius-step)] border px-4 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+  "focus-visible:outline-offset-[-3px] min-h-11 px-5 text-sm font-bold uppercase tracking-wide";
 
 /** List is the default and the accessible alternative; the map loads only on demand. */
 export function ListMapToggle({
@@ -20,14 +20,18 @@ export function ListMapToggle({
   const [view, setView] = useState<"list" | "map">("list");
   return (
     <div className="flex flex-col gap-4">
-      <div role="group" aria-label="View" className="flex gap-2">
+      <div
+        role="group"
+        aria-label="View"
+        className="inline-flex self-start rounded-[var(--radius-step)] shadow-[inset_0_0_0_1.5px_var(--color-ink)]"
+      >
         {(["list", "map"] as const).map((v) => (
           <button
             key={v}
             type="button"
             aria-pressed={view === v}
             onClick={() => setView(v)}
-            className={`${tab} ${view === v ? "border-accent bg-accent text-paper" : "border-line"}`}
+            className={`${tab} ${view === v ? "bg-ink text-paper" : "text-ink hover:bg-cloth"}`}
           >
             {v === "list" ? "List" : "Map"}
           </button>

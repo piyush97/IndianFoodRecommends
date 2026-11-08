@@ -86,7 +86,33 @@ export const creators = [
     ytChannelId: "UCTjYxU04HjYDb5oPmGWmKCw",
     igHandle: null,
   },
-  { slug: "foodka", name: "Foodka", ytChannelId: "UCNvM-A87wgmzGss0qG5aZKQ", igHandle: null },
+  { slug: "foodka", name: "Foodka", ytChannelId: "UCByoEPQbSxyB7PGFDmqtHwQ", igHandle: null },
+  // Added Nov 2026: multi-city creators found by search; Mumbai/Kolkata were thin.
+  {
+    slug: "khaane-mein-kya-hai",
+    name: "Khaane Mein Kya Hai",
+    ytChannelId: "UCvTLyB-aixsl4MhiMEomVRQ",
+    igHandle: null,
+  },
+  {
+    slug: "harry-uppal",
+    name: "Harry Uppal",
+    ytChannelId: "UC4qXyMvDs6OnNEnjQtinZJA",
+    igHandle: null,
+  },
+  { slug: "spiceler", name: "Spiceler", ytChannelId: "UCliImq_HTFRvNwS3C5GAVnA", igHandle: null },
+  {
+    slug: "lets-eat-folks",
+    name: "LeT'S Eat Folks",
+    ytChannelId: "UCJHhhU4DssItHxd54deYUwQ",
+    igHandle: null,
+  },
+  {
+    slug: "mr-singh-food-hunter",
+    name: "Mr. Singh Food Hunter",
+    ytChannelId: "UCM-q0U0F6-oMOFTYPtlsEfA",
+    igHandle: null,
+  },
 ];
 
 export const dishes: SeedDish[] = [
