@@ -43,6 +43,7 @@ type Row = {
   lat: number | null;
   lng: number | null;
   osmId: string | null;
+  googlePlaceId: string | null;
   lastVerified: string | null;
   dishSlug: string;
   dishName: string;
@@ -84,6 +85,7 @@ async function visibleRows(db: Db, ...filters: SQL[]): Promise<Row[]> {
       lat: p.lat,
       lng: p.lng,
       osmId: p.osmId,
+      googlePlaceId: p.googlePlaceId,
       lastVerified: p.lastVerified,
       dishSlug: d.slug,
       dishName: d.name,
@@ -283,6 +285,8 @@ export async function getPlace(db: Db, citySlug: string, placeSlug: string) {
       lng: first.lng,
       approx: first.osmId?.startsWith("approx:") ?? false,
       lastVerified: first.lastVerified,
+      // "none" marks a lookup that found no confident match.
+      googlePlaceId: first.googlePlaceId === "none" ? null : first.googlePlaceId,
     },
     dishes: [...creatorsPerDish.values()]
       .map((d) => ({ slug: d.slug, name: d.name, creators: d.creators.size }))

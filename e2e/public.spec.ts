@@ -69,3 +69,26 @@ test.describe("diet filter", () => {
     ).toBeVisible();
   });
 });
+
+test("city page shows every place as a pin on a map", async ({ page }) => {
+  await page.goto("/delhi");
+  await page.getByRole("button", { name: "Map" }).click();
+  await expect(page.getByRole("button", { name: /Chache Di Hatti/ })).toBeVisible();
+});
+
+test("place page links to Google Maps, Zomato and Swiggy", async ({ page }) => {
+  await page.goto("/delhi/place/chache-di-hatti");
+  const find = page.getByRole("navigation", { name: "Find Chache Di Hatti on other apps" });
+  await expect(find.getByRole("link", { name: /^Google Maps/ })).toHaveAttribute(
+    "href",
+    /^https:\/\/www\.google\.com\/maps\/search\/\?api=1&query=Chache%20Di%20Hatti/,
+  );
+  await expect(find.getByRole("link", { name: /^Zomato/ })).toHaveAttribute(
+    "href",
+    /site%3Azomato\.com$/,
+  );
+  await expect(find.getByRole("link", { name: /^Swiggy/ })).toHaveAttribute(
+    "href",
+    "https://www.swiggy.com/search?query=Chache%20Di%20Hatti",
+  );
+});

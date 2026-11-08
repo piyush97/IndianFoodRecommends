@@ -71,6 +71,8 @@ export const places = pgTable(
     lat: real("lat"),
     lng: real("lng"),
     osmId: text("osm_id"),
+    /** Google place ID: the one Google Maps field we may store. "none" = looked up, no confident match. */
+    googlePlaceId: text("google_place_id"),
     status: placeStatus("status").notNull().default("open"),
     lastVerified: date("last_verified"),
     createdAt,

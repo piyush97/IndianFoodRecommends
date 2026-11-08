@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { DishRow } from "../../../components/DishRow";
+import { ListMapToggle } from "../../../components/ListMapToggle";
+import { mapPoints } from "../../../components/map-points";
 import { DietFilter } from "../../../components/DietFilter";
 import { PageHead } from "../../../components/PageHead";
 import { NearMeList } from "../../../components/NearMeList";
@@ -59,10 +61,16 @@ async function City({
       />
       <section className="flex flex-col gap-3">
         <h2 className="type-lid border-b-2 border-ink pb-2 text-[1.75rem]">Most picked places</h2>
-        <NearMeList
-          cards={data.places}
+        <ListMapToggle
           citySlug={data.city.slug}
-          emptyText={`No ${diet ? `${diet} ` : ""}picks yet for ${data.city.name}.`}
+          points={mapPoints(data.places)}
+          list={
+            <NearMeList
+              cards={data.places}
+              citySlug={data.city.slug}
+              emptyText={`No ${diet ? `${diet} ` : ""}picks yet for ${data.city.name}.`}
+            />
+          }
         />
       </section>
       {data.dishes.length > 0 && (
