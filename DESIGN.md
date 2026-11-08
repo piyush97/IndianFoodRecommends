@@ -268,7 +268,7 @@ A details/summary band between two thread-line rules, 48px summary with a chevro
 
 ### Do:
 
-- **Do** bind each route colour to its city: Delhi #b8361d, Mumbai #2a6b45, Kolkata #e2a823 with ink text.
+- **Do** bind each route colour to its city: Delhi #b8361d, Mumbai #2a6b45, Kolkata #e2a823, Hyderabad #2e4a86, Bengaluru #6b3a7d, Chennai #1f6f78, Lucknow #7a4a1d, Jaipur #a8336a with ink text.
 - **Do** divide rows with hairline rules (1px thread line) and open lists with a 2px ink rule.
 - **Do** put the rank inline in the heading as "No.N" and put the same N on the map pin.
 - **Do** show city code, creator count and the word "creator(s)" on every lid tile, plus the video time when known, and repeat those facts in words beside it.

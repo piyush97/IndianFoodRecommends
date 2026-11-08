@@ -5,6 +5,11 @@ export const ROUTE: Record<string, { bg: string; fg: string; code: string }> = {
   delhi: { bg: "var(--color-route-delhi)", fg: "var(--color-paper)", code: "DL" },
   mumbai: { bg: "var(--color-route-mumbai)", fg: "var(--color-paper)", code: "MB" },
   kolkata: { bg: "var(--color-route-kolkata)", fg: "var(--color-ink)", code: "KL" },
+  hyderabad: { bg: "var(--color-route-hyderabad)", fg: "var(--color-paper)", code: "HY" },
+  bengaluru: { bg: "var(--color-route-bengaluru)", fg: "var(--color-paper)", code: "BL" },
+  chennai: { bg: "var(--color-route-chennai)", fg: "var(--color-paper)", code: "CH" },
+  lucknow: { bg: "var(--color-route-lucknow)", fg: "var(--color-paper)", code: "LK" },
+  jaipur: { bg: "var(--color-route-jaipur)", fg: "var(--color-paper)", code: "JP" },
 };
 
 /**

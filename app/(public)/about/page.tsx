@@ -19,9 +19,9 @@ export default function About() {
       <section className="flex flex-col gap-2">
         <h2 className="type-lid border-b-2 border-ink pb-2 text-[1.75rem]">What this site is</h2>
         <p>
-          One place to see which food spots in Delhi, Mumbai and Kolkata food vloggers recommend,
-          which dish they ordered, and the exact moment in their video. Every pick links back to the
-          creator&apos;s original video.
+          One place to see which food spots in Delhi, Mumbai, Kolkata, Hyderabad, Bengaluru,
+          Chennai, Lucknow and Jaipur food vloggers recommend, which dish they ordered, and the
+          exact moment in their video. Every pick links back to the creator&apos;s original video.
         </p>
       </section>
 
