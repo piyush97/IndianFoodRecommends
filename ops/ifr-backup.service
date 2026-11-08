@@ -1,4 +1,5 @@
 [Unit]
+OnFailure=ifr-alert@%n.service
 Description=IndianFoodRecommends nightly database backup
 After=network-online.target
 Wants=network-online.target

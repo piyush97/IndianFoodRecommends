@@ -1,9 +1,10 @@
 import { readFile } from "node:fs/promises";
-import { db } from "../db";
+import { and, eq, lt, sql } from "drizzle-orm";
+import { db, schema } from "../db";
 import { autoReviewPending, checkPick, geocodeIndia } from "../lib/auto-review";
 import { classifyVideo, gatedExtract } from "../lib/jev";
 import { extractPicks } from "../lib/llm/extract";
-import { listUploadsWithFallback as listUploads } from "../lib/youtube";
+import { listArchive, listUploadsWithFallback as listUploads } from "../lib/youtube";
 import { runIngest } from "../lib/worker/ingest";
 import { runEval, type Labelled } from "../lib/worker/eval";
 import { notifyRevalidate } from "../lib/revalidate-client";
@@ -19,7 +20,11 @@ function extractor() {
 async function ingest(): Promise<void> {
   const summary = await runIngest({ db, listUploads, extract: extractor(), now: () => new Date() });
   console.log(JSON.stringify(summary));
+  await review();
+}
 
+/** Decides every pending pick. Fails the run (and so fires the alert) when LLM picks stay pending over 48 h. */
+async function review(): Promise<void> {
   // No human queue: Jev verifies each pick and code approves or rejects it.
   const apiKey = process.env.TYPESAFE_API_KEY;
   if (!apiKey) {
@@ -29,6 +34,7 @@ async function ingest(): Promise<void> {
   const review = await autoReviewPending({
     db,
     listUploads: (channelId) => listUploads(channelId),
+    listArchive: (channelId) => listArchive(channelId, 100),
     check: (video, pick) => checkPick(video, pick, { apiKey }),
     geocode: geocodeIndia,
   });
@@ -37,6 +43,18 @@ async function ingest(): Promise<void> {
     const ok = await notifyRevalidate(["public"]);
     console.log(JSON.stringify({ revalidated: ok }));
   }
+  const [{ n }] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(schema.recommendations)
+    .where(
+      and(
+        eq(schema.recommendations.status, "pending"),
+        eq(schema.recommendations.origin, "llm"),
+        lt(schema.recommendations.createdAt, sql`now() - interval '48 hours'`),
+      ),
+    );
+  console.log(JSON.stringify({ stalePending: n }));
+  if (n > 0) process.exitCode = 1;
 }
 
 async function evaluate(): Promise<void> {
@@ -54,7 +72,7 @@ async function evaluate(): Promise<void> {
 }
 
 const command = process.argv[2] ?? "ingest";
-const run = command === "eval" ? evaluate : ingest;
+const run = command === "eval" ? evaluate : command === "review" ? review : ingest;
 
 run()
   .catch((error) => {

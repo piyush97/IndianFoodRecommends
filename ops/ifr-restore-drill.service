@@ -1,0 +1,11 @@
+[Unit]
+Description=IndianFoodRecommends monthly backup restore drill
+OnFailure=ifr-alert@%n.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/root/Projects/IndianFoodRecommends
+EnvironmentFile=-/etc/ifr/drill.env
+ExecStart=/usr/bin/env bash ops/restore-drill.sh
+PrivateTmp=yes
+NoNewPrivileges=yes

@@ -1,0 +1,9 @@
+[Unit]
+Description=Alert: %i failed
+
+[Service]
+Type=oneshot
+WorkingDirectory=/root/Projects/IndianFoodRecommends
+Environment=HOME=/root
+EnvironmentFile=-/etc/ifr/alert.env
+ExecStart=/usr/bin/env bash ops/alert.sh %i
