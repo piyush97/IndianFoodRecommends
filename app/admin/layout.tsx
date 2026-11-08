@@ -39,6 +39,9 @@ async function AdminGate({ children }: { children: React.ReactNode }) {
           <Link href="/admin/stale" className="min-h-11 content-center underline">
             Stale places
           </Link>
+          <Link href="/admin/searches" className="min-h-11 content-center underline">
+            Searches
+          </Link>
         </nav>
         <form
           action={async () => {

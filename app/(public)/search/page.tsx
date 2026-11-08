@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { after } from "next/server";
 import { Suspense } from "react";
 import { PickList } from "../../../components/PickList";
 import { Skeleton } from "../../../components/Skeleton";
@@ -7,6 +8,7 @@ import { db } from "../../../db";
 import { CITIES } from "../../../lib/cities";
 import { getDishPicks, getPlaceCards, type PickCard } from "../../../lib/public/queries";
 import { searchAll } from "../../../lib/public/search";
+import { logMiss } from "../../../lib/search-misses";
 import { cachedCities, cachedHome } from "../data";
 
 type Props = PageProps<"/search">;
@@ -81,6 +83,7 @@ async function Results({ searchParams }: Pick<Props, "searchParams">) {
   for (const c of [...allDishCards, ...placeOnly])
     perCity.set(c.citySlug, (perCity.get(c.citySlug) ?? 0) + 1);
   const total = allDishCards.length + placeOnly.length;
+  if (total === 0 && res.creators.length === 0) after(() => logMiss(db, query));
 
   const inCity = (c: PickCard) => !city || c.citySlug === city;
   const dishName = dishes.find((d) => d.slug === dish)?.name;
@@ -98,6 +101,16 @@ async function Results({ searchParams }: Pick<Props, "searchParams">) {
   );
   const placeCards = placeOnly.filter(inCity);
   const cityName = CITIES.find((c) => c.slug === city)?.name;
+  // Full pages (map, every creator) for each matched dish in each city that has picks.
+  const dishLinks = dishes
+    .filter((d) => !dish || d.slug === dish)
+    .flatMap((d) =>
+      CITIES.filter(
+        (c) =>
+          (!city || c.slug === city) &&
+          allDishCards.some((card) => card.citySlug === c.slug && card.dishes.includes(d.name)),
+      ).map((c) => ({ href: `/${c.slug}/${d.slug}`, label: `${d.name} in ${c.name}` })),
+    );
 
   return (
     <>
@@ -173,6 +186,15 @@ async function Results({ searchParams }: Pick<Props, "searchParams">) {
                     : "Most recently picked first."}
                 </p>
               </div>
+              {dishLinks.length > 0 && (
+                <nav aria-label="Dish pages" className="flex flex-wrap gap-2 py-1">
+                  {dishLinks.map((l) => (
+                    <Link key={l.href} href={l.href} className="btn btn-line">
+                      {l.label}
+                    </Link>
+                  ))}
+                </nav>
+              )}
               <PickList
                 cards={dishCards}
                 headingLevel={3}
