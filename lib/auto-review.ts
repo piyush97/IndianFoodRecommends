@@ -142,6 +142,8 @@ type Suggestions = { places?: Match[]; dishes?: Match[] };
 export type AutoReviewDeps = {
   db: Db;
   listUploads: (channelId: string) => Promise<Upload[]>;
+  /** Deeper lookup, tried once per channel when a pending pick's video is outside the feed window. */
+  listArchive?: (channelId: string) => Promise<Upload[]>;
   check: (video: { title: string; description: string }, pick: ExtractedPick) => Promise<PickCheck>;
   geocode?: (query: string) => Promise<{ lat: number; lng: number; osmId: string } | null>;
 };
@@ -157,13 +159,19 @@ export async function autoReviewPending(deps: AutoReviewDeps): Promise<AutoRevie
   );
 
   const feeds = new Map<string, Map<string, Upload>>();
+  const deepened = new Set<string>();
   async function videoText(channelId: string | null, videoId: string): Promise<Upload | undefined> {
     if (!channelId) return undefined;
     if (!feeds.has(channelId)) {
       const uploads = await deps.listUploads(channelId).catch(() => []);
       feeds.set(channelId, new Map(uploads.map((u) => [u.videoId, u])));
     }
-    return feeds.get(channelId)!.get(videoId);
+    const feed = feeds.get(channelId)!;
+    if (!feed.has(videoId) && deps.listArchive && !deepened.has(channelId)) {
+      deepened.add(channelId);
+      for (const u of await deps.listArchive(channelId).catch(() => [])) feed.set(u.videoId, u);
+    }
+    return feed.get(videoId);
   }
 
   summary.rejected += await admitSubmissions(db, videoText);

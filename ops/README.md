@@ -47,3 +47,33 @@ Restore into a scratch database:
 ```bash
 /usr/lib/postgresql/18/bin/pg_restore --no-owner --dbname "$SCRATCH_URL" /var/backups/ifr/<file>.dump
 ```
+
+## Failure alerts
+
+`ifr-ingest`, `ifr-backup` and `ifr-restore-drill` set `OnFailure=ifr-alert@%n.service`. `ops/alert.sh` then
+pushes to ntfy and keeps one open GitHub issue (label `ops-alert`) per failing unit; a repeat failure adds a comment.
+Only the unit name leaves the machine.
+
+```bash
+sudo systemctl link /root/Projects/IndianFoodRecommends/ops/ifr-alert@.service
+sudo install -m 600 /dev/stdin /etc/ifr/alert.env <<< $'ALERT_NTFY_TOPIC=ifr-<random>\nGH_REPO=piyush97/IndianFoodRecommends'
+# subscribe to the topic in the ntfy app (https://ntfy.sh/<topic>)
+systemd-run --unit ifr-failtest --wait --collect -p Type=oneshot \
+  -p OnFailure=ifr-alert@ifr-failtest.service /bin/false   # end-to-end test
+```
+
+The nightly ingest also exits non-zero when an LLM pick has stayed `pending` over 48 h, so a stuck review alerts too.
+`pnpm worker review` runs only the review step (no ingest), using yt-dlp for videos older than the feed window.
+
+## Restore drill
+
+`ops/restore-drill.sh` restores the newest dump into a scratch database `ifr_drill` (any server where
+`DRILL_ADMIN_URL` can create databases; default is the local dev server), checks that creators, places and approved
+picks are non-empty, and fails if the newest dump is older than 36 h. Monthly via `ifr-restore-drill.timer`
+(1st, 04:00 IST).
+
+```bash
+sudo systemctl link /root/Projects/IndianFoodRecommends/ops/ifr-restore-drill.{service,timer}
+sudo systemctl enable --now ifr-restore-drill.timer
+sudo systemctl start ifr-restore-drill.service   # run now
+```

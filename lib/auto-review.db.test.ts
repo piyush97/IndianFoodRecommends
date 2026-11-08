@@ -208,4 +208,16 @@ describeDb("autoReviewPending", () => {
     const [rec] = await db.select().from(schema.recommendations);
     expect(rec.status).toBe("rejected");
   });
+
+  it("reviews a pick whose video is older than the feed window via the archive", async () => {
+    await pending(base);
+    const summary = await autoReviewPending({
+      ...deps(),
+      listUploads: async () => [],
+      listArchive: async () => [upload("v1")],
+    });
+    expect(summary.approved).toBe(1);
+    const [rec] = await db.select().from(schema.recommendations);
+    expect(rec.status).toBe("approved");
+  });
 });
