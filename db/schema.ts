@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import {
   boolean,
+  customType,
   date,
   index,
   integer,
@@ -58,6 +59,8 @@ export const sources = pgTable(
   (t) => [unique("sources_platform_external_id_uk").on(t.platform, t.externalId)],
 );
 
+const geography = customType<{ data: string }>({ dataType: () => "geography(Point,4326)" });
+
 export const places = pgTable(
   "places",
   {
@@ -70,6 +73,10 @@ export const places = pgTable(
     locality: text("locality"),
     lat: real("lat"),
     lng: real("lng"),
+    // Derived from lat/lng, never written. A point in metres-aware geography so ST_DWithin takes metres.
+    geom: geography("geom").generatedAlwaysAs(
+      sql`ST_SetSRID(ST_MakePoint(lng, lat), 4326)::geography`,
+    ),
     osmId: text("osm_id"),
     /** Google place ID: the one Google Maps field we may store. "none" = looked up, no confident match. */
     googlePlaceId: text("google_place_id"),
@@ -79,8 +86,8 @@ export const places = pgTable(
   },
   (t) => [
     index("places_city_idx").on(t.cityId),
-    // earthdistance GiST index: radius and nearest-first lookups on the pin (see lib/geo.ts).
-    index("places_geo_idx").using("gist", sql`ll_to_earth(${t.lat}, ${t.lng})`),
+    // PostGIS: radius, nearest-first and bounding-box lookups use this index (see lib/geo.ts).
+    index("places_geom_idx").using("gist", t.geom),
   ],
 );
 
