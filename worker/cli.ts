@@ -3,6 +3,7 @@ import { and, eq, lt, sql } from "drizzle-orm";
 import { db, schema } from "../db";
 import { autoReviewPending, checkPick, geocodeIndia } from "../lib/auto-review";
 import { classifyVideo, gatedExtract } from "../lib/jev";
+import { readLocalities, syncAreas } from "../lib/areas";
 import { fillDiets } from "../lib/diet";
 import { extractPicks } from "../lib/llm/extract";
 import { listArchive, listUploadsWithFallback as listUploads } from "../lib/youtube";
@@ -24,6 +25,13 @@ async function ingest(): Promise<void> {
   await review();
   // Labelling is a nicety: a failure must not fail the ingest or fire the alert.
   await diet().catch((error) => console.error("diet:", error));
+  await areas().catch((error) => console.error("areas:", error));
+}
+
+/** Rebuilds the area list the "sort from an area" search reads, from the places' localities. */
+async function areas(): Promise<void> {
+  const result = await syncAreas(db, await readLocalities(db));
+  console.log(JSON.stringify({ areas: result }));
 }
 
 /** Labels new dishes veg / non-veg / mixed for the diet filter. */
@@ -90,7 +98,9 @@ const run =
       ? review
       : command === "diet"
         ? diet
-        : ingest;
+        : command === "areas"
+          ? areas
+          : ingest;
 
 run()
   .catch((error) => {

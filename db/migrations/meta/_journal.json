@@ -64,6 +64,13 @@
       "when": 1794247912842,
       "tag": "0008_keen_queen_noir",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794252735189,
+      "tag": "0009_wandering_randall",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,164 @@
+{"city": "delhi", "q": "Chandni Chowk", "expect": "Chandni Chowk", "kind": "exact"}
+{"city": "delhi", "q": "chandini chowk", "expect": "Chandni Chowk", "kind": "typo"}
+{"city": "delhi", "q": "chandani chowk", "expect": "Chandni Chowk", "kind": "typo"}
+{"city": "delhi", "q": "chandni chowk metro station", "expect": "Chandni Chowk", "kind": "extra"}
+{"city": "delhi", "q": "चांदनी चौक", "expect": "Chandni Chowk", "kind": "script"}
+{"city": "delhi", "q": "karol baagh", "expect": "Karol Bagh", "kind": "typo"}
+{"city": "delhi", "q": "carol bagh", "expect": "Karol Bagh", "kind": "typo"}
+{"city": "delhi", "q": "karol bagh market", "expect": "Karol Bagh", "kind": "extra"}
+{"city": "delhi", "q": "करोल बाग", "expect": "Karol Bagh", "kind": "script"}
+{"city": "delhi", "q": "cp", "expect": "Connaught Place", "kind": "nickname"}
+{"city": "delhi", "q": "CP", "expect": "Connaught Place", "kind": "nickname"}
+{"city": "delhi", "q": "connaught place", "expect": "Connaught Place", "kind": "exact"}
+{"city": "delhi", "q": "conaught place", "expect": "Connaught Place", "kind": "typo"}
+{"city": "delhi", "q": "connaught plase", "expect": "Connaught Place", "kind": "typo"}
+{"city": "delhi", "q": "connaught place delhi", "expect": "Connaught Place", "kind": "city"}
+{"city": "delhi", "q": "gk", "expect": "Greater Kailash", "kind": "nickname"}
+{"city": "delhi", "q": "GK1", "expect": "Greater Kailash", "kind": "nickname"}
+{"city": "delhi", "q": "gk2", "expect": "GK-2", "kind": "nickname"}
+{"city": "delhi", "q": "greater kailash 2", "expect": "GK-2", "kind": "nickname"}
+{"city": "delhi", "q": "south ex", "expect": "South Extension", "kind": "nickname"}
+{"city": "delhi", "q": "south extention", "expect": "South Extension", "kind": "typo"}
+{"city": "delhi", "q": "mkt", "expect": "Majnu ka Tilla", "kind": "nickname"}
+{"city": "delhi", "q": "majnu ka tila", "expect": "Majnu ka Tilla", "kind": "nickname"}
+{"city": "delhi", "q": "jama masjid", "expect": "Jama Masjid", "kind": "exact"}
+{"city": "delhi", "q": "jama masjid old delhi", "expect": "Jama Masjid", "kind": "extra"}
+{"city": "delhi", "q": "old delhi", "expect": "Old Delhi", "kind": "exact"}
+{"city": "delhi", "q": "mukherji nagar", "expect": "Mukherjee Nagar", "kind": "typo"}
+{"city": "delhi", "q": "mukherjee nager", "expect": "Mukherjee Nagar", "kind": "typo"}
+{"city": "delhi", "q": "dariyaganj", "expect": "Daryaganj", "kind": "nickname"}
+{"city": "delhi", "q": "daryaganj book market", "expect": "Daryaganj", "kind": "extra"}
+{"city": "delhi", "q": "paschim vihar", "expect": "Paschim Vihar", "kind": "exact"}
+{"city": "delhi", "q": "pashchim vihar", "expect": "Paschim Vihar", "kind": "typo"}
+{"city": "delhi", "q": "shahdra", "expect": "Shahdara", "kind": "typo"}
+{"city": "delhi", "q": "civil line", "expect": "Civil Lines", "kind": "typo"}
+{"city": "delhi", "q": "tilak nagar", "expect": "Tilak Nagar", "kind": "exact"}
+{"city": "mumbai", "q": "bandra west", "expect": "Bandra West", "kind": "exact"}
+{"city": "mumbai", "q": "bandra west mumbai", "expect": "Bandra West", "kind": "city"}
+{"city": "mumbai", "q": "bandara", "expect": "Bandra", "kind": "typo"}
+{"city": "mumbai", "q": "bandra mumbai", "expect": "Bandra", "kind": "city"}
+{"city": "mumbai", "q": "bkc", "expect": "BKC", "kind": "exact"}
+{"city": "mumbai", "q": "bandra kurla complex", "expect": "BKC", "kind": "nickname"}
+{"city": "mumbai", "q": "cst", "expect": "CSMT", "kind": "nickname"}
+{"city": "mumbai", "q": "victoria terminus", "expect": "CSMT", "kind": "nickname"}
+{"city": "mumbai", "q": "colaba causeway", "expect": "Colaba", "kind": "nickname"}
+{"city": "mumbai", "q": "kolaba", "expect": "Colaba", "kind": "typo"}
+{"city": "mumbai", "q": "colabba", "expect": "Colaba", "kind": "typo"}
+{"city": "mumbai", "q": "kala ghoda", "expect": "Kala Ghoda", "kind": "exact"}
+{"city": "mumbai", "q": "kala goda", "expect": "Kala Ghoda", "kind": "typo"}
+{"city": "mumbai", "q": "lal baug", "expect": "Lalbaug", "kind": "nickname"}
+{"city": "mumbai", "q": "lalbagh", "expect": "Lalbaug", "kind": "nickname"}
+{"city": "mumbai", "q": "lower parel", "expect": "Lower Parel", "kind": "exact"}
+{"city": "mumbai", "q": "lowerparel", "expect": "Lower Parel", "kind": "typo"}
+{"city": "mumbai", "q": "vileparle", "expect": "Vile Parle", "kind": "typo"}
+{"city": "mumbai", "q": "sion", "expect": "Sion Koliwada", "kind": "nickname"}
+{"city": "mumbai", "q": "dadar station", "expect": "Dadar", "kind": "extra"}
+{"city": "mumbai", "q": "powai lake", "expect": "Powai", "kind": "extra"}
+{"city": "mumbai", "q": "powi", "expect": "Powai", "kind": "typo"}
+{"city": "mumbai", "q": "kandivli", "expect": "Kandivali", "kind": "typo"}
+{"city": "mumbai", "q": "fort mumbai", "expect": "Fort", "kind": "city"}
+{"city": "mumbai", "q": "bombay fort", "expect": "Fort", "kind": "city"}
+{"city": "mumbai", "q": "matunga", "expect": "Matunga", "kind": "exact"}
+{"city": "bengaluru", "q": "koramangala", "expect": "Koramangala", "kind": "exact"}
+{"city": "bengaluru", "q": "kormangala", "expect": "Koramangala", "kind": "typo"}
+{"city": "bengaluru", "q": "koramangla", "expect": "Koramangala", "kind": "typo"}
+{"city": "bengaluru", "q": "koramangala 5th block", "expect": "Koramangala 5th Block", "kind": "exact"}
+{"city": "bengaluru", "q": "indranagar", "expect": "Indiranagar", "kind": "typo"}
+{"city": "bengaluru", "q": "indira nagar", "expect": "Indiranagar", "kind": "typo"}
+{"city": "bengaluru", "q": "mg road", "expect": "M G Road", "kind": "exact"}
+{"city": "bengaluru", "q": "m.g. road", "expect": "M G Road", "kind": "exact"}
+{"city": "bengaluru", "q": "jp nagar", "expect": "JP Nagar", "kind": "exact"}
+{"city": "bengaluru", "q": "j p nagar", "expect": "JP Nagar", "kind": "exact"}
+{"city": "bengaluru", "q": "jayanagara", "expect": "Jayanagar", "kind": "typo"}
+{"city": "bengaluru", "q": "jaya nagar", "expect": "Jayanagar", "kind": "typo"}
+{"city": "bengaluru", "q": "jayanagar 4th block", "expect": "Jayanagar 4th Block", "kind": "exact"}
+{"city": "bengaluru", "q": "btm", "expect": "BTM Layout", "kind": "nickname"}
+{"city": "bengaluru", "q": "btm 1st stage", "expect": "BTM 1st Stage", "kind": "exact"}
+{"city": "bengaluru", "q": "hsr", "expect": "HSR Layout", "kind": "nickname"}
+{"city": "bengaluru", "q": "hsr layout sector 2", "expect": "HSR Layout", "kind": "extra"}
+{"city": "bengaluru", "q": "whitfield", "expect": "Whitefield", "kind": "typo"}
+{"city": "bengaluru", "q": "white field", "expect": "Whitefield", "kind": "typo"}
+{"city": "bengaluru", "q": "chruch street", "expect": "Church Street", "kind": "typo"}
+{"city": "bengaluru", "q": "kr puram", "expect": "Krishnarajapuram", "kind": "nickname"}
+{"city": "bengaluru", "q": "k r puram", "expect": "Krishnarajapuram", "kind": "nickname"}
+{"city": "bengaluru", "q": "food street vv puram", "expect": "VV Puram", "kind": "extra"}
+{"city": "bengaluru", "q": "frazer town", "expect": "Frazer Town", "kind": "exact"}
+{"city": "bengaluru", "q": "ulsoor", "expect": "Halasuru", "kind": "nickname"}
+{"city": "bengaluru", "q": "indiranagar bangalore", "expect": "Indiranagar", "kind": "city"}
+{"city": "hyderabad", "q": "banjara hills", "expect": "Banjara Hills", "kind": "exact"}
+{"city": "hyderabad", "q": "banjara hils", "expect": "Banjara Hills", "kind": "typo"}
+{"city": "hyderabad", "q": "banjarahills", "expect": "Banjara Hills", "kind": "typo"}
+{"city": "hyderabad", "q": "jubliee hills", "expect": "Jubilee Hills", "kind": "typo"}
+{"city": "hyderabad", "q": "jubilee hill", "expect": "Jubilee Hills", "kind": "typo"}
+{"city": "hyderabad", "q": "gachibowly", "expect": "Gachibowli", "kind": "typo"}
+{"city": "hyderabad", "q": "gachi bowli", "expect": "Gachibowli", "kind": "typo"}
+{"city": "hyderabad", "q": "hitech city", "expect": "Hitech City", "kind": "exact"}
+{"city": "hyderabad", "q": "hi-tech city", "expect": "HITEC City", "kind": "nickname"}
+{"city": "hyderabad", "q": "kukatpalli", "expect": "Kukatpally", "kind": "typo"}
+{"city": "hyderabad", "q": "kphb", "expect": "Kukatpally", "kind": "nickname"}
+{"city": "hyderabad", "q": "madapur", "expect": "Madhapur", "kind": "typo"}
+{"city": "hyderabad", "q": "kondapur", "expect": "Kondapur", "kind": "exact"}
+{"city": "hyderabad", "q": "miyapur hyderabad", "expect": "Miyapur", "kind": "city"}
+{"city": "chennai", "q": "t nagar", "expect": "T. Nagar", "kind": "exact"}
+{"city": "chennai", "q": "tnagar", "expect": "T. Nagar", "kind": "nickname"}
+{"city": "chennai", "q": "thyagaraya nagar", "expect": "T. Nagar", "kind": "nickname"}
+{"city": "chennai", "q": "annanagar", "expect": "Anna Nagar", "kind": "typo"}
+{"city": "chennai", "q": "anna nagr", "expect": "Anna Nagar", "kind": "typo"}
+{"city": "chennai", "q": "mylapur", "expect": "Mylapore", "kind": "typo"}
+{"city": "chennai", "q": "triplikane", "expect": "Triplicane", "kind": "typo"}
+{"city": "chennai", "q": "nungabakkam", "expect": "Nungambakkam", "kind": "typo"}
+{"city": "chennai", "q": "kodambakam", "expect": "Kodambakkam", "kind": "typo"}
+{"city": "chennai", "q": "kk nagar", "expect": "K.K.Nagar", "kind": "nickname"}
+{"city": "chennai", "q": "anna salai", "expect": "Mount Road", "kind": "nickname"}
+{"city": "chennai", "q": "mylapore chennai", "expect": "Mylapore", "kind": "city"}
+{"city": "chennai", "q": "mylapore madras", "expect": "Mylapore", "kind": "city"}
+{"city": "kolkata", "q": "park street", "expect": "Park Street", "kind": "exact"}
+{"city": "kolkata", "q": "park stret", "expect": "Park Street", "kind": "typo"}
+{"city": "kolkata", "q": "park street kolkata", "expect": "Park Street", "kind": "city"}
+{"city": "kolkata", "q": "zakariya street", "expect": "Zakaria Street", "kind": "typo"}
+{"city": "kolkata", "q": "collage street", "expect": "College Street", "kind": "typo"}
+{"city": "kolkata", "q": "bhawanipur", "expect": "Bhowanipore", "kind": "typo"}
+{"city": "kolkata", "q": "ballygunj", "expect": "Ballygunge", "kind": "typo"}
+{"city": "kolkata", "q": "salt lake sector 5", "expect": "Salt Lake Sector V", "kind": "nickname"}
+{"city": "kolkata", "q": "shyam bazar", "expect": "Shyambazar", "kind": "typo"}
+{"city": "kolkata", "q": "raja bazar", "expect": "Rajabazar", "kind": "typo"}
+{"city": "kolkata", "q": "kamak street", "expect": "Camac Street", "kind": "typo"}
+{"city": "kolkata", "q": "alipur", "expect": "Alipore", "kind": "typo"}
+{"city": "kolkata", "q": "tangra calcutta", "expect": "Tangra", "kind": "city"}
+{"city": "lucknow", "q": "hazratganj", "expect": "Hazratganj", "kind": "exact"}
+{"city": "lucknow", "q": "hazaratganj", "expect": "Hazratganj", "kind": "typo"}
+{"city": "lucknow", "q": "hazrat ganj", "expect": "Hazratganj", "kind": "typo"}
+{"city": "lucknow", "q": "hazratganj metro", "expect": "Hazratganj", "kind": "extra"}
+{"city": "lucknow", "q": "aminbad", "expect": "Aminabad", "kind": "typo"}
+{"city": "lucknow", "q": "chowk", "expect": "Chowk", "kind": "exact"}
+{"city": "lucknow", "q": "gomtinagar", "expect": "Gomti Nagar", "kind": "nickname"}
+{"city": "lucknow", "q": "gomti nagr", "expect": "Gomti Nagar", "kind": "typo"}
+{"city": "lucknow", "q": "hussainabad", "expect": "Husainabad", "kind": "nickname"}
+{"city": "lucknow", "q": "alam bagh", "expect": "Alambagh", "kind": "nickname"}
+{"city": "lucknow", "q": "kapurthala", "expect": "Kapoorthala", "kind": "typo"}
+{"city": "jaipur", "q": "raja park", "expect": "Raja Park", "kind": "exact"}
+{"city": "jaipur", "q": "rajapark", "expect": "Raja Park", "kind": "typo"}
+{"city": "jaipur", "q": "vaishali nagr", "expect": "Vaishali Nagar", "kind": "typo"}
+{"city": "jaipur", "q": "vaishalinagar", "expect": "Vaishali Nagar", "kind": "typo"}
+{"city": "jaipur", "q": "chandpole", "expect": "Chandpole Bazar", "kind": "nickname"}
+{"city": "jaipur", "q": "masala chok", "expect": "Masala Chowk", "kind": "typo"}
+{"city": "delhi", "q": "lajpat nagar", "expect": null, "kind": "none"}
+{"city": "delhi", "q": "hauz khas", "expect": null, "kind": "none"}
+{"city": "delhi", "q": "colaba", "expect": null, "kind": "none"}
+{"city": "delhi", "q": "asdfgh", "expect": null, "kind": "none"}
+{"city": "delhi", "q": "near me", "expect": null, "kind": "none"}
+{"city": "delhi", "q": "restaurant", "expect": null, "kind": "none"}
+{"city": "mumbai", "q": "juhu", "expect": null, "kind": "none"}
+{"city": "mumbai", "q": "qwertyuiop", "expect": null, "kind": "none"}
+{"city": "mumbai", "q": "karol bagh", "expect": null, "kind": "none"}
+{"city": "bengaluru", "q": "electronic city", "expect": null, "kind": "none"}
+{"city": "bengaluru", "q": "andheri", "expect": null, "kind": "none"}
+{"city": "hyderabad", "q": "charminar", "expect": null, "kind": "none"}
+{"city": "hyderabad", "q": "secunderabad", "expect": null, "kind": "none"}
+{"city": "chennai", "q": "besant nagar", "expect": null, "kind": "none"}
+{"city": "chennai", "q": "marina beach", "expect": null, "kind": "none"}
+{"city": "kolkata", "q": "howrah bridge", "expect": null, "kind": "none"}
+{"city": "kolkata", "q": "marine drive", "expect": null, "kind": "none"}
+{"city": "lucknow", "q": "indira nagar", "expect": null, "kind": "none"}
+{"city": "lucknow", "q": "aliganj", "expect": null, "kind": "none"}
+{"city": "jaipur", "q": "johari bazar", "expect": null, "kind": "none"}
