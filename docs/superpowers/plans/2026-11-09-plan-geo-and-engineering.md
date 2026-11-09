@@ -47,16 +47,16 @@ native apps, paid infrastructure.
 
 New table `areas` (one row per named area we can resolve without calling anyone):
 
-| column   | type                         | notes                                     |
-| -------- | ---------------------------- | ----------------------------------------- |
-| id       | serial                       |                                           |
-| city_id  | int fk                       |                                           |
-| name     | text                         | display name, e.g. "Chandni Chowk"        |
-| slug     | text                         | unique per city                           |
-| aliases  | text[]                       | "CP" for Connaught Place, Hindi spellings |
-| geom     | geography(Point)             | centroid                                  |
-| boundary | geography(MultiPolygon) null | from OSM when available                   |
-| source   | text                         | `places` / `osm` / `manual`               |
+| column   | type                                                            | notes                                     |
+| -------- | --------------------------------------------------------------- | ----------------------------------------- |
+| id       | serial                                                          |                                           |
+| city_id  | int fk                                                          |                                           |
+| name     | text                                                            | display name, e.g. "Chandni Chowk"        |
+| slug     | text                                                            | unique per city                           |
+| aliases  | (separate `area_aliases` table, so a trigram index covers them) | "CP" for Connaught Place, Hindi spellings |
+| geom     | geography(Point)                                                | centroid                                  |
+| boundary | geography(MultiPolygon) null                                    | from OSM when available                   |
+| source   | text                                                            | `places` / `osm` / `manual`               |
 
 Seeding:
 
@@ -94,7 +94,7 @@ Migration steps (each its own migration, all reversible):
    uses `places_geom_idx`.
 4. Drop `places_geo_idx` and the `earthdistance`/`cube` extensions.
 
-Environments: local dev gets `postgresql-17-postgis-3` via apt; test DB the same; CI `db` job
+Environments: local dev gets `postgresql-18-postgis-3` via apt (local and Neon both run PG 18); test DB the same; CI `db` job
 switches image to `postgis/postgis:17-3.5`. Neon has it available.
 
 ### 2.3 Geo features (G2)
@@ -221,3 +221,8 @@ Not installed yet. Install the first two on approval.
 1. Approve Sprints 6-8 as scoped, or cut Sprint 7 items.
 2. OK to install the two skills above.
 3. OK to create GitHub issues + add them to project board 5.
+
+## Outcome notes
+
+- S6-1..S6-4 shipped in PR #100. `matchAreas` reranks the trigram hits in code (whole-word containment, bounded edit distance, sound-alike skeleton) because trigram similarity alone matched "besant nagar" to "T. Nagar". On 164 queries over 262 real localities: 87/144 resolvable and 8/20 negatives refused before, 143/144 and 20/20 after. Known gap: a spelling whose trigram similarity is under 0.3 ("bhawanipur", "kolba") never reaches the rerank; fix by storing the skeleton as an indexed column.
+- S6-5/S6-6 shipped in the PostGIS PR: `places.geom` generated column, `places_geom_idx`, `nearbyPlaces` on `ST_DWithin` and `<->`, `earthdistance` and `cube` dropped.

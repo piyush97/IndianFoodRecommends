@@ -73,16 +73,16 @@ describeDb("nearbyPlaces", () => {
     expect(found.map((f) => f.slug)).toEqual(["self", "near", "mid", "corner", "far"]);
   });
 
-  it("is answered through places_geo_idx", async () => {
+  it("is answered through places_geom_idx", async () => {
     // Seven rows would be scanned in order; forbidding that shows the index can serve the query.
     const plan = await db.transaction(async (tx) => {
       await tx.execute(sql`set local enable_seqscan = off`);
       return tx.execute(sql`
         explain select slug from places
-        where earth_box(ll_to_earth(28.6::float8, 77.2::float8), 1200::float8) @> ll_to_earth(lat, lng)
-        order by ll_to_earth(lat, lng) <-> ll_to_earth(28.6::float8, 77.2::float8)`);
+        where ST_DWithin(geom, ST_SetSRID(ST_MakePoint(77.2, 28.6), 4326)::geography, 1200)
+        order by geom <-> ST_SetSRID(ST_MakePoint(77.2, 28.6), 4326)::geography`);
     });
-    expect(plan.map((r) => String(r["QUERY PLAN"])).join("\n")).toContain("places_geo_idx");
+    expect(plan.map((r) => String(r["QUERY PLAN"])).join("\n")).toContain("places_geom_idx");
   });
 
   it("puts nearby picks on the place page data, without distances for approximate pins", async () => {
