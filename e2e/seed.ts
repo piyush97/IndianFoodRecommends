@@ -45,14 +45,57 @@ async function main(): Promise<void> {
         publishedOn: "2026-11-01",
       })
       .returning();
-    await db.insert(schema.recommendations).values({
-      sourceId: source.id,
-      placeId: place.id,
-      dishId: dish.id,
-      tsSeconds: 252,
-      status: "approved",
-      origin: "manual",
-    });
+    // A second creator's pick about 220 m from Chache Di Hatti, so its place page has a nearby pick.
+    const [other] = await db
+      .insert(schema.creators)
+      .values({
+        slug: "nearby-creator",
+        name: "Nearby Creator",
+        ytChannelId: "UCnearbycreator000000000",
+      })
+      .returning();
+    const [tikka] = await db
+      .insert(schema.dishes)
+      .values({ slug: "paneer-tikka", name: "Paneer Tikka", diet: "veg" })
+      .returning();
+    const [otherSource] = await db
+      .insert(schema.sources)
+      .values({
+        platform: "youtube",
+        externalId: "9bZkp7q19f0",
+        creatorId: other.id,
+        publishedOn: "2026-11-02",
+      })
+      .returning();
+    const [nearby] = await db
+      .insert(schema.places)
+      .values({
+        slug: "kamla-nagar-dhaba",
+        name: "Kamla Nagar Dhaba",
+        cityId: city.id,
+        locality: "Kamla Nagar",
+        lat: 28.682,
+        lng: 77.21,
+      })
+      .returning();
+    await db.insert(schema.recommendations).values([
+      {
+        sourceId: source.id,
+        placeId: place.id,
+        dishId: dish.id,
+        tsSeconds: 252,
+        status: "approved",
+        origin: "manual",
+      },
+      {
+        sourceId: otherSource.id,
+        placeId: nearby.id,
+        dishId: tikka.id,
+        tsSeconds: 300,
+        status: "approved",
+        origin: "manual",
+      },
+    ]);
     console.log("e2e seed ok");
   } finally {
     await client.end();

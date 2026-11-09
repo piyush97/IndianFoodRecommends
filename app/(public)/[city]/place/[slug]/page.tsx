@@ -234,6 +234,38 @@ async function Place({ params }: { params: Params }) {
         </section>
       )}
 
+      {data.nearby.length > 0 && (
+        <section className="flex flex-col gap-3">
+          <h2 className="type-lid border-b-2 border-ink pb-2 text-[1.75rem]">Nearby picks</h2>
+          <ul>
+            {data.nearby.map((n) => (
+              <li key={n.placeSlug} className="border-b border-line">
+                <Link
+                  href={`/${n.citySlug}/place/${n.placeSlug}`}
+                  className="flex min-h-12 items-center justify-between gap-3 py-2 font-semibold no-underline hover:underline"
+                >
+                  <span>
+                    {n.placeName}
+                    <span className="block text-sm font-normal text-muted">
+                      {n.dishes.slice(0, 3).join(", ")}
+                    </span>
+                  </span>
+                  <span className="shrink-0 text-right text-sm font-normal text-muted tabular-nums">
+                    {n.creators.length} {n.creators.length === 1 ? "creator" : "creators"}
+                    {n.meters !== null && (
+                      <span className="block">
+                        {n.meters < 1000
+                          ? `${Math.round(n.meters / 10) * 10} m`
+                          : `${(n.meters / 1000).toFixed(1)} km`}
+                      </span>
+                    )}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
       <ReportForm placeId={place.id} placeName={place.name} />
     </>
   );
