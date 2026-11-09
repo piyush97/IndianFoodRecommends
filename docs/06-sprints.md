@@ -113,6 +113,9 @@ Plan: `docs/superpowers/plans/2026-11-09-plan-geo-and-engineering.md`. Trigger: 
 
 ## Sprint 7 · Geo features (weeks 13-14)
 
+S7-1..S7-7 are implemented and verified locally on `sprint7-geo`. Production acceptance remains open;
+see [local validation and release gates](superpowers/plans/2026-11-09-plan-geo-and-engineering.md#sprint-7-local-validation).
+
 | ID   | Task                                                                          | Est (h) | Model  | Done when                                                      |
 | ---- | ----------------------------------------------------------------------------- | ------- | ------ | -------------------------------------------------------------- |
 | S7-1 | OSM neighbourhood import (Overpass, worker command, boundaries) for 8 cities  | 5       | Sonnet | areas have boundaries where OSM has them, attribution shown    |

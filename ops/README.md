@@ -28,6 +28,45 @@ journalctl -u ifr-ingest -n 100 --no-pager
   Audit rejects: `select extracted->>'place_name', extracted->'autoReview'->>'reason' from recommendations where status='rejected';`
 - Manual run: `pnpm worker ingest`.
 
+## Geo data (Sprint 7)
+
+Apply migrations before deploying the new pages. Worker commands read exported environment variables;
+they do not load `.env` automatically.
+
+```bash
+set -a
+. ./.env
+set +a
+pnpm db:migrate
+pnpm worker osm-areas
+pnpm worker geo
+```
+
+Both commands accept a city slug, for example `pnpm worker osm-areas delhi` or `pnpm worker geo delhi`.
+Without a city they process all eight supported cities. `osm-areas` calls Overpass sequentially within
+the catalog's city extents, using `NOMINATIM_USER_AGENT` with a contact address. It imports names,
+OSM object IDs and available boundaries; node-only results never erase existing polygons. Each city
+commits atomically, and failures are reported per city without deleting its prior data. Run this
+import explicitly; daily ingest does not make bulk Overpass requests.
+
+Daily ingest refreshes food walks and density after review and area synchronization. Walks require
+at least four open, exact-pin places with visible approved picks. DBSCAN uses a city-local UTM
+projection, 500 m and four minimum points. Stops start at the westernmost point, then use nearest
+neighbours. Each walk has at most five stops so its Google Maps URL fits the three-waypoint limit
+on mobile browsers. Distances shown are straight-line estimates, not measured walking distances.
+No qualifying cluster produces an empty walk list, never approximate substitute stops.
+
+The density worker enables `h3` and `h3_postgis` if the server provides them, then stores resolution-8
+cell polygons and distinct creator/place counts. If unavailable it reports `available: false`;
+the app shows an empty density state. Public heatmap reads aggregate stored JSON and counts, with
+no request-time H3 or geometry calculation. Creator opt-outs are excluded at read time. Walk reads
+also refuse a precomputed route when a stop is closed, loses its exact pin or no longer has a visible pick.
+
+Map viewport requests are bounded to 300 results and retain dish, diet and neighbourhood filters.
+Above 300 initial pins the map uses `/api/tiles/[z]/[x]/[y]`; smaller maps retain DOM pins.
+Tile coordinates, city, bounding boxes and filters are validated. Low-zoom world/hemisphere tiles
+avoid casting antipodal polygons to geography; higher zooms use the geography GiST prefilter.
+
 # Nightly backups
 
 `ops/backup.sh` dumps the production database (Neon, `DATABASE_URL_UNPOOLED` from `/etc/ifr/backup.env`, mode 600, that one line only) to
