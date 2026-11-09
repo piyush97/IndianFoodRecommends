@@ -77,7 +77,11 @@ export const places = pgTable(
     lastVerified: date("last_verified"),
     createdAt,
   },
-  (t) => [index("places_city_idx").on(t.cityId)],
+  (t) => [
+    index("places_city_idx").on(t.cityId),
+    // earthdistance GiST index: radius and nearest-first lookups on the pin (see lib/geo.ts).
+    index("places_geo_idx").using("gist", sql`ll_to_earth(${t.lat}, ${t.lng})`),
+  ],
 );
 
 export const dishes = pgTable("dishes", {

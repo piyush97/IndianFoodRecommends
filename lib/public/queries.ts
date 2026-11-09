@@ -4,6 +4,10 @@ import type { Platform } from "./links";
 import { CITIES } from "../cities";
 import { rankScore } from "./rank";
 import type { DietFilter } from "../diet";
+import { nearbyPlaces } from "../geo";
+
+/** A place near another one; `meters` is null when either pin is only neighbourhood-level. */
+export type NearbyCard = PickCard & { meters: number | null };
 
 export type PickCard = {
   citySlug: string;
@@ -252,7 +256,43 @@ export async function getPlaceCards(
   return toCards(rows, now);
 }
 
-export async function getPlace(db: Db, citySlug: string, placeSlug: string) {
+/** Other places with approved picks within 1.5 km of a pin, nearest first. */
+async function nearbyCards(
+  db: Db,
+  place: { slug: string; lat: number | null; lng: number | null; approx: boolean },
+  now: Date,
+): Promise<NearbyCard[]> {
+  if (place.lat === null || place.lng === null) return [];
+  const near = await nearbyPlaces(db, {
+    lat: place.lat,
+    lng: place.lng,
+    radiusKm: 1.5,
+    limit: 8,
+    exceptSlug: place.slug,
+  });
+  const cards = await getPlaceCards(
+    db,
+    near.map((n) => n.slug),
+    now,
+  );
+  const metres = new Map(near.map((n) => [n.slug, n.meters]));
+  return (
+    cards
+      .map((card): NearbyCard => {
+        // A neighbourhood-level pin has no real distance, so show none.
+        const m = place.approx || card.approx ? null : Math.round(metres.get(card.placeSlug) ?? 0);
+        return { ...card, meters: m };
+      })
+      // Pins in one neighbourhood share a point, so there the picks decide; elsewhere distance does.
+      .sort(
+        (a, b) =>
+          (metres.get(a.placeSlug) ?? 0) - (metres.get(b.placeSlug) ?? 0) || b.score - a.score,
+      )
+      .slice(0, 5)
+  );
+}
+
+export async function getPlace(db: Db, citySlug: string, placeSlug: string, now = new Date()) {
   const city = await findCity(db, citySlug);
   if (!city) return null;
   const rows = await visibleRows(
@@ -288,6 +328,16 @@ export async function getPlace(db: Db, citySlug: string, placeSlug: string) {
       // "none" marks a lookup that found no confident match.
       googlePlaceId: first.googlePlaceId === "none" ? null : first.googlePlaceId,
     },
+    nearby: await nearbyCards(
+      db,
+      {
+        slug: first.placeSlug,
+        lat: first.lat,
+        lng: first.lng,
+        approx: first.osmId?.startsWith("approx:") ?? false,
+      },
+      now,
+    ),
     dishes: [...creatorsPerDish.values()]
       .map((d) => ({ slug: d.slug, name: d.name, creators: d.creators.size }))
       .sort((a, b) => b.creators - a.creators || a.name.localeCompare(b.name)),

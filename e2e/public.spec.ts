@@ -109,3 +109,12 @@ test("the current city's tab is marked and the site ships its own icons and mani
     expect((await request.get(icon)).ok(), icon).toBe(true);
   }
 });
+
+test("a place page lists nearby picks with distance", async ({ page }) => {
+  await page.goto("/delhi/place/chache-di-hatti");
+  const nearby = page.getByRole("heading", { name: "Nearby picks" }).locator("xpath=..");
+  const link = nearby.getByRole("link", { name: /Kamla Nagar Dhaba/ });
+  await expect(link).toContainText("220 m");
+  await link.click();
+  await expect(page.getByRole("heading", { level: 1, name: "Kamla Nagar Dhaba" })).toBeVisible();
+});
