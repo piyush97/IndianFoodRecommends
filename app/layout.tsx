@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Analytics } from "../components/Analytics";
 import { SITE_URL } from "../lib/seo/site";
 import { Archivo } from "next/font/google";
@@ -11,6 +11,9 @@ const archivo = Archivo({
   variable: "--font-archivo",
   display: "swap",
 });
+
+// Paper colour: the phone status bar blends into the page, and the site is light only.
+export const viewport: Viewport = { themeColor: "#f2eee5", colorScheme: "light" };
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

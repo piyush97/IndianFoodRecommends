@@ -96,23 +96,26 @@ export function NearMeList({
               </button>
             )}
           </div>
-          <form onSubmit={search} className="flex flex-wrap items-end gap-2">
-            <label className="flex flex-col gap-1 text-sm font-medium">
+          <form onSubmit={search} className="flex flex-col gap-1">
+            <label htmlFor="area-q" className="text-sm font-medium">
               Or sort from an area or landmark
+            </label>
+            <div className="flex gap-2">
               <input
+                id="area-q"
                 name="q"
                 type="search"
                 required
                 minLength={2}
                 maxLength={80}
                 autoComplete="off"
-                placeholder="e.g. Connaught Place"
-                className="field min-h-11 w-64 max-w-full font-normal"
+                placeholder="Area or landmark"
+                className="field min-h-11 min-w-0 flex-1 font-normal sm:max-w-64 sm:flex-none sm:basis-64"
               />
-            </label>
-            <button type="submit" disabled={busy} className="btn btn-line">
-              {state === "searching" ? "Searching…" : "Sort from here"}
-            </button>
+              <button type="submit" disabled={busy} className="btn btn-line shrink-0">
+                {state === "searching" ? "Searching…" : "Sort from here"}
+              </button>
+            </div>
           </form>
           <p aria-live="polite" className="text-sm text-muted">
             {state === "nearest" && "Nearest first. Your location stays on this device."}

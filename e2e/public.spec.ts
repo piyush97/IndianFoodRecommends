@@ -92,3 +92,20 @@ test("place page links to Google Maps, Zomato and Swiggy", async ({ page }) => {
     "https://www.swiggy.com/search?query=Chache%20Di%20Hatti",
   );
 });
+
+test("the current city's tab is marked and the site ships its own icons and manifest", async ({
+  page,
+  request,
+}) => {
+  await page.goto("/delhi");
+  const tabs = page.getByRole("navigation", { name: "Cities" });
+  await expect(tabs.getByRole("link", { name: /^Delhi/ })).toHaveAttribute("aria-current", "page");
+  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute("content", "#f2eee5");
+
+  const manifest = await request.get("/manifest.webmanifest");
+  expect(manifest.ok()).toBe(true);
+  expect((await manifest.json()).name).toBe("Indian Food Recommends");
+  for (const icon of ["/icon.png", "/apple-icon.png", "/favicon.ico"]) {
+    expect((await request.get(icon)).ok(), icon).toBe(true);
+  }
+});
