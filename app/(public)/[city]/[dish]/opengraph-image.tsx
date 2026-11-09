@@ -18,6 +18,7 @@ export default async function Image({
   const n = data.places.length;
   return ogCard({
     title: `${data.dish.name} in ${data.city.name}`,
+    lid: { city: data.city.slug, count: data.creatorCount },
     subline: `${n} ${n === 1 ? "place" : "places"} picked by ${data.creatorCount} food ${data.creatorCount === 1 ? "vlogger" : "vloggers"}`,
   });
 }

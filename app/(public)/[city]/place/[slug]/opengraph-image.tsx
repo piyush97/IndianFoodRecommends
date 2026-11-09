@@ -19,5 +19,6 @@ export default async function Image({
   return ogCard({
     title: data.place.name,
     subline: `${where} · ${data.dishes.map((d) => d.name).join(", ")}`,
+    lid: { city: data.city.slug, count: new Set(data.proofs.map((p) => p.creator.slug)).size },
   });
 }
