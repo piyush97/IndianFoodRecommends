@@ -1,6 +1,7 @@
 import { cacheLife, cacheTag } from "next/cache";
 import { db } from "../../db";
 import type { DietFilter } from "../../lib/diet";
+import { getArea, getSpatialPicks, listAreas, getWalks } from "../../lib/public/spatial";
 import {
   getCity,
   getCreator,
@@ -53,4 +54,25 @@ export async function cachedCreator(slug: string, dish?: string) {
   cacheLife("hours");
   cacheTag("public", `creator:${slug}`);
   return getCreator(db, slug, dish);
+}
+export async function cachedAreas(city: string) {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("public", `city:${city}`);
+  return listAreas(db, city);
+}
+
+export async function cachedWalks(city: string, slug?: string) {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag("public", `city:${city}`);
+  return getWalks(db, city, slug);
+}
+
+export async function cachedArea(city: string, slug: string) {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("public", `city:${city}`);
+  const area = await getArea(db, city, slug);
+  return area ? { area, places: await getSpatialPicks(db, city, { area: slug }) } : null;
 }

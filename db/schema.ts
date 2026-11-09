@@ -60,6 +60,7 @@ export const sources = pgTable(
 );
 
 const geography = customType<{ data: string }>({ dataType: () => "geography(Point,4326)" });
+const geometry = customType<{ data: string }>({ dataType: () => "geometry" });
 
 export const places = pgTable(
   "places",
@@ -114,12 +115,15 @@ export const areas = pgTable(
     /** Places that mention this area: breaks ties between equally close names. */
     weight: integer("weight").notNull().default(1),
     source: areaSource("source").notNull().default("places"),
+    osmId: text("osm_id"),
+    boundary: geometry("boundary"),
     createdAt,
   },
   (t) => [
     unique("areas_city_slug_uk").on(t.cityId, t.slug),
     index("areas_city_key_idx").on(t.cityId, t.key),
     index("areas_key_trgm_idx").using("gin", t.key.op("gin_trgm_ops")),
+    index("areas_boundary_idx").using("gist", t.boundary),
   ],
 );
 
@@ -138,6 +142,40 @@ export const areaAliases = pgTable(
     index("area_aliases_key_idx").on(t.key),
     index("area_aliases_key_trgm_idx").using("gin", t.key.op("gin_trgm_ops")),
   ],
+);
+
+export const foodWalks = pgTable(
+  "food_walks",
+  {
+    id: serial("id").primaryKey(),
+    cityId: integer("city_id")
+      .notNull()
+      .references(() => cities.id, { onDelete: "cascade" }),
+    slug: text("slug").notNull(),
+    name: text("name").notNull(),
+    stopIds: jsonb("stop_ids").$type<number[]>().notNull(),
+    meters: integer("meters").notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [unique("food_walks_city_slug_uk").on(t.cityId, t.slug)],
+);
+
+export const heatCells = pgTable(
+  "heat_cells",
+  {
+    id: serial("id").primaryKey(),
+    cityId: integer("city_id")
+      .notNull()
+      .references(() => cities.id, { onDelete: "cascade" }),
+    creatorId: integer("creator_id")
+      .notNull()
+      .references(() => creators.id, { onDelete: "cascade" }),
+    cell: text("cell").notNull(),
+    count: integer("count").notNull(),
+    geometry: jsonb("geometry").$type<{ type: string; coordinates: unknown }>().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [unique("heat_cells_city_creator_cell_uk").on(t.cityId, t.creatorId, t.cell)],
 );
 
 export const dishes = pgTable("dishes", {

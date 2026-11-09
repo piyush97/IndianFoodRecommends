@@ -3,6 +3,7 @@ import postgres from "postgres";
 import * as schema from "../db/schema";
 import { truncateAll } from "../db/test-db";
 import { readLocalities, syncAreas } from "../lib/areas";
+import { refreshWalks, refreshHeatmap } from "../lib/worker/geo";
 
 /** Wipes DATABASE_URL and inserts one approved pick for the E2E flow. Never point at prod. */
 async function main(): Promise<void> {
@@ -98,6 +99,48 @@ async function main(): Promise<void> {
       },
     ]);
     await syncAreas(db, await readLocalities(db));
+    // Labelled synthetic city fixtures exercise the >300-pin tile path and five-stop walks.
+    const [tileCity] = await db
+      .insert(schema.cities)
+      .values({ slug: "jaipur", name: "Jaipur" })
+      .returning();
+    const [tileCreator] = await db
+      .insert(schema.creators)
+      .values({ slug: "tile-fixture", name: "Tile Fixture Creator" })
+      .returning();
+    const [tileSource] = await db
+      .insert(schema.sources)
+      .values({ platform: "youtube", externalId: "fixture0001", creatorId: tileCreator.id })
+      .returning();
+    const [tileDish] = await db
+      .insert(schema.dishes)
+      .values({ slug: "tile-fixture", name: "Tile Fixture Dish" })
+      .returning();
+    const tilePlaces = await db
+      .insert(schema.places)
+      .values(
+        Array.from({ length: 301 }, (_, i) => ({
+          cityId: tileCity.id,
+          slug: `tile-fixture-${i}`,
+          name: `Tile Fixture ${i}`,
+          locality: "Test fixtures",
+          lat: 26.91 + Math.floor(i / 21) * 0.0001,
+          lng: 75.78 + (i % 21) * 0.0001,
+          osmId: `node/${i + 1000}`,
+        })),
+      )
+      .returning({ id: schema.places.id });
+    await db.insert(schema.recommendations).values(
+      tilePlaces.map((p) => ({
+        placeId: p.id,
+        sourceId: tileSource.id,
+        dishId: tileDish.id,
+        status: "approved" as const,
+        origin: "manual" as const,
+      })),
+    );
+    await refreshWalks(db);
+    await refreshHeatmap(db);
     console.log("e2e seed ok");
   } finally {
     await client.end();

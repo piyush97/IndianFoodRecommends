@@ -6,6 +6,7 @@ const index: PathIndex = {
   places: new Set(["delhi/chache-di-hatti"]),
   dishes: new Set(["delhi/chole-bhature"]),
   creators: new Set(["sadi-gaddi"]),
+  areas: new Set(["delhi/kamla-nagar"]),
 };
 const known = (path: string) => isKnownPath(path.split("/").filter(Boolean), index);
 
@@ -16,6 +17,7 @@ describe("isKnownPath", () => {
       "/delhi",
       "/delhi/chole-bhature",
       "/delhi/place/chache-di-hatti",
+      "/delhi/area/kamla-nagar",
       "/delhi/place/chache-di-hatti/opengraph-image-1a2b3c",
       "/creator/sadi-gaddi",
       "/creator/sadi-gaddi/kit",
@@ -34,6 +36,8 @@ describe("isKnownPath", () => {
       "/delhi/pizza",
       "/mumbai/chole-bhature",
       "/delhi/place/nope",
+      "/delhi/area/nope",
+      "/delhi/area/kamla-nagar/extra",
       "/delhi/place/chache-di-hatti/extra",
       "/creator/nobody",
       "/creator/sadi-gaddi/a/b",

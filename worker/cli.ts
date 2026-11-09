@@ -10,6 +10,8 @@ import { listArchive, listUploadsWithFallback as listUploads } from "../lib/yout
 import { runIngest } from "../lib/worker/ingest";
 import { runEval, type Labelled } from "../lib/worker/eval";
 import { notifyRevalidate } from "../lib/revalidate-client";
+import { importOsmAreas } from "../lib/worker/osm-areas";
+import { refreshHeatmap, refreshWalks } from "../lib/worker/geo";
 
 // With a TypeSafe key, Jev screens each video before the LLM reads it.
 function extractor() {
@@ -26,6 +28,15 @@ async function ingest(): Promise<void> {
   // Labelling is a nicety: a failure must not fail the ingest or fire the alert.
   await diet().catch((error) => console.error("diet:", error));
   await areas().catch((error) => console.error("areas:", error));
+  await geo().catch((error) => console.error("geo:", error));
+}
+
+async function geo(): Promise<void> {
+  const city = process.argv[2] === "geo" ? process.argv[3] : undefined;
+  const walks = await refreshWalks(db, city);
+  const heatmap = await refreshHeatmap(db, city);
+  console.log(JSON.stringify({ walks, heatmap }));
+  await notifyRevalidate(["public"]);
 }
 
 /** Rebuilds the area list the "sort from an area" search reads, from the places' localities. */
@@ -94,13 +105,22 @@ const command = process.argv[2] ?? "ingest";
 const run =
   command === "eval"
     ? evaluate
-    : command === "review"
-      ? review
-      : command === "diet"
-        ? diet
-        : command === "areas"
-          ? areas
-          : ingest;
+    : command === "geo"
+      ? geo
+      : command === "osm-areas"
+        ? async () => {
+            const result = await importOsmAreas(db, process.argv[3]);
+            console.log(JSON.stringify({ osmAreas: result }));
+            if (result.some((r) => r.error)) process.exitCode = 1;
+            if (result.some((r) => r.areas)) await notifyRevalidate(["public"]);
+          }
+        : command === "review"
+          ? review
+          : command === "diet"
+            ? diet
+            : command === "areas"
+              ? areas
+              : ingest;
 
 run()
   .catch((error) => {
