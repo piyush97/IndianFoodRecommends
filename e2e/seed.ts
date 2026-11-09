@@ -2,6 +2,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "../db/schema";
 import { truncateAll } from "../db/test-db";
+import { readLocalities, syncAreas } from "../lib/areas";
 
 /** Wipes DATABASE_URL and inserts one approved pick for the E2E flow. Never point at prod. */
 async function main(): Promise<void> {
@@ -96,6 +97,7 @@ async function main(): Promise<void> {
         origin: "manual",
       },
     ]);
+    await syncAreas(db, await readLocalities(db));
     console.log("e2e seed ok");
   } finally {
     await client.end();

@@ -5,11 +5,13 @@ import { sortByDistance, type Point } from "./near-me";
 import { PickList } from "./PickList";
 
 type State = "ranked" | "locating" | "searching" | "nearest" | "area" | "denied" | "failed";
+type Suggestion = { name: string; lat: number; lng: number };
 
 /**
  * Opt-in distance sort, from the device position or from a typed area. The device position is
  * read only after the click and never leaves the browser: sorting happens here on coordinates
- * already in the page. A typed area is sent to OpenStreetMap search through /api/geocode.
+ * already in the page. A typed area goes to /api/geocode: matched against our own list of areas
+ * first (misspellings and nicknames included), and only if that fails sent to OpenStreetMap.
  */
 export function NearMeList({
   cards,
@@ -26,10 +28,21 @@ export function NearMeList({
   // Kept as a point, not a sorted copy, so new `cards` (a diet filter) are re-sorted.
   const [origin, setOrigin] = useState<Point | null>(null);
   const [note, setNote] = useState("");
+  const [via, setVia] = useState<"local" | "openstreetmap">("local");
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
 
   function reset() {
     setOrigin(null);
+    setSuggestions([]);
     setState("ranked");
+  }
+
+  function pick(choice: Suggestion) {
+    setOrigin({ lat: choice.lat, lng: choice.lng });
+    setNote(choice.name);
+    setVia("local");
+    setSuggestions([]);
+    setState("area");
   }
 
   function locate() {
@@ -56,19 +69,24 @@ export function NearMeList({
     const q = String(new FormData(event.currentTarget).get("q") ?? "").trim();
     if (q.length < 2) return;
     setState("searching");
+    setSuggestions([]);
     try {
       const res = await fetch(`/api/geocode?${new URLSearchParams({ city: citySlug, q })}`);
       const body = (await res.json()) as {
         lat?: number;
         lng?: number;
         label?: string;
+        via?: "local" | "openstreetmap";
         error?: string;
+        suggestions?: Suggestion[];
       };
       if (!res.ok || body.lat == null || body.lng == null) {
+        setSuggestions(body.suggestions ?? []);
         throw new Error(body.error ?? "Could not search right now.");
       }
       setOrigin({ lat: body.lat, lng: body.lng });
       setNote(body.label ?? q);
+      setVia(body.via ?? "openstreetmap");
       setState("area");
     } catch (error) {
       setOrigin(null);
@@ -120,10 +138,29 @@ export function NearMeList({
           <p aria-live="polite" className="text-sm text-muted">
             {state === "nearest" && "Nearest first. Your location stays on this device."}
             {state === "area" &&
-              `Nearest first to “${note}”. The text you typed was sent to OpenStreetMap to find it.`}
+              `Nearest first to “${note}”. ${
+                via === "local"
+                  ? "Matched against our own list of areas, nothing you typed left this site."
+                  : "The text you typed was sent to OpenStreetMap to find it."
+              }`}
             {state === "denied" && "Location is off, showing most picked first."}
             {state === "failed" && `${note} Showing most picked first.`}
           </p>
+          {state === "failed" && suggestions.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-sm font-medium">Did you mean</span>
+              {suggestions.map((choice) => (
+                <button
+                  key={choice.name}
+                  type="button"
+                  onClick={() => pick(choice)}
+                  className="btn btn-line"
+                >
+                  {choice.name}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
       <PickList

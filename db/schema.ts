@@ -84,6 +84,55 @@ export const places = pgTable(
   ],
 );
 
+/**
+ * Named areas a visitor can type ("Chandni Chowk", "CP"), resolved without calling anyone.
+ * `key` is the normalised name (lowercase, folded, punctuation gone) so lookups compare like with
+ * like and need no `unaccent` extension. `source`: places = derived from places.locality,
+ * manual = hand-curated, osm = imported boundaries, nominatim = a verified upstream hit we cached.
+ */
+export const areaSource = pgEnum("area_source", ["places", "manual", "osm", "nominatim"]);
+
+export const areas = pgTable(
+  "areas",
+  {
+    id: serial("id").primaryKey(),
+    cityId: integer("city_id")
+      .notNull()
+      .references(() => cities.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    key: text("key").notNull(),
+    slug: text("slug").notNull(),
+    lat: real("lat").notNull(),
+    lng: real("lng").notNull(),
+    /** Places that mention this area: breaks ties between equally close names. */
+    weight: integer("weight").notNull().default(1),
+    source: areaSource("source").notNull().default("places"),
+    createdAt,
+  },
+  (t) => [
+    unique("areas_city_slug_uk").on(t.cityId, t.slug),
+    index("areas_city_key_idx").on(t.cityId, t.key),
+    index("areas_key_trgm_idx").using("gin", t.key.op("gin_trgm_ops")),
+  ],
+);
+
+export const areaAliases = pgTable(
+  "area_aliases",
+  {
+    id: serial("id").primaryKey(),
+    areaId: integer("area_id")
+      .notNull()
+      .references(() => areas.id, { onDelete: "cascade" }),
+    alias: text("alias").notNull(),
+    key: text("key").notNull(),
+  },
+  (t) => [
+    unique("area_aliases_uk").on(t.areaId, t.key),
+    index("area_aliases_key_idx").on(t.key),
+    index("area_aliases_key_trgm_idx").using("gin", t.key.op("gin_trgm_ops")),
+  ],
+);
+
 export const dishes = pgTable("dishes", {
   id: serial("id").primaryKey(),
   slug: text("slug").notNull().unique(),

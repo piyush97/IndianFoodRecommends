@@ -1,0 +1,2098 @@
+[
+  {
+    "city": "bengaluru",
+    "locality": "BTM 1st Stage",
+    "n": 3,
+    "pinned": 3,
+    "lat": 12.919,
+    "lng": 77.6113
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Jayanagar",
+    "n": 3,
+    "pinned": 3,
+    "lat": 12.9283,
+    "lng": 77.5832
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Fraser Town",
+    "n": 2,
+    "pinned": 2,
+    "lat": 13.0028,
+    "lng": 77.6158
+  },
+  {
+    "city": "bengaluru",
+    "locality": "JP Nagar",
+    "n": 2,
+    "pinned": 2,
+    "lat": 12.9097,
+    "lng": 77.5866
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Kalyan Nagar",
+    "n": 2,
+    "pinned": 2,
+    "lat": 13.0221,
+    "lng": 77.6403
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Koramangala",
+    "n": 2,
+    "pinned": 2,
+    "lat": 12.9366,
+    "lng": 77.6209
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Seshadripuram",
+    "n": 2,
+    "pinned": 2,
+    "lat": 12.9947,
+    "lng": 77.5747
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Shivajinagar",
+    "n": 2,
+    "pinned": 2,
+    "lat": 12.9855,
+    "lng": 77.6054
+  },
+  {
+    "city": "bengaluru",
+    "locality": "5th Block",
+    "n": 1,
+    "pinned": 1,
+    "lat": 12.9194,
+    "lng": 77.5839
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Ayyappa Nagar, Krishnarajapuram",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "bengaluru",
+    "locality": "BTM Layout",
+    "n": 1,
+    "pinned": 1,
+    "lat": 12.914,
+    "lng": 77.6103
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Banashankari 2nd Stage",
+    "n": 1,
+    "pinned": 1,
+    "lat": 12.9269,
+    "lng": 77.5637
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Banashankari Stage 6",
+    "n": 1,
+    "pinned": 1,
+    "lat": 12.8849,
+    "lng": 77.5155
+  },
+  {
+    "city": "bengaluru",
+    "locality": "CBD",
+    "n": 1,
+    "pinned": 1,
+    "lat": 12.9742,
+    "lng": 77.6067
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Chamrajpet",
+    "n": 1,
+    "pinned": 1,
+    "lat": 12.9584,
+    "lng": 77.5629
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Chikkabanavara",
+    "n": 1,
+    "pinned": 1,
+    "lat": 13.0747,
+    "lng": 77.5056
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Chokkasandra, T. Dasarahalli",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Church Street",
+    "n": 1,
+    "pinned": 1,
+    "lat": 12.9753,
+    "lng": 77.6043
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Cooke Town",
+    "n": 1,
+    "pinned": 1,
+    "lat": 13.0022,
+    "lng": 77.6252
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Doddamavalli",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Doddamavalli, Lal Bagh Road",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Domlur",
+    "n": 1,
+    "pinned": 1,
+    "lat": 12.9625,
+    "lng": 77.6382
+  },
+  {
+    "city": "bengaluru",
+    "locality": "EPIP Zone, Whitefield",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "bengaluru",
+    "locality": "EPIP, Whitefield",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Frazer Town",
+    "n": 1,
+    "pinned": 1,
+    "lat": 12.9976,
+    "lng": 77.6137
+  },
+  {
+    "city": "bengaluru",
+    "locality": "HBR Layout",
+    "n": 1,
+    "pinned": 1,
+    "lat": 13.032,
+    "lng": 77.6281
+  },
+  {
+    "city": "bengaluru",
+    "locality": "HSR Layout",
+    "n": 1,
+    "pinned": 1,
+    "lat": 12.9116,
+    "lng": 77.6389
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Halasuru",
+    "n": 1,
+    "pinned": 1,
+    "lat": 12.9779,
+    "lng": 77.6247
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Hanumanthnagar, Banashankari",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Hulimavu",
+    "n": 1,
+    "pinned": 1,
+    "lat": 12.8773,
+    "lng": 77.6028
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Indiranagar",
+    "n": 1,
+    "pinned": 1,
+    "lat": 12.9818,
+    "lng": 77.641
+  },
+  {
+    "city": "bengaluru",
+    "locality": "JP Nagar 4th Phase",
+    "n": 1,
+    "pinned": 1,
+    "lat": 12.9046,
+    "lng": 77.5976
+  },
+  {
+    "city": "bengaluru",
+    "locality": "JP Nagar 9th Phase",
+    "n": 1,
+    "pinned": 1,
+    "lat": 12.8595,
+    "lng": 77.5606
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Jayanagar 4th Block",
+    "n": 1,
+    "pinned": 1,
+    "lat": 12.9286,
+    "lng": 77.582
+  },
+  {
+    "city": "bengaluru",
+    "locality": "KHB Colony, 5th Block",
+    "n": 1,
+    "pinned": 1,
+    "lat": 12.935,
+    "lng": 77.6178
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Kammanahalli",
+    "n": 1,
+    "pinned": 1,
+    "lat": 13.0149,
+    "lng": 77.6382
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Koramangala 4th Block",
+    "n": 1,
+    "pinned": 1,
+    "lat": 12.9328,
+    "lng": 77.6294
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Koramangala 5th Block",
+    "n": 1,
+    "pinned": 1,
+    "lat": 12.9348,
+    "lng": 77.619
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Koramangala 7th Block",
+    "n": 1,
+    "pinned": 1,
+    "lat": 12.9365,
+    "lng": 77.6135
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Krishnarajapuram",
+    "n": 1,
+    "pinned": 1,
+    "lat": 13.0005,
+    "lng": 77.6755
+  },
+  {
+    "city": "bengaluru",
+    "locality": "M G Road",
+    "n": 1,
+    "pinned": 1,
+    "lat": 12.9737,
+    "lng": 77.6132
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Mangammanapalya",
+    "n": 1,
+    "pinned": 1,
+    "lat": 12.9075,
+    "lng": 77.635
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Museum Road, Ashok Nagar",
+    "n": 1,
+    "pinned": 1,
+    "lat": 12.9715,
+    "lng": 77.6133
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Nanda Gokulam Layout, Shampura",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Nandi Bettada Cross, Heggadahalli",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "bengaluru",
+    "locality": "RMV 2nd Stage",
+    "n": 1,
+    "pinned": 1,
+    "lat": 13.036,
+    "lng": 77.5695
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Sachidananda Nagar, Rajarajeshwari Nagar",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Sarvagna Nagar",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "bengaluru",
+    "locality": "VV Puram",
+    "n": 1,
+    "pinned": 1,
+    "lat": 12.9532,
+    "lng": 77.5761
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Vijayanagar",
+    "n": 1,
+    "pinned": 1,
+    "lat": 12.971,
+    "lng": 77.5374
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Whitefield",
+    "n": 1,
+    "pinned": 1,
+    "lat": 12.9957,
+    "lng": 77.7579
+  },
+  {
+    "city": "bengaluru",
+    "locality": "Wilson Garden",
+    "n": 1,
+    "pinned": 1,
+    "lat": 12.9489,
+    "lng": 77.5968
+  },
+  {
+    "city": "chennai",
+    "locality": "Triplicane",
+    "n": 3,
+    "pinned": 3,
+    "lat": 13.0604,
+    "lng": 80.2751
+  },
+  {
+    "city": "chennai",
+    "locality": "Anna Nagar",
+    "n": 2,
+    "pinned": 2,
+    "lat": 13.0882,
+    "lng": 80.2073
+  },
+  {
+    "city": "chennai",
+    "locality": "Choolaimedu",
+    "n": 2,
+    "pinned": 2,
+    "lat": 13.0613,
+    "lng": 80.2252
+  },
+  {
+    "city": "chennai",
+    "locality": "Mogappair",
+    "n": 2,
+    "pinned": 2,
+    "lat": 13.0823,
+    "lng": 80.1702
+  },
+  {
+    "city": "chennai",
+    "locality": "Mylapore",
+    "n": 2,
+    "pinned": 2,
+    "lat": 13.0316,
+    "lng": 80.27
+  },
+  {
+    "city": "chennai",
+    "locality": "Saidapet East",
+    "n": 2,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "chennai",
+    "locality": "T. Nagar",
+    "n": 2,
+    "pinned": 2,
+    "lat": 13.0398,
+    "lng": 80.2352
+  },
+  {
+    "city": "chennai",
+    "locality": "Alapakkam",
+    "n": 1,
+    "pinned": 1,
+    "lat": 13.0499,
+    "lng": 80.1654
+  },
+  {
+    "city": "chennai",
+    "locality": "Aminjikarai",
+    "n": 1,
+    "pinned": 1,
+    "lat": 13.0721,
+    "lng": 80.2205
+  },
+  {
+    "city": "chennai",
+    "locality": "Avadi",
+    "n": 1,
+    "pinned": 1,
+    "lat": 13.119,
+    "lng": 80.0936
+  },
+  {
+    "city": "chennai",
+    "locality": "K.K.Nagar",
+    "n": 1,
+    "pinned": 1,
+    "lat": 13.0408,
+    "lng": 80.203
+  },
+  {
+    "city": "chennai",
+    "locality": "KNK Road",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "chennai",
+    "locality": "Karapakkam, OMR",
+    "n": 1,
+    "pinned": 1,
+    "lat": 12.9004,
+    "lng": 80.2274
+  },
+  {
+    "city": "chennai",
+    "locality": "Kodambakkam",
+    "n": 1,
+    "pinned": 1,
+    "lat": 13.0492,
+    "lng": 80.2243
+  },
+  {
+    "city": "chennai",
+    "locality": "Little Mount, Saidapet",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "chennai",
+    "locality": "Mandavelipakkam",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "chennai",
+    "locality": "Mount Road",
+    "n": 1,
+    "pinned": 1,
+    "lat": 13.0144,
+    "lng": 80.1931
+  },
+  {
+    "city": "chennai",
+    "locality": "Nungambakkam",
+    "n": 1,
+    "pinned": 1,
+    "lat": 13.0642,
+    "lng": 80.248
+  },
+  {
+    "city": "chennai",
+    "locality": "Palavakkam",
+    "n": 1,
+    "pinned": 1,
+    "lat": 12.96,
+    "lng": 80.256
+  },
+  {
+    "city": "chennai",
+    "locality": "Pallikaranai",
+    "n": 1,
+    "pinned": 1,
+    "lat": 12.9305,
+    "lng": 80.2078
+  },
+  {
+    "city": "chennai",
+    "locality": "Pattinapakkam",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "chennai",
+    "locality": "Perambur",
+    "n": 1,
+    "pinned": 1,
+    "lat": 13.1127,
+    "lng": 80.242
+  },
+  {
+    "city": "chennai",
+    "locality": "Pudur Road, Ambattur",
+    "n": 1,
+    "pinned": 1,
+    "lat": 13.1264,
+    "lng": 80.1589
+  },
+  {
+    "city": "chennai",
+    "locality": "Pulianthope",
+    "n": 1,
+    "pinned": 1,
+    "lat": 13.1008,
+    "lng": 80.2626
+  },
+  {
+    "city": "chennai",
+    "locality": "Red Hills",
+    "n": 1,
+    "pinned": 1,
+    "lat": 13.1923,
+    "lng": 80.1838
+  },
+  {
+    "city": "chennai",
+    "locality": "Shenoy Nagar",
+    "n": 1,
+    "pinned": 1,
+    "lat": 13.0789,
+    "lng": 80.2251
+  },
+  {
+    "city": "chennai",
+    "locality": "St Anthony Nagar, Puzhal",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "chennai",
+    "locality": "Swamy Nagar",
+    "n": 1,
+    "pinned": 1,
+    "lat": 13.1487,
+    "lng": 80.2298
+  },
+  {
+    "city": "chennai",
+    "locality": "Teynampet",
+    "n": 1,
+    "pinned": 1,
+    "lat": 13.0443,
+    "lng": 80.2498
+  },
+  {
+    "city": "chennai",
+    "locality": "Tharamani",
+    "n": 1,
+    "pinned": 1,
+    "lat": 12.9852,
+    "lng": 80.241
+  },
+  {
+    "city": "chennai",
+    "locality": "Vijayaraghavapuram, Saligramam",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "delhi",
+    "locality": "Karol Bagh",
+    "n": 3,
+    "pinned": 3,
+    "lat": 28.653,
+    "lng": 77.189
+  },
+  {
+    "city": "delhi",
+    "locality": "Majnu ka Tilla",
+    "n": 3,
+    "pinned": 3,
+    "lat": 28.7043,
+    "lng": 77.2245
+  },
+  {
+    "city": "delhi",
+    "locality": "Paschim Vihar",
+    "n": 2,
+    "pinned": 2,
+    "lat": 28.6696,
+    "lng": 77.096
+  },
+  {
+    "city": "delhi",
+    "locality": "Chandni Chowk",
+    "n": 1,
+    "pinned": 1,
+    "lat": 28.656,
+    "lng": 77.2322
+  },
+  {
+    "city": "delhi",
+    "locality": "Civil Lines",
+    "n": 1,
+    "pinned": 1,
+    "lat": 28.6807,
+    "lng": 77.2226
+  },
+  {
+    "city": "delhi",
+    "locality": "Connaught Place",
+    "n": 1,
+    "pinned": 1,
+    "lat": 28.6299,
+    "lng": 77.2173
+  },
+  {
+    "city": "delhi",
+    "locality": "Daryaganj",
+    "n": 1,
+    "pinned": 1,
+    "lat": 28.6461,
+    "lng": 77.243
+  },
+  {
+    "city": "delhi",
+    "locality": "Dwarka Sector 6 Market",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "delhi",
+    "locality": "GK-2",
+    "n": 1,
+    "pinned": 1,
+    "lat": 28.636,
+    "lng": 77.3052
+  },
+  {
+    "city": "delhi",
+    "locality": "Greater Kailash",
+    "n": 1,
+    "pinned": 1,
+    "lat": 28.5508,
+    "lng": 77.2339
+  },
+  {
+    "city": "delhi",
+    "locality": "Jail Road",
+    "n": 1,
+    "pinned": 1,
+    "lat": 28.6116,
+    "lng": 77.1118
+  },
+  {
+    "city": "delhi",
+    "locality": "Jama Masjid",
+    "n": 1,
+    "pinned": 1,
+    "lat": 28.6507,
+    "lng": 77.233
+  },
+  {
+    "city": "delhi",
+    "locality": "Jama Masjid, Old Delhi",
+    "n": 1,
+    "pinned": 1,
+    "lat": 28.6507,
+    "lng": 77.233
+  },
+  {
+    "city": "delhi",
+    "locality": "Jamuna Paar, East Delhi",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "delhi",
+    "locality": "Karampura",
+    "n": 1,
+    "pinned": 1,
+    "lat": 28.6646,
+    "lng": 77.1472
+  },
+  {
+    "city": "delhi",
+    "locality": "Mukherjee Nagar",
+    "n": 1,
+    "pinned": 1,
+    "lat": 28.7126,
+    "lng": 77.2144
+  },
+  {
+    "city": "delhi",
+    "locality": "Pacific Mall, Subhash Nagar",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "delhi",
+    "locality": "Pandara Road",
+    "n": 1,
+    "pinned": 1,
+    "lat": 28.6078,
+    "lng": 77.2301
+  },
+  {
+    "city": "delhi",
+    "locality": "Shahdara",
+    "n": 1,
+    "pinned": 1,
+    "lat": 28.6734,
+    "lng": 77.2899
+  },
+  {
+    "city": "delhi",
+    "locality": "Shakti Nagar",
+    "n": 1,
+    "pinned": 1,
+    "lat": 28.6793,
+    "lng": 77.1945
+  },
+  {
+    "city": "delhi",
+    "locality": "South Extension",
+    "n": 1,
+    "pinned": 1,
+    "lat": 28.5686,
+    "lng": 77.2206
+  },
+  {
+    "city": "delhi",
+    "locality": "Subhash Nagar",
+    "n": 1,
+    "pinned": 1,
+    "lat": 28.6405,
+    "lng": 77.1052
+  },
+  {
+    "city": "delhi",
+    "locality": "Tilak Nagar",
+    "n": 1,
+    "pinned": 1,
+    "lat": 28.6365,
+    "lng": 77.0965
+  },
+  {
+    "city": "hyderabad",
+    "locality": "Gachibowli",
+    "n": 6,
+    "pinned": 6,
+    "lat": 17.4436,
+    "lng": 78.352
+  },
+  {
+    "city": "hyderabad",
+    "locality": "Banjara Hills",
+    "n": 4,
+    "pinned": 4,
+    "lat": 17.4177,
+    "lng": 78.4399
+  },
+  {
+    "city": "hyderabad",
+    "locality": "Jubilee Hills",
+    "n": 4,
+    "pinned": 4,
+    "lat": 17.4308,
+    "lng": 78.4103
+  },
+  {
+    "city": "hyderabad",
+    "locality": "Kondapur",
+    "n": 4,
+    "pinned": 4,
+    "lat": 17.4588,
+    "lng": 78.3731
+  },
+  {
+    "city": "hyderabad",
+    "locality": "Kukatpally",
+    "n": 2,
+    "pinned": 2,
+    "lat": 17.4931,
+    "lng": 78.4054
+  },
+  {
+    "city": "hyderabad",
+    "locality": "Madhapur",
+    "n": 2,
+    "pinned": 2,
+    "lat": 17.4409,
+    "lng": 78.3916
+  },
+  {
+    "city": "hyderabad",
+    "locality": "Mallepally",
+    "n": 2,
+    "pinned": 2,
+    "lat": 17.3921,
+    "lng": 78.4546
+  },
+  {
+    "city": "hyderabad",
+    "locality": "Chatta Bazar, Nayapul",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "hyderabad",
+    "locality": "Chikkadpally",
+    "n": 1,
+    "pinned": 1,
+    "lat": 17.4062,
+    "lng": 78.4976
+  },
+  {
+    "city": "hyderabad",
+    "locality": "Gajularamaram",
+    "n": 1,
+    "pinned": 1,
+    "lat": 17.5272,
+    "lng": 78.42
+  },
+  {
+    "city": "hyderabad",
+    "locality": "HITEC City",
+    "n": 1,
+    "pinned": 1,
+    "lat": 17.449,
+    "lng": 78.3831
+  },
+  {
+    "city": "hyderabad",
+    "locality": "Hitech City",
+    "n": 1,
+    "pinned": 1,
+    "lat": 17.4697,
+    "lng": 78.3852
+  },
+  {
+    "city": "hyderabad",
+    "locality": "Housing Board Colony, Kukatpally",
+    "n": 1,
+    "pinned": 1,
+    "lat": 17.4922,
+    "lng": 78.3974
+  },
+  {
+    "city": "hyderabad",
+    "locality": "KPHB 4th Phase, Kukatpally",
+    "n": 1,
+    "pinned": 1,
+    "lat": 17.474,
+    "lng": 78.3885
+  },
+  {
+    "city": "hyderabad",
+    "locality": "KPHB Phase 3, Kukatpally",
+    "n": 1,
+    "pinned": 1,
+    "lat": 17.4877,
+    "lng": 78.3997
+  },
+  {
+    "city": "hyderabad",
+    "locality": "KPHB Phase IV, Kukatpally",
+    "n": 1,
+    "pinned": 1,
+    "lat": 17.4769,
+    "lng": 78.3823
+  },
+  {
+    "city": "hyderabad",
+    "locality": "Kompally",
+    "n": 1,
+    "pinned": 1,
+    "lat": 17.5355,
+    "lng": 78.5097
+  },
+  {
+    "city": "hyderabad",
+    "locality": "Kothapet",
+    "n": 1,
+    "pinned": 1,
+    "lat": 17.3764,
+    "lng": 78.541
+  },
+  {
+    "city": "hyderabad",
+    "locality": "Mathrusree Nagar, Hafeezpet",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "hyderabad",
+    "locality": "Miyapur",
+    "n": 1,
+    "pinned": 1,
+    "lat": 17.4982,
+    "lng": 78.3568
+  },
+  {
+    "city": "hyderabad",
+    "locality": "Nagar",
+    "n": 1,
+    "pinned": 1,
+    "lat": 17.4719,
+    "lng": 78.4924
+  },
+  {
+    "city": "hyderabad",
+    "locality": "Nallagandla",
+    "n": 1,
+    "pinned": 1,
+    "lat": 17.4775,
+    "lng": 78.306
+  },
+  {
+    "city": "hyderabad",
+    "locality": "Nanakramguda",
+    "n": 1,
+    "pinned": 1,
+    "lat": 17.4218,
+    "lng": 78.338
+  },
+  {
+    "city": "hyderabad",
+    "locality": "SR Nagar, Kalyan Nagar 1",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "hyderabad",
+    "locality": "Sarath City Mall, Gachibowli",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "hyderabad",
+    "locality": "Vanasthalipuram",
+    "n": 1,
+    "pinned": 1,
+    "lat": 17.3303,
+    "lng": 78.5683
+  },
+  {
+    "city": "jaipur",
+    "locality": "Masala Chowk, Adarsh Nagar",
+    "n": 2,
+    "pinned": 2,
+    "lat": 26.9103,
+    "lng": 75.8206
+  },
+  {
+    "city": "jaipur",
+    "locality": "22 Godam",
+    "n": 1,
+    "pinned": 1,
+    "lat": 26.9028,
+    "lng": 75.7927
+  },
+  {
+    "city": "jaipur",
+    "locality": "Chandpole Bazar",
+    "n": 1,
+    "pinned": 1,
+    "lat": 26.9229,
+    "lng": 75.8089
+  },
+  {
+    "city": "jaipur",
+    "locality": "Jyoti Nagar, Lal Kothi",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "jaipur",
+    "locality": "Masala Chowk",
+    "n": 1,
+    "pinned": 1,
+    "lat": 26.9103,
+    "lng": 75.8206
+  },
+  {
+    "city": "jaipur",
+    "locality": "Meera Marg, Mansarovar",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "jaipur",
+    "locality": "Raja Park",
+    "n": 1,
+    "pinned": 1,
+    "lat": 26.8966,
+    "lng": 75.8271
+  },
+  {
+    "city": "jaipur",
+    "locality": "Sodala",
+    "n": 1,
+    "pinned": 1,
+    "lat": 26.902,
+    "lng": 75.7736
+  },
+  {
+    "city": "jaipur",
+    "locality": "Vaishali Nagar",
+    "n": 1,
+    "pinned": 1,
+    "lat": 26.9148,
+    "lng": 75.7385
+  },
+  {
+    "city": "kolkata",
+    "locality": "Zakaria Street",
+    "n": 4,
+    "pinned": 4,
+    "lat": 22.5769,
+    "lng": 88.3602
+  },
+  {
+    "city": "kolkata",
+    "locality": "Park Circus",
+    "n": 3,
+    "pinned": 3,
+    "lat": 22.5408,
+    "lng": 88.3739
+  },
+  {
+    "city": "kolkata",
+    "locality": "Park Street",
+    "n": 3,
+    "pinned": 3,
+    "lat": 22.5542,
+    "lng": 88.3514
+  },
+  {
+    "city": "kolkata",
+    "locality": "Alipore",
+    "n": 2,
+    "pinned": 2,
+    "lat": 22.5265,
+    "lng": 88.3324
+  },
+  {
+    "city": "kolkata",
+    "locality": "Barasat",
+    "n": 2,
+    "pinned": 2,
+    "lat": 22.7191,
+    "lng": 88.4826
+  },
+  {
+    "city": "kolkata",
+    "locality": "Behala",
+    "n": 2,
+    "pinned": 2,
+    "lat": 22.5016,
+    "lng": 88.3209
+  },
+  {
+    "city": "kolkata",
+    "locality": "Bhowanipore",
+    "n": 2,
+    "pinned": 2,
+    "lat": 22.5326,
+    "lng": 88.3454
+  },
+  {
+    "city": "kolkata",
+    "locality": "Metiabruz",
+    "n": 2,
+    "pinned": 2,
+    "lat": 22.5436,
+    "lng": 88.2679
+  },
+  {
+    "city": "kolkata",
+    "locality": "South Kolkata",
+    "n": 2,
+    "pinned": 2,
+    "lat": 22.4971,
+    "lng": 88.5159
+  },
+  {
+    "city": "kolkata",
+    "locality": "Ballygunge",
+    "n": 1,
+    "pinned": 1,
+    "lat": 22.528,
+    "lng": 88.3659
+  },
+  {
+    "city": "kolkata",
+    "locality": "Barabazar",
+    "n": 1,
+    "pinned": 1,
+    "lat": 22.5814,
+    "lng": 88.3528
+  },
+  {
+    "city": "kolkata",
+    "locality": "Bhowanipore, South Kolkata",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "kolkata",
+    "locality": "Camac Street",
+    "n": 1,
+    "pinned": 1,
+    "lat": 22.5433,
+    "lng": 88.3521
+  },
+  {
+    "city": "kolkata",
+    "locality": "College Row",
+    "n": 1,
+    "pinned": 1,
+    "lat": 22.5774,
+    "lng": 88.3655
+  },
+  {
+    "city": "kolkata",
+    "locality": "College Street",
+    "n": 1,
+    "pinned": 1,
+    "lat": 22.5672,
+    "lng": 88.3601
+  },
+  {
+    "city": "kolkata",
+    "locality": "Coolootola",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "kolkata",
+    "locality": "Deshapriya Park",
+    "n": 1,
+    "pinned": 1,
+    "lat": 22.5184,
+    "lng": 88.3535
+  },
+  {
+    "city": "kolkata",
+    "locality": "Hazra",
+    "n": 1,
+    "pinned": 1,
+    "lat": 22.5227,
+    "lng": 88.3499
+  },
+  {
+    "city": "kolkata",
+    "locality": "Madhyamgram",
+    "n": 1,
+    "pinned": 1,
+    "lat": 22.6948,
+    "lng": 88.453
+  },
+  {
+    "city": "kolkata",
+    "locality": "Manicktala",
+    "n": 1,
+    "pinned": 1,
+    "lat": 22.5832,
+    "lng": 88.3917
+  },
+  {
+    "city": "kolkata",
+    "locality": "Middleton Street",
+    "n": 1,
+    "pinned": 1,
+    "lat": 22.549,
+    "lng": 88.3512
+  },
+  {
+    "city": "kolkata",
+    "locality": "Mirza Ghalib Street",
+    "n": 1,
+    "pinned": 1,
+    "lat": 22.5573,
+    "lng": 88.3547
+  },
+  {
+    "city": "kolkata",
+    "locality": "Rajabazar",
+    "n": 1,
+    "pinned": 1,
+    "lat": 22.5742,
+    "lng": 88.3734
+  },
+  {
+    "city": "kolkata",
+    "locality": "Salt Lake Sector V",
+    "n": 1,
+    "pinned": 1,
+    "lat": 22.5809,
+    "lng": 88.4291
+  },
+  {
+    "city": "kolkata",
+    "locality": "Salt Lake, City Center 1",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "kolkata",
+    "locality": "Shobhabazar",
+    "n": 1,
+    "pinned": 1,
+    "lat": 22.5959,
+    "lng": 88.3652
+  },
+  {
+    "city": "kolkata",
+    "locality": "Shyambazar",
+    "n": 1,
+    "pinned": 1,
+    "lat": 22.6013,
+    "lng": 88.3725
+  },
+  {
+    "city": "kolkata",
+    "locality": "Tangra",
+    "n": 1,
+    "pinned": 1,
+    "lat": 22.5565,
+    "lng": 88.3796
+  },
+  {
+    "city": "kolkata",
+    "locality": "Waterloo Street",
+    "n": 1,
+    "pinned": 1,
+    "lat": 22.5676,
+    "lng": 88.3514
+  },
+  {
+    "city": "lucknow",
+    "locality": "Aminabad",
+    "n": 5,
+    "pinned": 5,
+    "lat": 26.8487,
+    "lng": 80.927
+  },
+  {
+    "city": "lucknow",
+    "locality": "Chowk",
+    "n": 4,
+    "pinned": 4,
+    "lat": 26.8677,
+    "lng": 80.9042
+  },
+  {
+    "city": "lucknow",
+    "locality": "Hazratganj",
+    "n": 2,
+    "pinned": 2,
+    "lat": 26.8475,
+    "lng": 80.9432
+  },
+  {
+    "city": "lucknow",
+    "locality": "Sadar Market",
+    "n": 2,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "lucknow",
+    "locality": "Alambagh",
+    "n": 1,
+    "pinned": 1,
+    "lat": 26.814,
+    "lng": 80.9025
+  },
+  {
+    "city": "lucknow",
+    "locality": "Aminabad Market, Aminabad (lane adjacent Khun Khun Ji Jewellers)",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "lucknow",
+    "locality": "Buddha Park (Happiness Park), Hasanganj",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "lucknow",
+    "locality": "China Bazaar",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "lucknow",
+    "locality": "Chowk, Gol Darwaza",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "lucknow",
+    "locality": "D-Block, Rajajipuram",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "lucknow",
+    "locality": "Gomti Nagar",
+    "n": 1,
+    "pinned": 1,
+    "lat": 26.8612,
+    "lng": 81.0039
+  },
+  {
+    "city": "lucknow",
+    "locality": "Husainabad",
+    "n": 1,
+    "pinned": 1,
+    "lat": 26.8768,
+    "lng": 80.9071
+  },
+  {
+    "city": "lucknow",
+    "locality": "Husainabad Food Court, Husainabad",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "lucknow",
+    "locality": "Kaiser Bagh",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "lucknow",
+    "locality": "Kapoorthala",
+    "n": 1,
+    "pinned": 1,
+    "lat": 26.8827,
+    "lng": 80.946
+  },
+  {
+    "city": "lucknow",
+    "locality": "Khayali Ganj",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "lucknow",
+    "locality": "Lalbagh",
+    "n": 1,
+    "pinned": 1,
+    "lat": 26.7908,
+    "lng": 80.8702
+  },
+  {
+    "city": "lucknow",
+    "locality": "Latouche Road Tiraha, Ghasyari Mandi, Naka Hindola",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "lucknow",
+    "locality": "Lucknow University",
+    "n": 1,
+    "pinned": 1,
+    "lat": 26.8657,
+    "lng": 80.9367
+  },
+  {
+    "city": "lucknow",
+    "locality": "Mall Avenue",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "lucknow",
+    "locality": "Naka Hindola",
+    "n": 1,
+    "pinned": 1,
+    "lat": 26.8428,
+    "lng": 80.9278
+  },
+  {
+    "city": "lucknow",
+    "locality": "Naza Market, Hazratganj",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "lucknow",
+    "locality": "Near University of Lucknow Metro Station",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "lucknow",
+    "locality": "Nigoha (Lucknow-Raebareli Road)",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "lucknow",
+    "locality": "Nigoha Bazaar",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "lucknow",
+    "locality": "Sadar Market, near Chappan Bhog",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "lucknow",
+    "locality": "Sector L",
+    "n": 1,
+    "pinned": 1,
+    "lat": 26.8919,
+    "lng": 80.9996
+  },
+  {
+    "city": "lucknow",
+    "locality": "Sector-K, Aashiyana",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "lucknow",
+    "locality": "Tedhi Pulia, Alambagh",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "mumbai",
+    "locality": "Bandra",
+    "n": 4,
+    "pinned": 4,
+    "lat": 19.0547,
+    "lng": 72.838
+  },
+  {
+    "city": "mumbai",
+    "locality": "Colaba",
+    "n": 4,
+    "pinned": 4,
+    "lat": 18.9196,
+    "lng": 72.8294
+  },
+  {
+    "city": "mumbai",
+    "locality": "Fort",
+    "n": 4,
+    "pinned": 4,
+    "lat": 18.9379,
+    "lng": 72.8346
+  },
+  {
+    "city": "mumbai",
+    "locality": "Kandivali",
+    "n": 4,
+    "pinned": 4,
+    "lat": 19.2042,
+    "lng": 72.852
+  },
+  {
+    "city": "mumbai",
+    "locality": "Sion Koliwada",
+    "n": 4,
+    "pinned": 4,
+    "lat": 19.0106,
+    "lng": 72.8483
+  },
+  {
+    "city": "mumbai",
+    "locality": "Lalbaug",
+    "n": 3,
+    "pinned": 3,
+    "lat": 18.9914,
+    "lng": 72.8365
+  },
+  {
+    "city": "mumbai",
+    "locality": "Naupada",
+    "n": 3,
+    "pinned": 3,
+    "lat": 19.083,
+    "lng": 72.889
+  },
+  {
+    "city": "mumbai",
+    "locality": "Parel",
+    "n": 3,
+    "pinned": 3,
+    "lat": 18.9933,
+    "lng": 72.8358
+  },
+  {
+    "city": "mumbai",
+    "locality": "Bandra West",
+    "n": 2,
+    "pinned": 2,
+    "lat": 19.0583,
+    "lng": 72.8303
+  },
+  {
+    "city": "mumbai",
+    "locality": "CSMT Station",
+    "n": 2,
+    "pinned": 2,
+    "lat": 18.9405,
+    "lng": 72.8358
+  },
+  {
+    "city": "mumbai",
+    "locality": "Charni Road",
+    "n": 2,
+    "pinned": 2,
+    "lat": 18.9518,
+    "lng": 72.8182
+  },
+  {
+    "city": "mumbai",
+    "locality": "Dadar",
+    "n": 2,
+    "pinned": 2,
+    "lat": 19.0215,
+    "lng": 72.8418
+  },
+  {
+    "city": "mumbai",
+    "locality": "Gokhale Road, Naupada",
+    "n": 2,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "mumbai",
+    "locality": "Matunga",
+    "n": 2,
+    "pinned": 2,
+    "lat": 19.0289,
+    "lng": 72.8488
+  },
+  {
+    "city": "mumbai",
+    "locality": "Mulund West",
+    "n": 2,
+    "pinned": 2,
+    "lat": 19.172,
+    "lng": 72.9512
+  },
+  {
+    "city": "mumbai",
+    "locality": "Oshiwara",
+    "n": 2,
+    "pinned": 2,
+    "lat": 19.1502,
+    "lng": 72.8342
+  },
+  {
+    "city": "mumbai",
+    "locality": "Powai",
+    "n": 2,
+    "pinned": 2,
+    "lat": 19.1187,
+    "lng": 72.9073
+  },
+  {
+    "city": "mumbai",
+    "locality": "Vile Parle",
+    "n": 2,
+    "pinned": 2,
+    "lat": 19.0999,
+    "lng": 72.844
+  },
+  {
+    "city": "mumbai",
+    "locality": "Airoli",
+    "n": 1,
+    "pinned": 1,
+    "lat": 19.1461,
+    "lng": 72.9929
+  },
+  {
+    "city": "mumbai",
+    "locality": "Andheri East",
+    "n": 1,
+    "pinned": 1,
+    "lat": 19.1159,
+    "lng": 72.8542
+  },
+  {
+    "city": "mumbai",
+    "locality": "BKC",
+    "n": 1,
+    "pinned": 1,
+    "lat": 19.0593,
+    "lng": 72.8613
+  },
+  {
+    "city": "mumbai",
+    "locality": "Bandra East",
+    "n": 1,
+    "pinned": 1,
+    "lat": 19.0593,
+    "lng": 72.8613
+  },
+  {
+    "city": "mumbai",
+    "locality": "Bandra Reclamation (West)",
+    "n": 1,
+    "pinned": 1,
+    "lat": 19.0544,
+    "lng": 72.8352
+  },
+  {
+    "city": "mumbai",
+    "locality": "Beverly Park, Mira Road East",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "mumbai",
+    "locality": "Bhendi Bazar",
+    "n": 1,
+    "pinned": 1,
+    "lat": 18.9579,
+    "lng": 72.8318
+  },
+  {
+    "city": "mumbai",
+    "locality": "Bohri Mohalla, Bhendi Bazar",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "mumbai",
+    "locality": "CSMT",
+    "n": 1,
+    "pinned": 1,
+    "lat": 18.9414,
+    "lng": 72.8354
+  },
+  {
+    "city": "mumbai",
+    "locality": "Chakala, Andheri East",
+    "n": 1,
+    "pinned": 1,
+    "lat": 19.1153,
+    "lng": 72.8618
+  },
+  {
+    "city": "mumbai",
+    "locality": "Ghantali",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "mumbai",
+    "locality": "Glomax Mall, Sector 2, Kharghar",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "mumbai",
+    "locality": "Gokhale Road, Dadar West",
+    "n": 1,
+    "pinned": 1,
+    "lat": 19.0122,
+    "lng": 72.8329
+  },
+  {
+    "city": "mumbai",
+    "locality": "Hiranandani Estate, Ghodbunder Patlipada",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "mumbai",
+    "locality": "I.C. Colony, Borivali West",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "mumbai",
+    "locality": "Jangal Mangal, Bhandup",
+    "n": 1,
+    "pinned": 1,
+    "lat": 19.1456,
+    "lng": 72.9286
+  },
+  {
+    "city": "mumbai",
+    "locality": "Juhu",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "mumbai",
+    "locality": "Kala Ghoda",
+    "n": 1,
+    "pinned": 1,
+    "lat": 18.9318,
+    "lng": 72.8361
+  },
+  {
+    "city": "mumbai",
+    "locality": "Kalbadevi",
+    "n": 1,
+    "pinned": 1,
+    "lat": 18.9493,
+    "lng": 72.8279
+  },
+  {
+    "city": "mumbai",
+    "locality": "Kalwa",
+    "n": 1,
+    "pinned": 1,
+    "lat": 19.1961,
+    "lng": 72.988
+  },
+  {
+    "city": "mumbai",
+    "locality": "Kapurbawdi",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "mumbai",
+    "locality": "Kharegaon",
+    "n": 1,
+    "pinned": 1,
+    "lat": 19.2046,
+    "lng": 73.007
+  },
+  {
+    "city": "mumbai",
+    "locality": "Kolbad, Uthalsar",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "mumbai",
+    "locality": "Kopar Khairane",
+    "n": 1,
+    "pinned": 1,
+    "lat": 19.0987,
+    "lng": 73.0015
+  },
+  {
+    "city": "mumbai",
+    "locality": "Lower Parel",
+    "n": 1,
+    "pinned": 1,
+    "lat": 18.9957,
+    "lng": 72.8303
+  },
+  {
+    "city": "mumbai",
+    "locality": "Manpada, Thane West",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "mumbai",
+    "locality": "Marol",
+    "n": 1,
+    "pinned": 1,
+    "lat": 19.1172,
+    "lng": 72.8823
+  },
+  {
+    "city": "mumbai",
+    "locality": "Marol, Andheri",
+    "n": 1,
+    "pinned": 1,
+    "lat": 19.1081,
+    "lng": 72.8796
+  },
+  {
+    "city": "mumbai",
+    "locality": "Mhada, Vihar West",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "mumbai",
+    "locality": "Mindspace Airoli East, Airoli",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "mumbai",
+    "locality": "Mohammed Ali Road, Bhendi Bazaar",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "mumbai",
+    "locality": "Mulund",
+    "n": 1,
+    "pinned": 1,
+    "lat": 19.1721,
+    "lng": 72.9567
+  },
+  {
+    "city": "mumbai",
+    "locality": "Owale, Thane West",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "mumbai",
+    "locality": "Panch Pakhadi",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "mumbai",
+    "locality": "Phoenix Marketcity, Kurla",
+    "n": 1,
+    "pinned": 1,
+    "lat": 19.0863,
+    "lng": 72.8892
+  },
+  {
+    "city": "mumbai",
+    "locality": "Pokhran No 2",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "mumbai",
+    "locality": "Ram Maruti Road",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "mumbai",
+    "locality": "Ranade Road, Dadar West",
+    "n": 1,
+    "pinned": 1,
+    "lat": 19.0251,
+    "lng": 72.8369
+  },
+  {
+    "city": "mumbai",
+    "locality": "Sawarkar Nagar",
+    "n": 1,
+    "pinned": 1,
+    "lat": 19.1992,
+    "lng": 72.9961
+  },
+  {
+    "city": "mumbai",
+    "locality": "Sector 42, Nerul",
+    "n": 1,
+    "pinned": 1,
+    "lat": 19.0371,
+    "lng": 73.0233
+  },
+  {
+    "city": "mumbai",
+    "locality": "Shivaji Nagar",
+    "n": 1,
+    "pinned": 1,
+    "lat": 19.0638,
+    "lng": 72.9249
+  },
+  {
+    "city": "mumbai",
+    "locality": "Teen Hath Naka",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  },
+  {
+    "city": "mumbai",
+    "locality": "Thakur Village, East",
+    "n": 1,
+    "pinned": 1,
+    "lat": 19.2136,
+    "lng": 72.867
+  },
+  {
+    "city": "mumbai",
+    "locality": "Tilak Road, Ghatkopar East",
+    "n": 1,
+    "pinned": 1,
+    "lat": 19.0809,
+    "lng": 72.9065
+  },
+  {
+    "city": "mumbai",
+    "locality": "Zaveri Bazar, Kalbadevi",
+    "n": 1,
+    "pinned": 0,
+    "lat": null,
+    "lng": null
+  }
+]
