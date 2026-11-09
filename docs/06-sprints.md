@@ -97,9 +97,47 @@ Ranked by return per hour. State at planning (2026-11-08): 40 approved picks, 11
 
 Carried over: #39 (100 approved picks per city), #42 (contact 3 creators).
 
+## Sprint 6 · Area search fix + PostGIS (week 12)
+
+Plan: `docs/superpowers/plans/2026-11-09-plan-geo-and-engineering.md`. Trigger: "chandini chowk" returned "Could not find that place in Delhi" because Nominatim has no fuzzy match and `findArea` ignores our own `places.locality`.
+
+| ID   | Task                                                                                           | Est (h) | Model                | Done when                                                      |
+| ---- | ---------------------------------------------------------------------------------------------- | ------- | -------------------- | -------------------------------------------------------------- |
+| S6-1 | Area-query eval set: 100 queries over 8 cities + baseline hit rate of the Nominatim path       | 3       | Sonnet + Human       | `eval/area-queries.jsonl` committed, baseline number in the PR |
+| S6-2 | `areas` table seeded from `places.locality`, `unaccent` + `pg_trgm` GIN indexes                | 4       | Sonnet               | ~260 areas on prod, EXPLAIN test uses the trigram index        |
+| S6-3 | `findArea()`: exact/alias, trigram, Nominatim with write-back, "Did you mean" links            | 5       | Opus                 | "chandini chowk" resolves on prod; a miss shows 3 suggestions  |
+| S6-4 | Run the area eval in CI with a 95% gate                                                        | 2       | Haiku                | CI fails when hit rate < 95%                                   |
+| S6-5 | PostGIS in local dev, test DB and CI (`postgis/postgis` image)                                 | 2       | Sonnet               | `pnpm test` with DB passes locally and in CI on PostGIS        |
+| S6-6 | `places.geom` generated column + GiST, port `nearbyPlaces` to `ST_DWithin`, drop earthdistance | 4       | Opus                 | geo tests pass, plan uses `places_geom_idx`, old index dropped |
+| S6-7 | ADR backfill: 8 decisions in `docs/adr/`                                                       | 3       | Sonnet + Human edits | 8 records with context, options, decision, revisit trigger     |
+
+## Sprint 7 · Geo features (weeks 13-14)
+
+| ID   | Task                                                                          | Est (h) | Model  | Done when                                                      |
+| ---- | ----------------------------------------------------------------------------- | ------- | ------ | -------------------------------------------------------------- |
+| S7-1 | OSM neighbourhood import (Overpass, worker command, boundaries) for 8 cities  | 5       | Sonnet | areas have boundaries where OSM has them, attribution shown    |
+| S7-2 | Dish-near-area query ("chole bhature near chandni chowk") + search page + e2e | 5       | Opus   | e2e: query returns only picks within 2 km, sorted by distance  |
+| S7-3 | "Search this area" on the map (bbox endpoint, list sync, keyboard reachable)  | 5       | Sonnet | pan + button re-lists picks in view, works by keyboard         |
+| S7-4 | Neighbourhood pages `/[city]/area/[slug]` + sitemap + OG + known-paths        | 5       | Sonnet | page 200 on prod, unknown area 404, in sitemap                 |
+| S7-5 | Food walks: DBSCAN job, `food_walks` table, page, Google Maps multi-stop link | 8       | Opus   | each walk has 4+ exact-pin stops, total distance, working link |
+| S7-6 | H3 heatmap layer, precomputed by the worker                                   | 4       | Sonnet | toggle on city map, no request-time geo work                   |
+| S7-7 | MVT tile route; map uses tiles above 300 pins                                 | 5       | Opus   | `/api/tiles/z/x/y` returns valid MVT, map renders from tiles   |
+
+## Sprint 8 · Prove it (week 15)
+
+| ID   | Task                                                       | Est (h) | Model              | Done when                                                        |
+| ---- | ---------------------------------------------------------- | ------- | ------------------ | ---------------------------------------------------------------- |
+| S8-1 | Record current numbers, then write `docs/slo.md`           | 3       | Sonnet             | SLOs written next to measured baselines                          |
+| S8-2 | OpenTelemetry tracing + worker `runs` table + `/admin/ops` | 6       | Sonnet             | a trace shows DB + Nominatim spans, last 30 runs visible         |
+| S8-3 | 50k synthetic places seed for EXPLAIN tests in CI          | 3       | Sonnet             | hot-query plan tests run at 50k rows in CI                       |
+| S8-4 | k6 load test against a preview + committed report          | 3       | Sonnet             | report in `docs/perf/`, command reproduces it                    |
+| S8-5 | Postgres token-bucket rate limit for geocode + search      | 4       | Opus               | limit survives cold starts, test covers burst and refill         |
+| S8-6 | Neon branch per PR + CI migration safety check             | 5       | Opus               | PR migrations run on a branch DB, unsafe index/type change fails |
+| S8-7 | Case study, architecture diagram, README section           | 4       | Opus + Human edits | every number has a command that reproduces it                    |
+
 ## Totals
 
-~170 engineer-hours. With AI doing most build tasks, human time ≈ 40 h (labels, review, legal, accounts).
+~170 engineer-hours through Sprint 4, plus Sprints 6-8 at 88 h (23 + 37 + 28). With AI doing most build tasks, human time ≈ 40 h (labels, review, legal, accounts).
 
 ## Creating the board (when approved)
 
