@@ -26,6 +26,7 @@ DONE = {
     "S3-1", "S3-2", "S3-3", "S3-4", "S3-5", "S3-6", "S3-7", "S3-8", "S3-9",
     "S4-1", "S4-3", "S4-4",
     "S5-1", "S5-2", "S5-3", "S5-4", "S5-5", "S5-6", "S5-7", "S5-8", "S5-9",
+    "S6-1", "S6-2", "S6-3", "S6-4", "S6-5", "S6-6", "S6-7",
 }
 NOTES = {
     "S0-7": "Done with Neon via Vercel Marketplace. No Google Cloud key: YouTube RSS replaced the Data API.",
