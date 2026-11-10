@@ -14,7 +14,9 @@ function planText(rows: unknown): string {
   return JSON.stringify(rows);
 }
 
-describeDb("hot query plans at 50k places", () => {
+// Other DB test files truncate shared tables in parallel, so any EXPLAIN here can wait
+// on their locks or a re-seed; one suite-wide budget instead of per-test ones.
+describeDb("hot query plans at 50k places", { timeout: 240_000 }, () => {
   let db: Db;
   let total: number;
 

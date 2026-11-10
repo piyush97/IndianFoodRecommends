@@ -1,0 +1,21 @@
+name: Neon cleanup
+
+# Deletes the pr-<number> branch DB that ci.yml creates, so free-tier branch slots don't run out.
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  delete-branch:
+    runs-on: ubuntu-latest
+    env:
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+    steps:
+      - if: env.NEON_API_KEY != ''
+        # PRs opened before the key existed have no branch to delete.
+        continue-on-error: true
+        uses: neondatabase/delete-branch-action@v3
+        with:
+          project_id: ${{ vars.NEON_PROJECT_ID }}
+          branch: pr-${{ github.event.number }}
+          api_key: ${{ env.NEON_API_KEY }}
