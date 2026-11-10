@@ -1,3 +1,4 @@
+-- ifr:allow-locking-index: worker_runs is created empty in this same migration, so the index lock is instant.
 CREATE TABLE "worker_runs" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"command" text NOT NULL,
