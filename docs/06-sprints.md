@@ -138,6 +138,18 @@ see [local validation and release gates](superpowers/plans/2026-11-09-plan-geo-a
 | S8-6 | Neon branch per PR + CI migration safety check             | 5       | Opus               | PR migrations run on a branch DB, unsafe index/type change fails |
 | S8-7 | Case study, architecture diagram, README section           | 4       | Opus + Human edits | every number has a command that reproduces it                    |
 
+## Sprint 9 · Ship what's built (week 16)
+
+Open work only: Sprint 7 production gates, the unfinished parts of S8-4 and S8-6, and two items carried since Sprint 4.
+
+| ID   | Task                                                                                   | Est (h) | Model  | Done when                                                        |
+| ---- | -------------------------------------------------------------------------------------- | ------- | ------ | ---------------------------------------------------------------- |
+| S9-1 | Sprint 7 on prod: migrations, 8-city OSM import, walks + heatmap refresh, route checks | 3       | Sonnet | prod schema matches a fresh migrate; area, walk, tile routes 200 |
+| S9-2 | Neon branch per PR: CI runs migrations on a branch of prod, deleted on PR close        | 2       | Opus   | a PR with a migration shows a `pr-<n>` branch run in CI          |
+| S9-3 | k6 load test against a Vercel preview, report in `docs/perf/`                          | 2       | Sonnet | report names the preview URL and the command that reproduces it  |
+| S9-4 | 100 approved picks per city: creators + backfill for the 7 cities under 100 (#39)      | 5       | Sonnet | each city has 100 approved picks                                 |
+| S9-5 | Creator outreach kit (share link, embed badge), carried from #42                       | 3       | Sonnet | creator page has a copyable link and badge snippet               |
+
 ## Totals
 
 ~170 engineer-hours through Sprint 4, plus Sprints 6-8 at 88 h (23 + 37 + 28). With AI doing most build tasks, human time ≈ 40 h (labels, review, legal, accounts).
