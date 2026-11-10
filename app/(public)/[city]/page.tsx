@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { DishRow } from "../../../components/DishRow";
@@ -10,7 +11,7 @@ import { NearMeList } from "../../../components/NearMeList";
 import { Skeleton } from "../../../components/Skeleton";
 import { CITIES } from "../../../lib/cities";
 import { parseDiet } from "../../../lib/diet";
-import { cachedCity } from "../data";
+import { cachedCity, cachedAreas } from "../data";
 
 export async function generateMetadata({ params }: PageProps<"/[city]">): Promise<Metadata> {
   const { city } = await params;
@@ -46,7 +47,7 @@ async function City({
 }) {
   const { city: slug } = await params;
   const diet = parseDiet((await searchParams).diet);
-  const data = await cachedCity(slug, diet);
+  const [data, areas] = await Promise.all([cachedCity(slug, diet), cachedAreas(slug)]);
   if (!data) notFound();
 
   return (
@@ -62,8 +63,12 @@ async function City({
       <section className="flex flex-col gap-3">
         <h2 className="type-lid border-b-2 border-ink pb-2 text-[1.75rem]">Most picked places</h2>
         <ListMapToggle
+          key={diet ?? "all"}
           citySlug={data.city.slug}
           points={mapPoints(data.places)}
+          cards={data.places}
+          filter={{ diet }}
+          heatmap={!diet}
           list={
             <NearMeList
               cards={data.places}
@@ -77,6 +82,25 @@ async function City({
         <section className="flex flex-col gap-2">
           <h2 className="type-lid border-b-2 border-ink pb-2 text-[1.75rem]">By dish</h2>
           <DishRow citySlug={data.city.slug} cityName={data.city.name} dishes={data.dishes} />
+        </section>
+      )}
+      <Link className="btn btn-line self-start" href={`/${slug}/walks`}>
+        Food walks in {data.city.name}
+      </Link>
+      {areas.length > 0 && (
+        <section className="flex flex-col gap-2">
+          <h2 className="type-lid border-b-2 border-ink pb-2 text-[1.75rem]">By neighbourhood</h2>
+          <nav aria-label="Neighbourhoods" className="flex flex-wrap gap-x-4 gap-y-1">
+            {areas.map((a) => (
+              <Link
+                className="inline-flex min-h-11 items-center underline"
+                key={a.slug}
+                href={`/${slug}/area/${a.slug}`}
+              >
+                {a.name}
+              </Link>
+            ))}
+          </nav>
         </section>
       )}
     </>

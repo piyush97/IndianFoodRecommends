@@ -5,12 +5,16 @@ import { Suspense } from "react";
 import { DietFilter } from "../../../components/DietFilter";
 import { FilterGroup, Segment } from "../../../components/FilterGroup";
 import { PickList } from "../../../components/PickList";
+import { nearAreaSearch } from "../../../lib/public/spatial";
 import { Skeleton } from "../../../components/Skeleton";
 import { db } from "../../../db";
 import { parseDiet, type DietFilter as Diet } from "../../../lib/diet";
 import { CITIES } from "../../../lib/cities";
 import { getDishPicks, getPlaceCards, type PickCard } from "../../../lib/public/queries";
 import { searchAll } from "../../../lib/public/search";
+import { clientKey, takeToken } from "../../../lib/rate-limit";
+import { withSpan } from "../../../lib/tracing";
+import { headers } from "next/headers";
 import { logMiss } from "../../../lib/search-misses";
 import { cachedCities, cachedHome } from "../data";
 
@@ -59,7 +63,70 @@ async function Results({ searchParams }: Pick<Props, "searchParams">) {
 
   if (!query.trim()) return <EmptyQuery />;
 
-  const res = await searchAll(db, query);
+  const nearby = await nearAreaSearch(db, query, city || undefined, diet);
+  if (nearby)
+    return (
+      <>
+        <h1 className="type-lid text-[2.2rem]">Results for “{query}”</h1>
+        {nearby.area ? (
+          <p className="text-sm text-muted">
+            Within 2 km of{" "}
+            <Link href={`/${nearby.area.citySlug}/area/${nearby.area.slug}`} className="underline">
+              {nearby.area.name}, {nearby.area.cityName}
+            </Link>
+            . Nearest first. Distances are straight-line; approximate pins remain labelled.
+          </p>
+        ) : (
+          <p role="status">{nearby.error}</p>
+        )}
+        <DietFilter
+          current={diet}
+          href={(d) => searchHref({ q: query, city, dish: "", sort, diet: d })}
+        />
+        {nearby.suggestions.length > 0 && (
+          <nav aria-label="Area suggestions" className="flex flex-wrap gap-2">
+            {nearby.suggestions.map((s) => (
+              <Link
+                key={`${s.city}/${s.label}`}
+                className="btn btn-line"
+                href={searchHref({
+                  q: `${nearby.dish} near ${s.label}`,
+                  city: s.city,
+                  dish: "",
+                  sort,
+                  diet,
+                })}
+              >
+                {s.label} ({s.city})
+              </Link>
+            ))}
+          </nav>
+        )}
+        <PickList
+          cards={nearby.cards}
+          headingLevel={2}
+          emptyText="No matching picks within this area. Try another dish or neighbourhood."
+        />
+      </>
+    );
+
+  // Search is the heaviest read path; cap it per client in Postgres.
+  const limit = await takeToken(db, clientKey({ headers: await headers() }, "search"), {
+    capacity: 30,
+    refillPerSecond: 30 / 60,
+  });
+  if (!limit.ok) {
+    return (
+      <p className="border-y border-line py-6 text-muted" role="status">
+        Too many searches from this connection. Try again in {Math.ceil(limit.retryAfterMs / 1000)}{" "}
+        seconds.
+      </p>
+    );
+  }
+
+  const res = await withSpan("db.search", () => searchAll(db, query), {
+    "search.length": query.length,
+  });
   const dishes = [...new Map(res.dishes.map((d) => [d.slug, d.name]))].map(([slug, name]) => ({
     slug,
     name,

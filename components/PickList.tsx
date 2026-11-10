@@ -68,6 +68,12 @@ export function PickList({
                 {card.dishes.length > 0 && (
                   <p className="mt-0.5 text-sm text-muted">{card.dishes.join(" · ")}</p>
                 )}
+                {card.distanceM !== undefined && (
+                  <p className="mt-1 text-sm text-muted">
+                    {(card.distanceM / 1000).toFixed(1)} km from area centre
+                    {card.approx ? " (approximate pin)" : ""}
+                  </p>
+                )}
               </div>
               <LidCode citySlug={card.citySlug} creators={n} tsSeconds={card.proof.tsSeconds} />
             </div>

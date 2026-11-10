@@ -9,7 +9,8 @@ export type SearchResults = {
 };
 
 const EMPTY: SearchResults = { dishes: [], places: [], creators: [] };
-const MIN_SIMILARITY = 0.3;
+// The `%` operator uses pg_trgm.similarity_threshold, which defaults to 0.3,
+// the threshold this search was written against; keep the extension default.
 const LIMIT = 10;
 
 /** `%`, `_` and `\` match literally inside ILIKE. */
@@ -25,7 +26,9 @@ export async function searchAll(db: Db, raw: string): Promise<SearchResults> {
   if (!q) return EMPTY;
   const like = likePattern(q);
   const hit = (col: string) =>
-    sql`(similarity(lower(${sql.raw(col)}), ${q}) >= ${MIN_SIMILARITY} or lower(${sql.raw(col)}) ilike ${like})`;
+    // `%` is the same test as similarity() >= threshold, but GIN can index it;
+    // the similarity() form forced a full scan of every name and alias.
+    sql`(lower(${sql.raw(col)}) % ${q} or lower(${sql.raw(col)}) ilike ${like})`;
   const score = (col: string) => sql`similarity(lower(${sql.raw(col)}), ${q})`;
 
   const [dishes, places, creators] = await Promise.all([

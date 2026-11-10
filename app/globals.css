@@ -60,6 +60,12 @@
     background: rgb(242 238 229 / 0.9) !important;
   }
 
+  .maplibregl-ctrl button,
+  .maplibregl-ctrl-attrib.maplibregl-compact {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
   h1,
   h2,
   h3 {

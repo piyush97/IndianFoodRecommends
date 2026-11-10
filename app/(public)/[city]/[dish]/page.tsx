@@ -73,6 +73,8 @@ async function Dish({ params }: { params: Params }) {
       <ListMapToggle
         citySlug={data.city.slug}
         points={mapPoints(data.places)}
+        cards={data.places}
+        filter={{ dish: data.dish.slug }}
         list={
           <NearMeList
             headingLevel={2}

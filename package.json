@@ -20,6 +20,8 @@
     "eval:area": "vitest run eval/area-eval.test.ts"
   },
   "dependencies": {
+    "@opentelemetry/api": "^1.9.0",
+    "@vercel/otel": "^2.3.0",
     "botid": "^1.5.12",
     "drizzle-orm": "^0.45.4",
     "maplibre-gl": "^6.17.0",

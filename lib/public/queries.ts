@@ -23,6 +23,8 @@ export type PickCard = {
   score: number;
   /** Newest pick date for this place, YYYY-MM-DD. */
   pickedOn: string;
+  /** Straight-line distance from an area search; approximate pins remain labelled. */
+  distanceM?: number;
 };
 
 type City = { slug: string; name: string };
@@ -250,9 +252,15 @@ export async function getPlaceCards(
   placeSlugs: string[],
   now = new Date(),
   diet?: DietFilter,
+  dishSlugs?: string[],
 ) {
   if (placeSlugs.length === 0) return [];
-  const rows = await visibleRows(db, inArray(schema.places.slug, placeSlugs), ...dietWhere(diet));
+  const rows = await visibleRows(
+    db,
+    inArray(schema.places.slug, placeSlugs),
+    ...dietWhere(diet),
+    ...(dishSlugs ? [inArray(schema.dishes.slug, dishSlugs)] : []),
+  );
   return toCards(rows, now);
 }
 

@@ -11,7 +11,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
   return (
     <>
       <header className="flex flex-col gap-3 pt-4 pb-3">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <Link
             href="/"
             className="type-lid min-h-11 content-center text-lg leading-none no-underline sm:text-xl"
@@ -25,7 +25,13 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
             Suggest a pick
           </Link>
         </div>
-        <Suspense fallback={<SearchBar />}>
+        <Suspense
+          fallback={
+            <fieldset disabled aria-busy="true" aria-label="Loading search">
+              <SearchBar />
+            </fieldset>
+          }
+        >
           <HeaderSearch />
         </Suspense>
         <Suspense fallback={<CityTabs active={[]} />}>

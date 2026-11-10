@@ -113,6 +113,9 @@ Plan: `docs/superpowers/plans/2026-11-09-plan-geo-and-engineering.md`. Trigger: 
 
 ## Sprint 7 · Geo features (weeks 13-14)
 
+S7-1..S7-7 are implemented and verified locally on `sprint7-geo`. Production acceptance remains open;
+see [local validation and release gates](superpowers/plans/2026-11-09-plan-geo-and-engineering.md#sprint-7-local-validation).
+
 | ID   | Task                                                                          | Est (h) | Model  | Done when                                                      |
 | ---- | ----------------------------------------------------------------------------- | ------- | ------ | -------------------------------------------------------------- |
 | S7-1 | OSM neighbourhood import (Overpass, worker command, boundaries) for 8 cities  | 5       | Sonnet | areas have boundaries where OSM has them, attribution shown    |
@@ -142,3 +145,15 @@ Plan: `docs/superpowers/plans/2026-11-09-plan-geo-and-engineering.md`. Trigger: 
 ## Creating the board (when approved)
 
 `gh project create` + `gh issue create` per row, script generated from this file. Not run yet: publishes to GitHub.
+
+## Sprint 8 status (2026-11-10)
+
+| Task                               | State            | Evidence                                                                                                                                           |
+| ---------------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| S8-1 SLOs                          | Done             | `docs/slo.md`, numbers from `scripts/bench-latency.mjs`                                                                                            |
+| S8-2 Tracing + runs + `/admin/ops` | Done             | `instrumentation.ts`, `lib/tracing.ts`, `worker_runs`, `lib/worker/run-log.ts`, `app/admin/ops`                                                    |
+| S8-3 50k plan tests                | Done             | `db/perf-seed.ts`, `db/plans.integration.test.ts` (runs in `pnpm test`)                                                                            |
+| S8-4 k6 load report                | Done, local only | `ops/load.js`, `docs/perf/2026-11-10-load.md`; not yet run against a preview                                                                       |
+| S8-5 Postgres rate limit           | Done             | `lib/rate-limit.ts`, `lib/rate-limit.integration.test.ts`, used by geocode and search                                                              |
+| S8-6 CI migration safety           | Partial          | `scripts/check-migrations.mjs` runs on every PR against the CI Postgres service; the Neon branch-per-PR step needs `NEON_API_KEY` and is not wired |
+| S8-7 Case study + README           | Done             | `docs/case-study.md`, `README.md`                                                                                                                  |

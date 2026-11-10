@@ -1,6 +1,6 @@
 # Plan: geospatial search + staff-level engineering (Sprints 6-8)
 
-Status: draft, awaiting owner approval. Written 2026-11-09.
+Status: Sprint 6 merged. Sprint 7 authorized, implemented and verified locally; production acceptance pending. Sprint 8 not started. Written 2026-11-09.
 
 ## 0. Trigger and root cause
 
@@ -226,3 +226,40 @@ Not installed yet. Install the first two on approval.
 
 - S6-1..S6-4 shipped in PR #100. `matchAreas` reranks the trigram hits in code (whole-word containment, bounded edit distance, sound-alike skeleton) because trigram similarity alone matched "besant nagar" to "T. Nagar". On 164 queries over 262 real localities: 87/144 resolvable and 8/20 negatives refused before, 143/144 and 20/20 after. Known gap: a spelling whose trigram similarity is under 0.3 ("bhawanipur", "kolba") never reaches the rerank; fix by storing the skeleton as an indexed column.
 - S6-5/S6-6 shipped in the PostGIS PR: `places.geom` generated column, `places_geom_idx`, `nearbyPlaces` on `ST_DWithin` and `<->`, `earthdistance` and `cube` dropped.
+
+### Sprint 7 local validation
+
+S7-1..S7-7 are implemented on `sprint7-geo`. This records local implementation and verification;
+the production exit criteria above remain open.
+
+| ID   | Local implementation and evidence                                                                                                                                                                                                   |
+| ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| S7-1 | Sequential eight-city Overpass worker, atomic city upserts, OSM attribution and optional boundaries. Manual centroids and existing polygons survive later imports. Import/parser integration tests cover mocked Overpass responses. |
+| S7-2 | Dish/area parsing and fuzzy/alias resolution, nearest-first 2 km search, boundary coverage and 1 km centroid fallback for area pages. Scoped DB tests and browser search flow pass.                                                 |
+| S7-3 | Validated bbox/filter endpoint, 300-result cap, map/list synchronization, keyboard activation and reset. Browser coverage passes.                                                                                                   |
+| S7-4 | Neighbourhood pages, OG images, sitemap and known-path checks. Local browser requests confirm 200/404 behavior and a fetchable OG image.                                                                                            |
+| S7-5 | Precomputed 500 m/four-pin DBSCAN walks in city-local UTM. Four or five exact-pin stops; five-stop browser fixture verifies the three-waypoint Google Maps link. Distances are labelled straight-line estimates.                    |
+| S7-6 | Worker-precomputed resolution-8 H3 polygons/counts; public reads use stored values. Local `ifr_test` has `h3` and `h3_postgis` 4.2.3. Missing extensions produce an explicit unavailable state; CI's PostGIS image remains H3-free. |
+| S7-7 | Validated MVT route and map switch above 300 pins. Scoped DB tests decode actual tiles, including low-zoom world/hemisphere cases. A 301-place browser fixture requests real MVT and renders without console errors.                |
+
+Earlier implementation checks passed: 70 targeted unit/integration tests across ten files, typecheck,
+lint and production build. Lint reported one unrelated existing warning in `.cheapag/opencode/tools/finish.ts`.
+These completed checks were retained rather than rerun during the final resume.
+
+Final resume: production build (including TypeScript), layout ESLint and all 35 focused Chromium E2E
+checks passed against `ifr_test`. The map capture check passed again after its screenshot was scoped
+to the map element. The final pass also fixed an editable Suspense fallback that could be replaced
+while someone typed, silently clearing their search; the fallback form is now disabled until ready.
+
+Visual review covered the vector map, a 360 px neighbourhood page and the five-stop walk page.
+The E2E checks cover serious/critical axe findings, keyboard map search, 360 px overflow and 200% CSS
+zoom reflow. Map tests use a deterministic flat basemap; overlays, APIs and controls are real.
+Live basemap availability, physical touch input and actual browser zoom were not assessed.
+Local captures and source hashes are recorded in `/tmp/ifr-sprint7-visual-evidence.json`;
+captures are `/tmp/ifr-sprint7-map.png`, `/tmp/ifr-sprint7-area-mobile.png` and `/tmp/ifr-sprint7-walk.png`.
+These are temporary local review artifacts, not published product assets.
+
+Migrations `0011_osm_areas.sql` and `0012_geo_features.sql` were applied only to `ifr_test`.
+Production migrations/extensions, the live eight-city OSM import, derived-data refresh and production
+route checks remain release gates. Deployment/import commands are documented in `ops/README.md`.
+Nothing was pushed, deployed or published as part of this implementation.

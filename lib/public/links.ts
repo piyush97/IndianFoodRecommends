@@ -41,3 +41,29 @@ export function formatTs(seconds: number | null): string | null {
   const s = String(seconds % 60).padStart(2, "0");
   return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${s}` : `${m}:${s}`;
 }
+/** Up to five stops keeps the URL usable in Google Maps mobile browsers. */
+export function walkDirections(stops: { lat: number | null; lng: number | null }[]): string | null {
+  if (
+    stops.length < 2 ||
+    stops.length > 5 ||
+    stops.some(
+      (p) =>
+        p.lat === null ||
+        p.lng === null ||
+        !Number.isFinite(p.lat) ||
+        !Number.isFinite(p.lng) ||
+        Math.abs(p.lat) > 90 ||
+        Math.abs(p.lng) > 180,
+    )
+  )
+    return null;
+  const points = stops.map((p) => `${p.lat},${p.lng}`);
+  const query = new URLSearchParams({
+    api: "1",
+    travelmode: "walking",
+    origin: points[0],
+    destination: points[points.length - 1],
+  });
+  if (points.length > 2) query.set("waypoints", points.slice(1, -1).join("|"));
+  return `https://www.google.com/maps/dir/?${query}`;
+}
