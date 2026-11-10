@@ -61,21 +61,26 @@ Add one row per week. Rates as percent, one decimal.
 
 All names are kebab-case. Fired from `lib/track.ts` (`track(event, data)`, a no-op when Umami is absent or blocked) or from `data-umami-event` attributes.
 
-| event | fires when | data |
-| ----- | ---------- | ---- |
-| `watch` | "Watch moment" link clicked on a pick card | `place` |
-| `directions` | Directions link clicked on a pick card or the place page | `place` |
-| `share` | Share button clicked on a place or dish page | `place` |
-| `play` | Video facade clicked to load the embed | `platform` |
-| `find-on` | "Find it on" app link clicked on the place page | `app`, `place` |
-| `google-rating` | Google Maps rating link clicked on the place page | none |
-| `search` | Search results page rendered with a query | `results`: `0`, `1-5`, `6+` |
-| `near-me` | Near me used: location granted, denied or unavailable, or an area typed or picked | `result`: `granted`, `denied`, `area` (`none-nearby` is in the spec, not emitted yet) |
-| `report` | Report form submitted successfully | `kind` |
-| `save` | Place saved to the eat list (ships in a later task) | `place` |
-| `unsave` | Place removed from the eat list (ships in a later task) | `place` |
-| `list-share` | Eat list shared (ships in a later task) | `size` |
-| `list-open` | `/list?p=...` opened (ships in a later task) | `size`, `own`: `yes`, `no` |
-| `list-save-all` | "Save all to my list" clicked on a friend's list (ships in a later task) | none |
+| event           | fires when                                                                        | data                        |
+| --------------- | --------------------------------------------------------------------------------- | --------------------------- |
+| `watch`         | "Watch moment" link clicked on a pick card                                        | `place`                     |
+| `directions`    | Directions link clicked on a pick card or the place page                          | `place`                     |
+| `share`         | Share button clicked on a place or dish page                                      | `place`                     |
+| `play`          | Video facade clicked to load the embed                                            | `platform`                  |
+| `find-on`       | "Find it on" app link clicked on the place page                                   | `app`, `place`              |
+| `google-rating` | Google Maps rating link clicked on the place page                                 | none                        |
+| `search`        | Search results page rendered with a query                                         | `results`: `0`, `1-5`, `6+` |
+| `near-me`       | Near me used: location granted, denied or unavailable, or an area typed or picked | `result`, see below         |
+| `report`        | Report form submitted successfully                                                | `kind`                      |
+| `save`          | Place saved to the eat list                                                       | `place`                     |
+| `unsave`        | Place removed from the eat list                                                   | `place`                     |
+| `list-share`    | Eat list shared                                                                   | `size`                      |
+| `list-open`     | `/list?p=...` opened                                                              | `size`, `own`: `yes`, `no`  |
+| `list-save-all` | "Save all to my list" clicked on a friend's list                                  | none                        |
+
+`near-me` `result` values by emitter:
+
+- `HomeNearMe` (home page): `granted`, `denied`, `area`, `none-nearby`, `unavailable` (position error or timeout). `none-nearby` replaces `granted` or `area` when nothing is within range.
+- `NearMeList` (city and dish pages): `granted`, `denied`, `area` only.
 
 No cookies, no accounts, and no coordinates are sent with any event.

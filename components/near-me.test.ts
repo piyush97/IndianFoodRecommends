@@ -62,7 +62,7 @@ describe("nearMe", () => {
     creators: Array.from({ length: n }, (_, i) => ({ slug: `c${i}`, name: "" })),
   });
 
-  it("bands then creators", () => {
+  it("orders by creators then distance inside one band", () => {
     const r = nearMe(
       [
         at("far1", 28.66, 77.2303, 1),
@@ -73,6 +73,29 @@ describe("nearMe", () => {
     );
     expect(r.mode).toBe("near");
     expect(r.cards.map((c) => c.placeSlug)).toEqual(["close3", "close1", "far1"]);
+  });
+
+  it("puts the nearer 500 m band first even with fewer creators, across the 0.5 km edge", () => {
+    // 0.0044 deg is about 0.489 km (band 0), 0.0046 deg about 0.511 km (band 1).
+    const r = nearMe(
+      [at("band1", 28.6562 + 0.0046, 77.2303, 5), at("band0", 28.6562 + 0.0044, 77.2303, 1)],
+      o,
+    );
+    expect(r.cards.map((c) => c.placeSlug)).toEqual(["band0", "band1"]);
+  });
+
+  it("keeps a farther place in the same band ahead when it has more creators", () => {
+    const r = nearMe([at("few", 28.6563, 77.2303, 1), at("many", 28.6562 + 0.0044, 77.2303, 3)], o);
+    expect(r.cards.map((c) => c.placeSlug)).toEqual(["many", "few"]);
+  });
+
+  it("includes a place at exactly 5 km and switches to far just past it", () => {
+    const deg = 5 / ((6371 * Math.PI) / 180);
+    const edge = { lat: 0, lng: 0 };
+    const exact = { ...at("edge", deg, 0), km: 0 };
+    expect(haversineKm(edge, { lat: deg, lng: 0 })).toBeLessThanOrEqual(5);
+    expect(nearMe([exact], edge).mode).toBe("near");
+    expect(nearMe([at("past", deg * 1.001, 0)], edge).mode).toBe("far");
   });
 
   it("puts a nearer 500 m band before more creators", () => {

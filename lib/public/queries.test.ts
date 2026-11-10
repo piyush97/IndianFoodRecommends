@@ -5,6 +5,7 @@ import {
   getCity,
   getCreator,
   getDishInCity,
+  getAllCards,
   getDishPicks,
   getHome,
   getPlace,
@@ -140,5 +141,12 @@ describeDb("public queries", () => {
     expect(await getDishInCity(db, "delhi", "pizza", now)).toBeNull();
     expect(await getPlace(db, "delhi", "nope")).toBeNull();
     expect(await getCreator(db, "nobody")).toBeNull();
+  });
+
+  it("builds the near-me index from visible picks only", async () => {
+    const cards = await getAllCards(db, now);
+    expect(cards.map((c) => c.placeSlug).sort()).toEqual(["a", "b"]);
+    const alpha = cards.find((c) => c.placeSlug === "a");
+    expect(alpha?.creators.map((c) => c.slug).sort()).toEqual(["one", "two"]);
   });
 });
