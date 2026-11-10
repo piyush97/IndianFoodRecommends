@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { withUtm } from "../lib/track";
 
 /** Native share sheet where the browser has one (phones, where WhatsApp lives); copy-link elsewhere. */
 export function ShareButton({
@@ -25,7 +26,7 @@ export function ShareButton({
 
   async function copy() {
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(withUtm(url, "copy"));
       say("Link copied");
     } catch {
       say("Could not copy. Copy the address from the browser bar.");
@@ -35,7 +36,7 @@ export function ShareButton({
   async function share() {
     if (!navigator.share) return copy();
     try {
-      await navigator.share({ url, title, text });
+      await navigator.share({ url: withUtm(url, "native"), title, text });
     } catch (error) {
       // Closing the share sheet is a choice, not a failure.
       if ((error as Error).name !== "AbortError") await copy();

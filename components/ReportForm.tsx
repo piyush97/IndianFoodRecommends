@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { track } from "../lib/track";
 
 const KINDS = [
   ["closed", "Closed for good"],
@@ -28,6 +29,7 @@ export function ReportForm({ placeId, placeName }: { placeId: number; placeName:
         }),
       });
       if (res.ok) {
+        track("report", { kind: String(form.get("kind")) });
         setStatus("done");
         return;
       }

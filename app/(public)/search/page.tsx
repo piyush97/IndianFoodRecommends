@@ -7,6 +7,7 @@ import { FilterGroup, Segment } from "../../../components/FilterGroup";
 import { PickList } from "../../../components/PickList";
 import { nearAreaSearch } from "../../../lib/public/spatial";
 import { Skeleton } from "../../../components/Skeleton";
+import { TrackSearch } from "../../../components/TrackSearch";
 import { db } from "../../../db";
 import { parseDiet, type DietFilter as Diet } from "../../../lib/diet";
 import { CITIES } from "../../../lib/cities";
@@ -67,6 +68,7 @@ async function Results({ searchParams }: Pick<Props, "searchParams">) {
   if (nearby)
     return (
       <>
+        <TrackSearch query={query} total={nearby.cards.length} />
         <h1 className="type-lid text-[2.2rem]">Results for “{query}”</h1>
         {nearby.area ? (
           <p className="text-sm text-muted">
@@ -189,6 +191,7 @@ async function Results({ searchParams }: Pick<Props, "searchParams">) {
 
   return (
     <>
+      <TrackSearch query={query} total={total + res.creators.length} />
       <h1 className="type-lid text-[2.2rem]">Results for “{query}”</h1>
 
       {!diet && total === 0 && res.creators.length === 0 ? (

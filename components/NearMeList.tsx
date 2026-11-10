@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import type { PickCard } from "../lib/public/queries";
+import { track } from "../lib/track";
 import { sortByDistance, type Point } from "./near-me";
 import { PickList } from "./PickList";
 
@@ -42,11 +43,13 @@ export function NearMeList({
     setNote(choice.name);
     setVia("local");
     setSuggestions([]);
+    track("near-me", { result: "area" });
     setState("area");
   }
 
   function locate() {
     if (!("geolocation" in navigator)) {
+      track("near-me", { result: "denied" });
       setState("denied");
       return;
     }
@@ -54,10 +57,12 @@ export function NearMeList({
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setOrigin({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        track("near-me", { result: "granted" });
         setState("nearest");
       },
       () => {
         setOrigin(null);
+        track("near-me", { result: "denied" });
         setState("denied");
       },
       { maximumAge: 300_000, timeout: 10_000 },
@@ -87,6 +92,7 @@ export function NearMeList({
       setOrigin({ lat: body.lat, lng: body.lng });
       setNote(body.label ?? q);
       setVia(body.via ?? "openstreetmap");
+      track("near-me", { result: "area" });
       setState("area");
     } catch (error) {
       setOrigin(null);

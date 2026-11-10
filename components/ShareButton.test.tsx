@@ -24,9 +24,22 @@ describe("ShareButton", () => {
     render(<ShareButton {...props} />);
     press();
     await waitFor(() =>
-      expect(share).toHaveBeenCalledWith({ url: props.url, title: props.title, text: props.text }),
+      expect(share).toHaveBeenCalledWith({
+        url: `${props.url}?utm_source=share&utm_medium=native`,
+        title: props.title,
+        text: props.text,
+      }),
     );
     expect(screen.getByRole("status").textContent).toBe("");
+  });
+
+  it("tags the native share link with utm_medium=native", async () => {
+    const share = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, { share });
+    render(<ShareButton {...props} />);
+    press();
+    await waitFor(() => expect(share).toHaveBeenCalled());
+    expect(share.mock.calls[0][0].url).toBe(`${props.url}?utm_source=share&utm_medium=native`);
   });
 
   it("copies the link and says so when there is no share sheet", async () => {
@@ -35,7 +48,7 @@ describe("ShareButton", () => {
     render(<ShareButton {...props} />);
     press();
     await waitFor(() => expect(screen.getByRole("status").textContent).toBe("Link copied"));
-    expect(writeText).toHaveBeenCalledWith(props.url);
+    expect(writeText).toHaveBeenCalledWith(`${props.url}?utm_source=share&utm_medium=copy`);
   });
 
   it("stays quiet when the user closes the share sheet", async () => {
