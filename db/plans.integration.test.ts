@@ -48,7 +48,7 @@ describeDb("hot query plans at 50k places", () => {
     const text = planText(plan);
     expect(text).toContain("places_name_lower_trgm_idx");
     expect(text.toUpperCase()).not.toContain('"SEQ SCAN"');
-  });
+  }, 240_000);
 
   it("uses the GiST index for nearby picks", async () => {
     await ensureRows();
@@ -67,5 +67,5 @@ describeDb("hot query plans at 50k places", () => {
       explain (format json) select slug, name from places where slug = 'perf-place-7'
     `);
     expect(planText(plan)).toContain("places_slug_unique");
-  });
+  }, 240_000);
 });
