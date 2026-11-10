@@ -60,6 +60,15 @@ describeDb("spatial food discovery", () => {
       { slug: "pending", name: "Pending", cityId: 1, lat: 28.65, lng: 77.23 },
       { slug: "other-dish", name: "Other dish", cityId: 1, lat: 28.65, lng: 77.23 },
       { slug: "other-city", name: "Other city", cityId: 2, lat: 28.65, lng: 77.23 },
+      // Sits in the "Empty" area: its only pick is closed, so it must not light up the area or a tile.
+      {
+        slug: "closed-spot",
+        name: "Closed spot",
+        cityId: 1,
+        lat: 28.1,
+        lng: 77.1,
+        status: "closed" as const,
+      },
     ]);
     await db.insert(schema.recommendations).values([
       ...[1, 2, 3, 7].map((placeId) => ({
@@ -69,6 +78,7 @@ describeDb("spatial food discovery", () => {
         status: "approved" as const,
       })),
       { placeId: 4, sourceId: 2, dishId: 1, status: "approved" },
+      { placeId: 8, sourceId: 1, dishId: 1, status: "approved" },
       { placeId: 5, sourceId: 1, dishId: 1, status: "pending" },
       { placeId: 6, sourceId: 1, dishId: 2, status: "approved" },
     ]);
@@ -120,6 +130,7 @@ describeDb("spatial food discovery", () => {
         .map((p) => p.placeSlug)
         .sort(),
     ).toEqual(["close", "other-dish"]);
+    // "Empty" has a closed place's approved pick only, so it is not listed.
     expect((await listAreas(db, "delhi")).map((a) => a.slug)).toEqual(["chandni-chowk"]);
     expect(await getArea(db, "delhi", "unknown")).toBeNull();
   });

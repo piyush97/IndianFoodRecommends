@@ -27,5 +27,5 @@ test("creator kit shows a working badge and snippet", async ({ page, request }) 
     /\/creator\/e2e-creator\?utm_source=creator&utm_campaign=e2e-creator$/,
   );
   await page.getByRole("button", { name: "Copy link" }).click();
-  await expect(page.getByRole("status")).toBeVisible();
+  await expect(page.getByRole("status")).toHaveText(/Link copied|Could not copy/);
 });

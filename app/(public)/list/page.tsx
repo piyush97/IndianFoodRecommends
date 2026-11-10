@@ -62,6 +62,7 @@ async function ListContent({ searchParams }: Pick<Props, "searchParams">) {
         <Link className="btn btn-line self-start" href="/">
           Find places to eat
         </Link>
+        <ListActions mode="clear" />
       </div>
     );
   }

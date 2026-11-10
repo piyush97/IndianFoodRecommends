@@ -49,7 +49,7 @@ export async function mergeDishAction(fromId: number, intoId: number): Promise<v
   revalidateTag("public", "max");
 }
 
-const PlaceId = z.number().int().positive();
+const PlaceId = z.number().int().positive().max(2_147_483_647);
 const Outcome = z.enum(["open", "closed", "moved"]);
 
 export async function resolveReportAction(
@@ -63,15 +63,15 @@ export async function resolveReportAction(
 }
 
 const MissQuery = z.string().trim().min(1).max(100);
-const DishSlug = z.string().trim().min(1).max(80);
+const DishSlug = z.string().trim().toLowerCase().min(1).max(80);
 
 export async function aliasMissAction(form: FormData): Promise<void> {
   await requireAdmin();
-  await addMissAsAlias(
-    db,
-    MissQuery.parse(form.get("query")),
-    DishSlug.parse(form.get("dishSlug")),
-  );
+  const query = MissQuery.parse(form.get("query"));
+  // A blank or malformed slug is a typo, not an attack: do nothing instead of the error page.
+  const slug = DishSlug.safeParse(form.get("dishSlug"));
+  if (!slug.success) return;
+  await addMissAsAlias(db, query, slug.data);
   revalidatePath("/admin/searches");
   revalidateTag("public", "max");
 }

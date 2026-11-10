@@ -104,7 +104,7 @@ describeDb("admin server actions", () => {
       },
     );
 
-    it.each([0, -1, 1.5, Number.NaN, "1", null, undefined])(
+    it.each([0, -1, 1.5, 1e10, Number.NaN, "1", null, undefined])(
       "rejects the place id %j and writes nothing",
       async (placeId) => {
         gate.admin = true;
@@ -160,13 +160,29 @@ describeDb("admin server actions", () => {
       ["punctuation-only query", "!!", "chole-bhature"],
       ["too long query", "x".repeat(101), "chole-bhature"],
       ["missing query", undefined, "chole-bhature"],
-      ["empty slug", "chhole bature", ""],
-      ["too long slug", "chhole bature", "x".repeat(81)],
-      ["missing slug", "chhole bature", undefined],
     ])("rejects %s and writes nothing", async (_name, query, dishSlug) => {
       gate.admin = true;
       await expect(aliasMissAction(form(query, dishSlug))).rejects.toThrow();
       await untouched();
+    });
+
+    it.each([
+      ["empty slug", ""],
+      ["whitespace-only slug", "   "],
+      ["too long slug", "x".repeat(81)],
+      ["missing slug", undefined],
+    ])("ignores %s without writing or throwing", async (_name, dishSlug) => {
+      gate.admin = true;
+      await aliasMissAction(form("chhole bature", dishSlug));
+      await untouched();
+    });
+
+    it("finds the dish whatever the case of the typed slug", async () => {
+      gate.admin = true;
+      await aliasMissAction(form("chhole bature", " Chole-Bhature "));
+      expect((await db.select().from(schema.dishAliases)).map((a) => a.alias)).toEqual([
+        "chhole bature",
+      ]);
     });
 
     it("rejects a file instead of a string", async () => {

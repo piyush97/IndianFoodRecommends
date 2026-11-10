@@ -79,17 +79,19 @@ async function Place({ params }: { params: Params }) {
 
   return (
     <>
-      <JsonLd
-        data={restaurantLd({
-          name: place.name,
-          path: `/${data.city.slug}/place/${place.slug}`,
-          locality: place.locality,
-          city: data.city.name,
-          lat: place.lat,
-          lng: place.lng,
-          dishes: data.dishes.map((d) => d.name),
-        })}
-      />
+      {place.status !== "closed" && (
+        <JsonLd
+          data={restaurantLd({
+            name: place.name,
+            path: `/${data.city.slug}/place/${place.slug}`,
+            locality: place.locality,
+            city: data.city.name,
+            lat: place.lat,
+            lng: place.lng,
+            dishes: data.dishes.map((d) => d.name),
+          })}
+        />
+      )}
       <section className="flex flex-col gap-3">
         <div className="flex items-start justify-between gap-4">
           <PageHead

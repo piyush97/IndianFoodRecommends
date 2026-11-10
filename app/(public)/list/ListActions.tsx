@@ -8,15 +8,44 @@ import { track, withUtm } from "../../../lib/track";
 
 const noopSubscribe = () => () => {};
 function useHydrated() {
-  return useSyncExternalStore(noopSubscribe, () => true, () => false);
+  return useSyncExternalStore(
+    noopSubscribe,
+    () => true,
+    () => false,
+  );
 }
 
 type Props =
   | { mode: "redirect" }
+  | { mode: "clear" }
   | { mode: "view"; slugs: string[]; requested: string[]; text: string; url: string };
 
 export function ListActions(props: Props) {
-  return props.mode === "redirect" ? <Redirect /> : <View {...props} />;
+  if (props.mode === "redirect") return <Redirect />;
+  return props.mode === "clear" ? <ClearStale /> : <View {...props} />;
+}
+
+function confirmClear(): boolean {
+  if (!confirm("Remove every place from your list on this device?")) return false;
+  writeList([]);
+  return true;
+}
+
+/** Every place in a link is gone: the owner can still empty the stale slugs saved on this device. */
+function ClearStale() {
+  const router = useRouter();
+  const hydrated = useHydrated();
+  const device = useEatList();
+  if (!hydrated || device.length === 0) return null;
+  return (
+    <button
+      type="button"
+      onClick={() => confirmClear() && router.replace("/list")}
+      className="btn btn-line self-start"
+    >
+      Clear my list
+    </button>
+  );
 }
 
 /** `/list` with no `?p=`: send the visitor to their own device list. Nothing is read on the server. */
@@ -25,7 +54,8 @@ function Redirect() {
   const hydrated = useHydrated();
   const list = useEatList();
   useEffect(() => {
-    if (hydrated && list.length > 0) router.replace(`/list?p=${encodeURIComponent(listParam(list))}`);
+    if (hydrated && list.length > 0)
+      router.replace(`/list?p=${encodeURIComponent(listParam(list))}`);
   }, [hydrated, list, router]);
   if (!hydrated || list.length > 0) {
     return (
@@ -104,9 +134,7 @@ function View({
   }
 
   function clear() {
-    if (!confirm("Remove every place from your list on this device?")) return;
-    writeList([]);
-    router.replace("/list");
+    if (confirmClear()) router.replace("/list");
   }
 
   if (!hydrated) return <div className="min-h-11" aria-hidden="true" />;

@@ -81,7 +81,9 @@ describe("HomeNearMe", () => {
     fireEvent.click(screen.getByRole("button", { name: "Picks near me" }));
     expect(await screen.findByText("Location is off. Type an area instead.")).toBeTruthy();
     expect(track).toHaveBeenCalledWith("near-me", { result: "denied" });
-    await waitFor(() => expect(document.activeElement).toBe(screen.getByLabelText("Area or landmark")));
+    await waitFor(() =>
+      expect(document.activeElement).toBe(screen.getByLabelText("Area or landmark")),
+    );
   });
 
   it("says so when nothing is near", async () => {
@@ -95,12 +97,22 @@ describe("HomeNearMe", () => {
   it("searches an area through /api/geocode with the chosen city", async () => {
     fetchMock.mockImplementation(async (url: string) =>
       url.startsWith("/api/geocode")
-        ? { ok: true, json: async () => ({ lat: 28.6562, lng: 77.2303, label: "Chandni Chowk", via: "local" }) }
+        ? {
+            ok: true,
+            json: async () => ({
+              lat: 28.6562,
+              lng: 77.2303,
+              label: "Chandni Chowk",
+              via: "local",
+            }),
+          }
         : indexResponse([card("close", 28.6563, 77.2303)]),
     );
     render(<HomeNearMe />);
     fireEvent.change(screen.getByLabelText("City"), { target: { value: "delhi" } });
-    fireEvent.change(screen.getByLabelText("Area or landmark"), { target: { value: "Chandni Chowk" } });
+    fireEvent.change(screen.getByLabelText("Area or landmark"), {
+      target: { value: "Chandni Chowk" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Search area" }));
     expect(await screen.findByRole("link", { name: "close" })).toBeTruthy();
     expect(String(fetchMock.mock.calls[0][0])).toBe("/api/geocode?city=delhi&q=Chandni+Chowk");
@@ -135,10 +147,35 @@ describe("HomeNearMe", () => {
     getCurrentPosition.mockImplementation((_ok, fail) => fail({ code }));
     render(<HomeNearMe />);
     fireEvent.click(screen.getByRole("button", { name: "Picks near me" }));
-    expect(await screen.findByText("Could not find your location. Type an area instead.")).toBeTruthy();
+    expect(
+      await screen.findByText("Could not find your location. Type an area instead."),
+    ).toBeTruthy();
     expect(track).toHaveBeenCalledWith("near-me", { result: "unavailable" });
     expect(track).not.toHaveBeenCalledWith("near-me", { result: "denied" });
-    await waitFor(() => expect(document.activeElement).toBe(screen.getByLabelText("Area or landmark")));
+    await waitFor(() =>
+      expect(document.activeElement).toBe(screen.getByLabelText("Area or landmark")),
+    );
+  });
+
+  it("announces when the browser has no geolocation", async () => {
+    delete (navigator as { geolocation?: unknown }).geolocation;
+    render(<HomeNearMe />);
+    fireEvent.click(screen.getByRole("button", { name: "Picks near me" }));
+    expect(await screen.findByText("Location is off. Type an area instead.")).toBeTruthy();
+    expect(screen.getByRole("status").textContent).toContain("Location is off");
+    expect(track).toHaveBeenCalledWith("near-me", { result: "denied" });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("falls back to the closest picks when none are within 5 km", async () => {
+    // About 11 km north of the only pick: outside the 5 km radius, inside the 50 km cap.
+    grant(28.7562, 77.2303);
+    fetchMock.mockResolvedValue(indexResponse([card("farther", 28.6563, 77.2303)]));
+    render(<HomeNearMe />);
+    fireEvent.click(screen.getByRole("button", { name: "Picks near me" }));
+    expect(await screen.findByRole("heading", { name: "Closest picks" })).toBeTruthy();
+    expect(screen.getByRole("status").textContent).toContain("Nothing within 5 km");
+    expect(screen.getByRole("link", { name: "farther" })).toBeTruthy();
   });
 
   it("reports a failed index download", async () => {
@@ -150,18 +187,25 @@ describe("HomeNearMe", () => {
   });
 
   const search = () => {
-    fireEvent.change(screen.getByLabelText("Area or landmark"), { target: { value: "Chandni Chowk" } });
+    fireEvent.change(screen.getByLabelText("Area or landmark"), {
+      target: { value: "Chandni Chowk" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Search area" }));
   };
 
   it("shows the server message for a rate limit, never the code", async () => {
     fetchMock.mockResolvedValue({
       ok: false,
-      json: async () => ({ error: "rate", message: "Too many location lookups. Try again in a moment." }),
+      json: async () => ({
+        error: "rate",
+        message: "Too many location lookups. Try again in a moment.",
+      }),
     });
     render(<HomeNearMe />);
     search();
-    expect(await screen.findByText("Too many location lookups. Try again in a moment.")).toBeTruthy();
+    expect(
+      await screen.findByText("Too many location lookups. Try again in a moment."),
+    ).toBeTruthy();
     expect(screen.queryByText("rate")).toBeNull();
   });
 
@@ -209,6 +253,8 @@ describe("HomeNearMe", () => {
   it("keeps the status in one polite region and links it to the field", async () => {
     render(<HomeNearMe />);
     const status = screen.getByRole("status");
-    expect(screen.getByLabelText("Area or landmark").getAttribute("aria-describedby")).toBe(status.id);
+    expect(screen.getByLabelText("Area or landmark").getAttribute("aria-describedby")).toBe(
+      status.id,
+    );
   });
 });

@@ -64,6 +64,7 @@ async function ReportQueue() {
                     className="min-h-11 rounded-[var(--radius-step)] border border-line px-3 focus-visible:outline-2 focus-visible:outline-accent"
                   >
                     {label}
+                    <span className="sr-only"> for {place.name}</span>
                   </button>
                 </form>
               ))}

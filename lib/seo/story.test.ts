@@ -42,6 +42,20 @@ describe("storyLines", () => {
     expect(title).toBe(`${"C".repeat(39)}…'s picks`);
   });
 
+  it("trims trailing space before the ellipsis", () => {
+    const name = `${"A".repeat(38)} Bcd`;
+    expect(storyLines(data([pick(1, { placeName: name })])).places[0].name).toBe(
+      `${"A".repeat(38)}…`,
+    );
+  });
+
+  it("keeps a long single token intact for the renderer to wrap", () => {
+    const token = "W".repeat(45);
+    expect(storyLines(data([pick(1, { placeName: token })])).places[0].name).toBe(
+      `${"W".repeat(39)}…`,
+    );
+  });
+
   it("falls back to the raw slug for a city it does not know", () => {
     expect(storyLines(data([pick(1, { citySlug: "atlantis" })])).places[0].city).toBe("atlantis");
   });

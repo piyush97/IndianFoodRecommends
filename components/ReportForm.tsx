@@ -34,7 +34,7 @@ export function ReportForm({
       details.current?.querySelector<HTMLInputElement>('input[value="closed"]')?.focus();
     }
     function onClick(event: MouseEvent) {
-      if ((event.target as Element).closest('a[href="#report"]')) jump();
+      if (event.target instanceof Element && event.target.closest('a[href="#report"]')) jump();
     }
     function onHash() {
       if (window.location.hash === "#report") jump();

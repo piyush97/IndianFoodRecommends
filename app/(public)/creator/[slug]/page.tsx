@@ -18,6 +18,7 @@ export async function generateMetadata({ params }: Pick<Props, "params">): Promi
     title: `${data.creator.name}'s food picks`,
     description: `${data.total} food ${data.total === 1 ? "pick" : "picks"} from ${data.creator.name}, each linked to the video moment.`,
     alternates: { canonical: `/creator/${data.creator.slug}` },
+    ...(data.total === 0 && { robots: { index: false, follow: true } }),
   };
 }
 

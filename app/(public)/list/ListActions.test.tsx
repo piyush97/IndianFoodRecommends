@@ -17,7 +17,9 @@ const URL_ = "https://x.app/list?p=a%2Cb";
 const TEXT = "2 places to eat in Delhi, picked by 1 food vlogger";
 
 function view(slugs: string[], requested = slugs) {
-  return render(<ListActions mode="view" slugs={slugs} requested={requested} text={TEXT} url={URL_} />);
+  return render(
+    <ListActions mode="view" slugs={slugs} requested={requested} text={TEXT} url={URL_} />,
+  );
 }
 function device(slugs: string[]) {
   localStorage.setItem(LIST_KEY, JSON.stringify(slugs));
@@ -57,6 +59,31 @@ describe("ListActions own detection", () => {
     expect(screen.queryByRole("button", { name: "Share" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Clear" })).toBeNull();
     expect(track).toHaveBeenCalledWith("list-open", { size: "2", own: "no" });
+  });
+});
+
+describe("ListActions clear mode (every requested place hidden)", () => {
+  it("offers Clear my list when the device holds stale slugs, and empties it", () => {
+    device(["gone", "gone2"]);
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    render(<ListActions mode="clear" />);
+    fireEvent.click(screen.getByRole("button", { name: "Clear my list" }));
+    expect(readList()).toEqual([]);
+    expect(replace).toHaveBeenCalledWith("/list");
+  });
+
+  it("keeps the list when the visitor cancels", () => {
+    device(["gone"]);
+    vi.spyOn(window, "confirm").mockReturnValue(false);
+    render(<ListActions mode="clear" />);
+    fireEvent.click(screen.getByRole("button", { name: "Clear my list" }));
+    expect(readList()).toEqual(["gone"]);
+    expect(replace).not.toHaveBeenCalled();
+  });
+
+  it("renders nothing when the device list is empty", () => {
+    const { container } = render(<ListActions mode="clear" />);
+    expect(container.textContent).toBe("");
   });
 });
 

@@ -23,6 +23,7 @@ export async function generateMetadata({ params }: PageProps<"/[city]/[dish]">):
     title: `${data.dish.name} in ${data.city.name}: where food vloggers eat`,
     description: `${n} ${n === 1 ? "place" : "places"} for ${data.dish.name} in ${data.city.name}, ranked by how many food vloggers picked them, with the video moment for each.`,
     alternates: { canonical: `/${data.city.slug}/${data.dish.slug}` },
+    ...(n === 0 && { robots: { index: false, follow: true } }),
   };
 }
 

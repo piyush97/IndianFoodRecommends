@@ -8,7 +8,7 @@ export const storySize = { width: 1080, height: 1920 };
 
 export type StoryLines = { title: string; places: { name: string; city: string }[] };
 
-const clip = (s: string) => (s.length > 40 ? `${s.slice(0, 39)}…` : s);
+const clip = (s: string) => (s.length > 40 ? `${s.slice(0, 39).trimEnd()}…` : s);
 
 /** What the story shows: creator title plus their top five open places, in rank order. */
 export function storyLines(data: { creator: { name: string }; picks: PickCard[] }): StoryLines {
@@ -56,7 +56,9 @@ export async function storyCard({ title, places }: StoryLines) {
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 28, marginTop: 120 }}>
-        <div style={{ ...lid, fontSize: size, display: "flex" }}>{title}</div>
+        <div style={{ ...lid, fontSize: size, display: "flex", wordBreak: "break-word" }}>
+          {title}
+        </div>
         <div
           style={{
             display: "flex",
@@ -108,8 +110,19 @@ export async function storyCard({ title, places }: StoryLines) {
               >
                 {route.code}
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1 }}>
-                <div style={{ ...lid, display: "flex", fontSize: 52 }}>{p.name}</div>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 8,
+                  flex: 1,
+                  minWidth: 0,
+                  overflow: "hidden",
+                }}
+              >
+                <div style={{ ...lid, display: "flex", fontSize: 52, wordBreak: "break-word" }}>
+                  {p.name}
+                </div>
                 <div
                   style={{
                     display: "flex",
