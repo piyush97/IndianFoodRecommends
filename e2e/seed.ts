@@ -98,6 +98,71 @@ async function main(): Promise<void> {
         origin: "manual",
       },
     ]);
+    // Trust and near-me fixtures: a closed place, a flagged place (3 distinct reporters) and a
+    // pin next to Chandni Chowk (28.656, 77.23), all with approved picks from their own creator.
+    const [street] = await db
+      .insert(schema.creators)
+      .values({ slug: "street-eats", name: "Street Eats" })
+      .returning();
+    const [golGappe] = await db
+      .insert(schema.dishes)
+      .values({ slug: "gol-gappe", name: "Gol Gappe", diet: "veg" })
+      .returning();
+    const [streetSource] = await db
+      .insert(schema.sources)
+      .values({
+        platform: "youtube",
+        externalId: "streetEats01",
+        creatorId: street.id,
+        publishedOn: "2026-10-20",
+      })
+      .returning();
+    const [chandni, closed, flagged] = await db
+      .insert(schema.places)
+      .values([
+        {
+          slug: "chandni-chowk-chaat",
+          name: "Chandni Chowk Chaat",
+          cityId: city.id,
+          locality: "Chandni Chowk",
+          lat: 28.6562,
+          lng: 77.2303,
+        },
+        {
+          slug: "closed-chaat-corner",
+          name: "Closed Chaat Corner",
+          cityId: city.id,
+          lat: 28.57,
+          lng: 77.32,
+          status: "closed",
+          statusChangedAt: new Date("2026-09-15T00:00:00Z"),
+        },
+        {
+          slug: "flagged-sweet-shop",
+          name: "Flagged Sweet Shop",
+          cityId: city.id,
+          lat: 28.54,
+          lng: 77.24,
+        },
+      ])
+      .returning();
+    await db.insert(schema.recommendations).values(
+      [chandni, closed, flagged].map((p) => ({
+        sourceId: streetSource.id,
+        placeId: p.id,
+        dishId: golGappe.id,
+        tsSeconds: 60,
+        status: "approved" as const,
+        origin: "manual" as const,
+      })),
+    );
+    await db.insert(schema.reports).values(
+      ["hash-a", "hash-b", "hash-c"].map((ipHash) => ({
+        placeId: flagged.id,
+        kind: "closed",
+        ipHash,
+      })),
+    );
     await syncAreas(db, await readLocalities(db));
     // Labelled synthetic city fixtures exercise the >300-pin tile path and five-stop walks.
     const [tileCity] = await db

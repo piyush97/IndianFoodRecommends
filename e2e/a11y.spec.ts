@@ -12,6 +12,7 @@ const PAGES = [
   "/about",
   "/submit",
   "/creator/e2e-creator/kit",
+  "/list?p=chache-di-hatti,kamla-nagar-dhaba",
 ];
 
 for (const path of PAGES) {
