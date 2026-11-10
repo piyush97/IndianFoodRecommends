@@ -3,6 +3,7 @@ import {
   boolean,
   customType,
   date,
+  doublePrecision,
   index,
   integer,
   jsonb,
@@ -32,15 +33,19 @@ export const cities = pgTable("cities", {
   createdAt,
 });
 
-export const creators = pgTable("creators", {
-  id: serial("id").primaryKey(),
-  slug: text("slug").notNull().unique(),
-  name: text("name").notNull(),
-  ytChannelId: text("yt_channel_id").unique(),
-  igHandle: text("ig_handle"),
-  optedOut: boolean("opted_out").notNull().default(false),
-  createdAt,
-});
+export const creators = pgTable(
+  "creators",
+  {
+    id: serial("id").primaryKey(),
+    slug: text("slug").notNull().unique(),
+    name: text("name").notNull(),
+    ytChannelId: text("yt_channel_id").unique(),
+    igHandle: text("ig_handle"),
+    optedOut: boolean("opted_out").notNull().default(false),
+    createdAt,
+  },
+  (t) => [index("creators_name_lower_trgm_idx").using("gin", sql`lower(${t.name}) gin_trgm_ops`)],
+);
 
 export const sources = pgTable(
   "sources",
@@ -89,6 +94,8 @@ export const places = pgTable(
     index("places_city_idx").on(t.cityId),
     // PostGIS: radius, nearest-first and bounding-box lookups use this index (see lib/geo.ts).
     index("places_geom_idx").using("gist", t.geom),
+    // Search compares lower(name); an index on the bare column cannot serve it.
+    index("places_name_lower_trgm_idx").using("gin", sql`lower(${t.name}) gin_trgm_ops`),
   ],
 );
 
@@ -178,15 +185,19 @@ export const heatCells = pgTable(
   (t) => [unique("heat_cells_city_creator_cell_uk").on(t.cityId, t.creatorId, t.cell)],
 );
 
-export const dishes = pgTable("dishes", {
-  id: serial("id").primaryKey(),
-  slug: text("slug").notNull().unique(),
-  name: text("name").notNull(),
-  cuisine: text("cuisine"),
-  /** null = not classified yet; mixed = a thali or platter that can hold both. */
-  diet: text("diet").$type<"veg" | "non-veg" | "mixed">(),
-  createdAt,
-});
+export const dishes = pgTable(
+  "dishes",
+  {
+    id: serial("id").primaryKey(),
+    slug: text("slug").notNull().unique(),
+    name: text("name").notNull(),
+    cuisine: text("cuisine"),
+    /** null = not classified yet; mixed = a thali or platter that can hold both. */
+    diet: text("diet").$type<"veg" | "non-veg" | "mixed">(),
+    createdAt,
+  },
+  (t) => [index("dishes_name_lower_trgm_idx").using("gin", sql`lower(${t.name}) gin_trgm_ops`)],
+);
 
 export const recommendations = pgTable(
   "recommendations",
@@ -231,7 +242,10 @@ export const placeAliases = pgTable(
       .references(() => places.id, { onDelete: "cascade" }),
     alias: text("alias").notNull(),
   },
-  (t) => [unique("place_aliases_uk").on(t.placeId, t.alias)],
+  (t) => [
+    unique("place_aliases_uk").on(t.placeId, t.alias),
+    index("place_aliases_alias_lower_trgm_idx").using("gin", sql`lower(${t.alias}) gin_trgm_ops`),
+  ],
 );
 
 export const dishAliases = pgTable(
@@ -243,10 +257,35 @@ export const dishAliases = pgTable(
       .references(() => dishes.id, { onDelete: "cascade" }),
     alias: text("alias").notNull(),
   },
-  (t) => [unique("dish_aliases_uk").on(t.dishId, t.alias)],
+  (t) => [
+    unique("dish_aliases_uk").on(t.dishId, t.alias),
+    index("dish_aliases_alias_lower_trgm_idx").using("gin", sql`lower(${t.alias}) gin_trgm_ops`),
+  ],
 );
 
 /** Searches that found nothing: query text only, no IP or user id. Shows which dishes and creators to add next. */
+/** One row per worker command, so /admin/ops can show the last 30 runs. */
+export const workerRuns = pgTable(
+  "worker_runs",
+  {
+    id: serial("id").primaryKey(),
+    command: text("command").notNull(),
+    status: runStatus("status").notNull().default("running"),
+    summary: jsonb("summary").$type<Record<string, unknown>>(),
+    error: text("error"),
+    startedAt: timestamp("started_at", { withTimezone: true }).notNull().defaultNow(),
+    finishedAt: timestamp("finished_at", { withTimezone: true }),
+  },
+  (t) => [index("worker_runs_started_idx").on(t.startedAt)],
+);
+
+/** Token buckets for rate limiting; see lib/rate-limit.ts. */
+export const rateLimits = pgTable("rate_limits", {
+  key: text("key").primaryKey(),
+  tokens: doublePrecision("tokens").notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const searchMisses = pgTable("search_misses", {
   query: text("query").primaryKey(),
   hits: integer("hits").notNull().default(1),

@@ -56,6 +56,13 @@ jobs:
       - run: pnpm install --frozen-lockfile
       # Migrations, then the integration tests: they seed twice (idempotency)
       # and rely on the recommendation dedupe index.
+      # The safety check needs history to know which migrations are new in this PR.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: node scripts/check-migrations.mjs origin/${{ github.base_ref || 'main' }}
+      # Migrations run against this Postgres service on every PR, so a broken or
+      # unsafe one fails here instead of at deploy time.
       - run: pnpm db:migrate
       - run: pnpm test
       # E2E on a freshly seeded DB (tests above truncate it).

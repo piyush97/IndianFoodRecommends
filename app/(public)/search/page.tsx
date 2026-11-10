@@ -12,6 +12,9 @@ import { parseDiet, type DietFilter as Diet } from "../../../lib/diet";
 import { CITIES } from "../../../lib/cities";
 import { getDishPicks, getPlaceCards, type PickCard } from "../../../lib/public/queries";
 import { searchAll } from "../../../lib/public/search";
+import { clientKey, takeToken } from "../../../lib/rate-limit";
+import { withSpan } from "../../../lib/tracing";
+import { headers } from "next/headers";
 import { logMiss } from "../../../lib/search-misses";
 import { cachedCities, cachedHome } from "../data";
 
@@ -107,7 +110,23 @@ async function Results({ searchParams }: Pick<Props, "searchParams">) {
       </>
     );
 
-  const res = await searchAll(db, query);
+  // Search is the heaviest read path; cap it per client in Postgres.
+  const limit = await takeToken(db, clientKey({ headers: await headers() }, "search"), {
+    capacity: 30,
+    refillPerSecond: 30 / 60,
+  });
+  if (!limit.ok) {
+    return (
+      <p className="border-y border-line py-6 text-muted" role="status">
+        Too many searches from this connection. Try again in {Math.ceil(limit.retryAfterMs / 1000)}{" "}
+        seconds.
+      </p>
+    );
+  }
+
+  const res = await withSpan("db.search", () => searchAll(db, query), {
+    "search.length": query.length,
+  });
   const dishes = [...new Map(res.dishes.map((d) => [d.slug, d.name]))].map(([slug, name]) => ({
     slug,
     name,

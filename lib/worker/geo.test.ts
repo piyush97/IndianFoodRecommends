@@ -22,39 +22,37 @@ describeDb("precomputed food geography", () => {
       { platform: "youtube", externalId: "s2", creatorId: 2 },
     ]);
     await db.insert(schema.dishes).values({ slug: "chole-bhature", name: "Chole Bhature" });
-    await db
-      .insert(schema.places)
-      .values([
-        ...[0, 1, 2, 3].map((i) => ({
-          slug: `exact-${i}`,
-          name: `Exact ${i}`,
-          cityId: 1,
-          lat: 28.65,
-          lng: 77.23 + i * 0.001,
-          osmId: `node/${i + 1}`,
-        })),
-        {
-          slug: "approx",
-          name: "Approximate",
-          cityId: 1,
-          lat: 28.65,
-          lng: 77.23,
-          osmId: "approx:5",
-        },
-        { slug: "hidden", name: "Hidden", cityId: 1, lat: 28.65, lng: 77.23, osmId: "node/6" },
-        { slug: "isolated", name: "Isolated", cityId: 1, lat: 28.8, lng: 77.4, osmId: "node/7" },
-        { slug: "unverified", name: "Unverified", cityId: 1, lat: 28.65, lng: 77.23 },
-        { slug: "pending", name: "Pending", cityId: 1, lat: 28.65, lng: 77.23, osmId: "node/9" },
-        {
-          slug: "closed",
-          name: "Closed",
-          cityId: 1,
-          lat: 28.65,
-          lng: 77.23,
-          osmId: "node/10",
-          status: "closed",
-        },
-      ]);
+    await db.insert(schema.places).values([
+      ...[0, 1, 2, 3].map((i) => ({
+        slug: `exact-${i}`,
+        name: `Exact ${i}`,
+        cityId: 1,
+        lat: 28.65,
+        lng: 77.23 + i * 0.001,
+        osmId: `node/${i + 1}`,
+      })),
+      {
+        slug: "approx",
+        name: "Approximate",
+        cityId: 1,
+        lat: 28.65,
+        lng: 77.23,
+        osmId: "approx:5",
+      },
+      { slug: "hidden", name: "Hidden", cityId: 1, lat: 28.65, lng: 77.23, osmId: "node/6" },
+      { slug: "isolated", name: "Isolated", cityId: 1, lat: 28.8, lng: 77.4, osmId: "node/7" },
+      { slug: "unverified", name: "Unverified", cityId: 1, lat: 28.65, lng: 77.23 },
+      { slug: "pending", name: "Pending", cityId: 1, lat: 28.65, lng: 77.23, osmId: "node/9" },
+      {
+        slug: "closed",
+        name: "Closed",
+        cityId: 1,
+        lat: 28.65,
+        lng: 77.23,
+        osmId: "node/10",
+        status: "closed",
+      },
+    ]);
     await db.insert(schema.recommendations).values(
       Array.from({ length: 10 }, (_, i) => ({
         placeId: i + 1,

@@ -12,6 +12,7 @@ import { runEval, type Labelled } from "../lib/worker/eval";
 import { notifyRevalidate } from "../lib/revalidate-client";
 import { importOsmAreas } from "../lib/worker/osm-areas";
 import { refreshHeatmap, refreshWalks } from "../lib/worker/geo";
+import { recordRun } from "../lib/worker/run-log";
 
 // With a TypeSafe key, Jev screens each video before the LLM reads it.
 function extractor() {
@@ -122,7 +123,11 @@ const run =
               ? areas
               : ingest;
 
-run()
+// Every command is recorded so /admin/ops shows the last runs and any failure.
+recordRun(db, process.argv[2] ?? "ingest", async () => {
+  await run();
+  return { ok: true };
+})
   .catch((error) => {
     console.error(error);
     process.exitCode = 1;

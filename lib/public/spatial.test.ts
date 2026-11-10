@@ -61,19 +61,17 @@ describeDb("spatial food discovery", () => {
       { slug: "other-dish", name: "Other dish", cityId: 1, lat: 28.65, lng: 77.23 },
       { slug: "other-city", name: "Other city", cityId: 2, lat: 28.65, lng: 77.23 },
     ]);
-    await db
-      .insert(schema.recommendations)
-      .values([
-        ...[1, 2, 3, 7].map((placeId) => ({
-          placeId,
-          sourceId: 1,
-          dishId: 1,
-          status: "approved" as const,
-        })),
-        { placeId: 4, sourceId: 2, dishId: 1, status: "approved" },
-        { placeId: 5, sourceId: 1, dishId: 1, status: "pending" },
-        { placeId: 6, sourceId: 1, dishId: 2, status: "approved" },
-      ]);
+    await db.insert(schema.recommendations).values([
+      ...[1, 2, 3, 7].map((placeId) => ({
+        placeId,
+        sourceId: 1,
+        dishId: 1,
+        status: "approved" as const,
+      })),
+      { placeId: 4, sourceId: 2, dishId: 1, status: "approved" },
+      { placeId: 5, sourceId: 1, dishId: 1, status: "pending" },
+      { placeId: 6, sourceId: 1, dishId: 2, status: "approved" },
+    ]);
     await db.insert(schema.areas).values([
       {
         cityId: 1,
