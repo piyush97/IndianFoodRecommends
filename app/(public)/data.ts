@@ -4,6 +4,7 @@ import type { DietFilter } from "../../lib/diet";
 import { inRequestOrder, listCacheKey } from "../../lib/list-params";
 import { getArea, getSpatialPicks, listAreas, getWalks } from "../../lib/public/spatial";
 import {
+  getAllCards,
   getCity,
   getCreator,
   getDishInCity,
@@ -91,4 +92,11 @@ async function cachedListByKey(key: string) {
 /** Cards for `slugs` (already through `parseListParam`) in the requested order; the order is applied outside the cache. */
 export async function cachedList(slugs: string[]) {
   return inRequestOrder(await cachedListByKey(listCacheKey(slugs)), slugs);
+}
+
+export async function cachedAllCards() {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("public");
+  return getAllCards(db);
 }

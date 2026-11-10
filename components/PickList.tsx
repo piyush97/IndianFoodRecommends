@@ -9,12 +9,15 @@ export function PickList({
   emptyText,
   numbered = true,
   headingLevel = 3,
+  distanceLabel = "from area centre",
 }: {
   cards: PickCard[];
   emptyText: string;
   numbered?: boolean;
   /** 2 when the list sits directly under the page h1, 3 under a section h2. */
   headingLevel?: 2 | 3;
+  /** Where `distanceM` is measured from. */
+  distanceLabel?: string;
 }) {
   const Heading = headingLevel === 2 ? "h2" : "h3";
   if (cards.length === 0) {
@@ -71,7 +74,7 @@ export function PickList({
                 )}
                 {card.distanceM !== undefined && (
                   <p className="mt-1 text-sm text-muted">
-                    {(card.distanceM / 1000).toFixed(1)} km from area centre
+                    {(card.distanceM / 1000).toFixed(1)} km {distanceLabel}
                     {card.approx ? " (approximate pin)" : ""}
                   </p>
                 )}

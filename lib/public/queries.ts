@@ -264,6 +264,11 @@ export async function getPlaceCards(
   return toCards(rows, now);
 }
 
+/** Every visible place as a card, for the on-device near-me index. */
+export async function getAllCards(db: Db, now: Date = new Date()): Promise<PickCard[]> {
+  return toCards(await visibleRows(db), now);
+}
+
 /** Shared-list cards in the order of `slugs`. Unknown, unapproved and opted-out places are simply absent. */
 export async function getListCards(
   db: Db,
