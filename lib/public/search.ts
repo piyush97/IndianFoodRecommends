@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import type { Db } from "../../db";
+import { expandQuery } from "../synonyms";
 import { normalizeName } from "../text";
 
 export type SearchResults = {
@@ -26,16 +27,32 @@ const VISIBLE = sql`r.status = 'approved' and c.opted_out = false and p.status <
 export async function searchAll(db: Db, raw: string): Promise<SearchResults> {
   const q = normalizeName(raw.slice(0, 100));
   if (!q) return EMPTY;
-  const like = likePattern(q);
-  const hit = (col: string) =>
+  const hitFor = (col: string, term: string) =>
     // `%` is the same test as similarity() >= threshold, but GIN can index it;
     // the similarity() form forced a full scan of every name and alias.
-    sql`(lower(${sql.raw(col)}) % ${q} or lower(${sql.raw(col)}) ilike ${like})`;
+    sql`(lower(${sql.raw(col)}) % ${term} or lower(${sql.raw(col)}) ilike ${likePattern(term)})`;
+  const hit = (col: string) => hitFor(col, q);
   const score = (col: string) => sql`similarity(lower(${sql.raw(col)}), ${q})`;
+  // Dishes also match their spelling/Hindi synonyms; a synonym hit scores like a direct hit,
+  // and the raw query gets a small bonus so a direct match wins ties. Places and creators stay raw.
+  const terms = expandQuery(q);
+  const dishHit = (col: string) =>
+    sql`(${sql.join(
+      terms.map((t) => hitFor(col, t)),
+      sql` or `,
+    )})`;
+  const dishScore = (col: string) =>
+    sql`greatest(${sql.join(
+      terms.map(
+        (t, i) =>
+          sql`similarity(lower(${sql.raw(col)}), ${t}) + ${sql.raw(i === 0 ? "0.01" : "0")}`,
+      ),
+      sql`, `,
+    )})`;
 
   const [dishes, places, creators] = await Promise.all([
     db.execute(sql`
-      select d.slug, d.name, ci.slug as city_slug, max(greatest(${score("d.name")}, coalesce(${score("a.alias")}, 0))) as score
+      select d.slug, d.name, ci.slug as city_slug, max(greatest(${dishScore("d.name")}, coalesce(${dishScore("a.alias")}, 0))) as score
       from dishes d
       left join dish_aliases a on a.dish_id = d.id
       join recommendations r on r.dish_id = d.id
@@ -43,7 +60,7 @@ export async function searchAll(db: Db, raw: string): Promise<SearchResults> {
       join creators c on c.id = s.creator_id
       join places p on p.id = r.place_id
       join cities ci on ci.id = p.city_id
-      where ${VISIBLE} and (${hit("d.name")} or (a.alias is not null and ${hit("a.alias")}))
+      where ${VISIBLE} and (${dishHit("d.name")} or (a.alias is not null and ${dishHit("a.alias")}))
       group by d.slug, d.name, ci.slug
       order by score desc, d.name
       limit ${LIMIT}`),

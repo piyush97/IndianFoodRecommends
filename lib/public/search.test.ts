@@ -20,6 +20,9 @@ describeDb("searchAll", () => {
       { slug: "chole-bhature", name: "Chole Bhature" },
       { slug: "momos", name: "Momos" },
       { slug: "nihari", name: "Nihari" },
+      { slug: "gol-gappe", name: "Gol Gappe" },
+      { slug: "biryani", name: "Biryani" },
+      { slug: "chicken-biryani", name: "Chicken Biryani" },
     ]);
     await db.insert(schema.dishAliases).values({ dishId: 1, alias: "chole bature" });
     await db.insert(schema.places).values([
@@ -34,6 +37,9 @@ describeDb("searchAll", () => {
       { sourceId: 1, placeId: 1, dishId: 1, status: "approved" },
       { sourceId: 1, placeId: 2, dishId: 2, status: "pending" },
       { sourceId: 2, placeId: 1, dishId: 3, status: "approved" },
+      { sourceId: 1, placeId: 1, dishId: 4, status: "approved" },
+      { sourceId: 1, placeId: 1, dishId: 5, status: "approved" },
+      { sourceId: 1, placeId: 1, dishId: 6, status: "approved" },
     ]);
   });
 
@@ -79,5 +85,26 @@ describeDb("searchAll", () => {
     const nihari = await searchAll(db, "nihari");
     expect(nihari.dishes).toEqual([]);
     expect((await searchAll(db, "gone vlogs")).creators).toEqual([]);
+  });
+
+  it("finds a dish through a synonym spelling", async () => {
+    const res = await searchAll(db, "puchka");
+    expect(res.dishes.map((d) => d.slug)).toContain("gol-gappe");
+  });
+
+  it("finds a Latin-named dish from a Devanagari query", async () => {
+    const res = await searchAll(db, "गोलगप्पे ");
+    expect(res.dishes.map((d) => d.slug)).toContain("gol-gappe");
+  });
+
+  it("ranks the direct match ahead of the synonym group", async () => {
+    const res = await searchAll(db, "chicken biryani");
+    expect(res.dishes.map((d) => d.name).slice(0, 2)).toEqual(["Chicken Biryani", "Biryani"]);
+  });
+
+  it("keeps places and creators on the raw query only", async () => {
+    const res = await searchAll(db, "puchka");
+    expect(res.places).toEqual([]);
+    expect(res.creators).toEqual([]);
   });
 });
