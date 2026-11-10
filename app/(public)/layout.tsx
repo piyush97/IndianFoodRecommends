@@ -19,7 +19,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
           >
             Indian Food <span className="text-accent">Recommends</span>
           </Link>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-x-4">
             <ListLink />
             <Link
               href="/submit"
