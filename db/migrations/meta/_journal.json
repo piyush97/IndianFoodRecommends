@@ -113,6 +113,13 @@
       "when": 1794283511021,
       "tag": "0015_condemned_james_howlett",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1794341687577,
+      "tag": "0016_sturdy_black_cat",
+      "breakpoints": true
     }
   ]
 }
