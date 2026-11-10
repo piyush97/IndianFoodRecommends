@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { PickCard } from "./public/queries";
-import { listShareText, parseListParam } from "./list-params";
+import { inRequestOrder, listCacheKey, listShareText, parseListParam } from "./list-params";
 
 function card(citySlug: string, creators: string[]): PickCard {
   return {
@@ -46,4 +46,19 @@ describe("listShareText", () => {
     expect(listShareText([card("delhi", ["x"])])).toBe(
       "1 place to eat in Delhi, picked by 1 food vlogger",
     ));
+});
+
+describe("list cache key", () => {
+  it("is the same for every ordering and duplicates", () => {
+    expect(listCacheKey(["b", "a", "b"])).toBe("a,b");
+    expect(listCacheKey(["a", "b"])).toBe(listCacheKey(["b", "a"]));
+  });
+  it("restores the requested order", () => {
+    const cards = [card("delhi", ["x"]), card("mumbai", ["y"])];
+    const [d, m] = cards;
+    expect(inRequestOrder(cards, [m.placeSlug, d.placeSlug]).map((c) => c.placeSlug)).toEqual([
+      m.placeSlug,
+      d.placeSlug,
+    ]);
+  });
 });

@@ -46,6 +46,18 @@ describeDb("getListCards", () => {
     expect(cards.map((c) => c.placeSlug)).toEqual(["c", "a", "b"]);
   });
 
+  it("collapses duplicate slugs", async () => {
+    const cards = await getListCards(db, ["b", "a", "b", "a"], now);
+    expect(cards.map((c) => c.placeSlug)).toEqual(["b", "a"]);
+  });
+
+  it("caps input at 30 slugs and still answers", async () => {
+    const many = Array.from({ length: 200 }, (_, i) => `s${i}`);
+    expect(await getListCards(db, many, now)).toEqual([]);
+    const cards = await getListCards(db, [...many.slice(0, 29), "a", "b"], now);
+    expect(cards.map((c) => c.placeSlug)).toEqual(["a"]);
+  });
+
   it("returns nothing for hostile or empty input without throwing", async () => {
     expect(await getListCards(db, [], now)).toEqual([]);
     expect(await getListCards(db, ["../x", "'; drop table places;--"], now)).toEqual([]);

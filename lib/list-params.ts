@@ -34,3 +34,13 @@ export function listShareText(cards: PickCard[]): string {
       : `across ${cities.length} cities`;
   return `${n} ${n === 1 ? "place" : "places"} to eat ${where}, picked by ${m} food ${m === 1 ? "vlogger" : "vloggers"}`;
 }
+
+/** Cache key for a list: sorted and deduped, so every ordering of the same slugs shares one entry. */
+export function listCacheKey(slugs: string[]): string {
+  return [...new Set(slugs)].sort().join(",");
+}
+
+/** Put cards back in the order the visitor asked for. */
+export function inRequestOrder(cards: PickCard[], slugs: string[]): PickCard[] {
+  return [...cards].sort((a, b) => slugs.indexOf(a.placeSlug) - slugs.indexOf(b.placeSlug));
+}

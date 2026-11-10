@@ -13,14 +13,14 @@ import { ListActions } from "./ListActions";
 type Props = PageProps<"/list">;
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
-  const key = listParam(parseListParam((await searchParams).p));
+  const requested = parseListParam((await searchParams).p);
   const base: Metadata = { title: "My eat list", robots: { index: false } };
-  if (!key) return base;
+  if (requested.length === 0) return base;
   try {
-    const cards = await cachedList(key);
+    const cards = await cachedList(requested);
     if (cards.length === 0) return base;
     const text = listShareText(cards);
-    const image = `/api/og/list?p=${encodeURIComponent(key)}`;
+    const image = `/api/og/list?p=${encodeURIComponent(listParam(cards.map((c) => c.placeSlug)))}`;
     return {
       ...base,
       title: text,
@@ -42,8 +42,8 @@ export default function ListPage({ searchParams }: Props) {
 
 async function ListContent({ searchParams }: Pick<Props, "searchParams">) {
   const { p } = await searchParams;
-  const key = listParam(parseListParam(p));
-  if (!key) {
+  const requested = parseListParam(p);
+  if (requested.length === 0) {
     return (
       <div className="flex flex-col gap-4">
         <PageHead title="My eat list" />
@@ -51,7 +51,7 @@ async function ListContent({ searchParams }: Pick<Props, "searchParams">) {
       </div>
     );
   }
-  const cards = await cachedList(key);
+  const cards = await cachedList(requested);
   if (cards.length === 0) {
     return (
       <div className="flex flex-col gap-4">
@@ -73,6 +73,7 @@ async function ListContent({ searchParams }: Pick<Props, "searchParams">) {
       <ListActions
         mode="view"
         slugs={slugs}
+        requested={requested}
         text={text}
         url={absoluteUrl(`/list?p=${encodeURIComponent(listParam(slugs))}`)}
       />

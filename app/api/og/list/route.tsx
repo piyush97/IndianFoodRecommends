@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
   const slugs = parseListParam(request.nextUrl.searchParams.get("p") ?? undefined);
   if (slugs.length === 0) return fallback(HIT);
   try {
-    const cards = await cachedList(slugs.join(","));
+    const cards = await cachedList(slugs);
     if (cards.length === 0) return fallback(HIT);
     const res = await ogCard({
       title: `${cards.length} ${cards.length === 1 ? "place" : "places"} to eat`,

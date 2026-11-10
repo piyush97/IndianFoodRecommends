@@ -1,6 +1,7 @@
 import { cacheLife, cacheTag } from "next/cache";
 import { db } from "../../db";
 import type { DietFilter } from "../../lib/diet";
+import { inRequestOrder, listCacheKey } from "../../lib/list-params";
 import { getArea, getSpatialPicks, listAreas, getWalks } from "../../lib/public/spatial";
 import {
   getCity,
@@ -78,11 +79,16 @@ export async function cachedArea(city: string, slug: string) {
   return area ? { area, places: await getSpatialPicks(db, city, { area: slug }) } : null;
 }
 
-/** `key` is the comma-joined slug list from `parseListParam`, so it is already sanitised and capped. */
-export async function cachedList(key: string) {
+/** `key` is `listCacheKey(slugs)`: sorted and deduped, so permutations share one entry. */
+async function cachedListByKey(key: string) {
   "use cache";
   const slugs = key.split(",").filter(Boolean);
   cacheLife("minutes");
   cacheTag("public", ...slugs.map((s) => `place:${s}`));
   return getListCards(db, slugs);
+}
+
+/** Cards for `slugs` (already through `parseListParam`) in the requested order; the order is applied outside the cache. */
+export async function cachedList(slugs: string[]) {
+  return inRequestOrder(await cachedListByKey(listCacheKey(slugs)), slugs);
 }

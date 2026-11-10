@@ -13,7 +13,7 @@ function useHydrated() {
 
 type Props =
   | { mode: "redirect" }
-  | { mode: "view"; slugs: string[]; text: string; url: string };
+  | { mode: "view"; slugs: string[]; requested: string[]; text: string; url: string };
 
 export function ListActions(props: Props) {
   return props.mode === "redirect" ? <Redirect /> : <View {...props} />;
@@ -46,11 +46,22 @@ function Redirect() {
   );
 }
 
-function View({ slugs, text, url }: { slugs: string[]; text: string; url: string }) {
+function View({
+  slugs,
+  requested,
+  text,
+  url,
+}: {
+  slugs: string[];
+  requested: string[];
+  text: string;
+  url: string;
+}) {
   const router = useRouter();
   const hydrated = useHydrated();
   const device = useEatList();
-  const own = listParam(device) === listParam(slugs);
+  // `requested` includes slugs hidden since saving, so a stale device entry never demotes the owner.
+  const own = listParam(device) === listParam(requested);
   const [note, setNote] = useState("");
   const opened = useRef(false);
 
