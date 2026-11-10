@@ -232,15 +232,15 @@ Not installed yet. Install the first two on approval.
 S7-1..S7-7 are implemented on `sprint7-geo`. This records local implementation and verification;
 the production exit criteria above remain open.
 
-| ID | Local implementation and evidence |
-| --- | --- |
+| ID   | Local implementation and evidence                                                                                                                                                                                                   |
+| ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | S7-1 | Sequential eight-city Overpass worker, atomic city upserts, OSM attribution and optional boundaries. Manual centroids and existing polygons survive later imports. Import/parser integration tests cover mocked Overpass responses. |
-| S7-2 | Dish/area parsing and fuzzy/alias resolution, nearest-first 2 km search, boundary coverage and 1 km centroid fallback for area pages. Scoped DB tests and browser search flow pass. |
-| S7-3 | Validated bbox/filter endpoint, 300-result cap, map/list synchronization, keyboard activation and reset. Browser coverage passes. |
-| S7-4 | Neighbourhood pages, OG images, sitemap and known-path checks. Local browser requests confirm 200/404 behavior and a fetchable OG image. |
-| S7-5 | Precomputed 500 m/four-pin DBSCAN walks in city-local UTM. Four or five exact-pin stops; five-stop browser fixture verifies the three-waypoint Google Maps link. Distances are labelled straight-line estimates. |
+| S7-2 | Dish/area parsing and fuzzy/alias resolution, nearest-first 2 km search, boundary coverage and 1 km centroid fallback for area pages. Scoped DB tests and browser search flow pass.                                                 |
+| S7-3 | Validated bbox/filter endpoint, 300-result cap, map/list synchronization, keyboard activation and reset. Browser coverage passes.                                                                                                   |
+| S7-4 | Neighbourhood pages, OG images, sitemap and known-path checks. Local browser requests confirm 200/404 behavior and a fetchable OG image.                                                                                            |
+| S7-5 | Precomputed 500 m/four-pin DBSCAN walks in city-local UTM. Four or five exact-pin stops; five-stop browser fixture verifies the three-waypoint Google Maps link. Distances are labelled straight-line estimates.                    |
 | S7-6 | Worker-precomputed resolution-8 H3 polygons/counts; public reads use stored values. Local `ifr_test` has `h3` and `h3_postgis` 4.2.3. Missing extensions produce an explicit unavailable state; CI's PostGIS image remains H3-free. |
-| S7-7 | Validated MVT route and map switch above 300 pins. Scoped DB tests decode actual tiles, including low-zoom world/hemisphere cases. A 301-place browser fixture requests real MVT and renders without console errors. |
+| S7-7 | Validated MVT route and map switch above 300 pins. Scoped DB tests decode actual tiles, including low-zoom world/hemisphere cases. A 301-place browser fixture requests real MVT and renders without console errors.                |
 
 Earlier implementation checks passed: 70 targeted unit/integration tests across ten files, typecheck,
 lint and production build. Lint reported one unrelated existing warning in `.cheapag/opencode/tools/finish.ts`.
