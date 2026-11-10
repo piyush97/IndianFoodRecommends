@@ -45,4 +45,10 @@ describe("eat-list", () => {
     expect(l[0]).toBe("new");
     expect(l).not.toContain("p-29");
   });
+
+  it("toggle ignores invalid slugs", () => {
+    expect(toggle("../x")).toBe(false);
+    expect(toggle("A")).toBe(false);
+    expect(readList()).toEqual([]);
+  });
 });

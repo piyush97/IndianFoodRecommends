@@ -1,8 +1,9 @@
 import { useSyncExternalStore } from "react";
+import { listParam, MAX_LIST, SLUG_RE } from "./list-core";
+
+export { listParam, MAX_LIST, SLUG_RE };
 
 export const LIST_KEY = "ifr:list:v1";
-export const MAX_LIST = 30;
-export const SLUG_RE = /^[a-z0-9-]{1,80}$/;
 
 const EVENT = "ifr:list";
 const EMPTY: string[] = [];
@@ -73,6 +74,7 @@ function readStored(): string | null {
 
 /** Returns the new saved state for `slug`. New saves go to the front. */
 export function toggle(slug: string): boolean {
+  if (!SLUG_RE.test(slug)) return false;
   const list = readList();
   const saved = !list.includes(slug);
   writeList(saved ? [slug, ...list] : list.filter((s) => s !== slug));
@@ -90,8 +92,4 @@ function subscribe(onChange: () => void): () => void {
 
 export function useEatList(): string[] {
   return useSyncExternalStore(subscribe, readList, () => EMPTY);
-}
-
-export function listParam(slugs: string[]): string {
-  return slugs.join(",");
 }

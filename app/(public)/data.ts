@@ -7,6 +7,7 @@ import {
   getCreator,
   getDishInCity,
   getHome,
+  getListCards,
   getPlace,
   listActiveCities,
 } from "../../lib/public/queries";
@@ -75,4 +76,13 @@ export async function cachedArea(city: string, slug: string) {
   cacheTag("public", `city:${city}`);
   const area = await getArea(db, city, slug);
   return area ? { area, places: await getSpatialPicks(db, city, { area: slug }) } : null;
+}
+
+/** `key` is the comma-joined slug list from `parseListParam`, so it is already sanitised and capped. */
+export async function cachedList(key: string) {
+  "use cache";
+  const slugs = key.split(",").filter(Boolean);
+  cacheLife("minutes");
+  cacheTag("public", ...slugs.map((s) => `place:${s}`));
+  return getListCards(db, slugs);
 }

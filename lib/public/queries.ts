@@ -264,6 +264,20 @@ export async function getPlaceCards(
   return toCards(rows, now);
 }
 
+/** Shared-list cards in the order of `slugs`. Unknown, unapproved and opted-out places are simply absent. */
+export async function getListCards(
+  db: Db,
+  slugs: string[],
+  now: Date = new Date(),
+): Promise<PickCard[]> {
+  const wanted = [...new Set(slugs)].slice(0, 30);
+  if (wanted.length === 0) return [];
+  const rows = await visibleRows(db, inArray(schema.places.slug, wanted));
+  return toCards(rows, now).sort(
+    (a, b) => wanted.indexOf(a.placeSlug) - wanted.indexOf(b.placeSlug),
+  );
+}
+
 /** Other places with approved picks within 1.5 km of a pin, nearest first. */
 async function nearbyCards(
   db: Db,
