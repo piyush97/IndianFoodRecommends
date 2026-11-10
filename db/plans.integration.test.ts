@@ -14,7 +14,9 @@ function planText(rows: unknown): string {
   return JSON.stringify(rows);
 }
 
-describeDb("hot query plans at 50k places", () => {
+// Other DB test files truncate shared tables in parallel, so any EXPLAIN here can wait
+// on their locks or a re-seed; one suite-wide budget instead of per-test ones.
+describeDb("hot query plans at 50k places", { timeout: 240_000 }, () => {
   let db: Db;
   let total: number;
 
@@ -48,7 +50,7 @@ describeDb("hot query plans at 50k places", () => {
     const text = planText(plan);
     expect(text).toContain("places_name_lower_trgm_idx");
     expect(text.toUpperCase()).not.toContain('"SEQ SCAN"');
-  }, 240_000);
+  });
 
   it("uses the GiST index for nearby picks", async () => {
     await ensureRows();
@@ -67,5 +69,5 @@ describeDb("hot query plans at 50k places", () => {
       explain (format json) select slug, name from places where slug = 'perf-place-7'
     `);
     expect(planText(plan)).toContain("places_slug_unique");
-  }, 240_000);
+  });
 });
