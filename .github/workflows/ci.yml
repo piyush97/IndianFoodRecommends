@@ -46,6 +46,8 @@ jobs:
       REPORT_SALT: ci-only-salt
       AUTH_SECRET: ci-only-auth-secret
       AUTH_TRUST_HOST: "true"
+      # Empty until the repo secret exists; the Neon steps skip then.
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
     steps:
       # The migration safety check needs history to know which migrations are new in this PR.
       - uses: actions/checkout@v4
@@ -63,6 +65,20 @@ jobs:
       # Migrations run against this Postgres service on every PR, so a broken or
       # unsafe one fails here instead of at deploy time.
       - run: pnpm db:migrate
+      # Same migrations against a Neon branch of production (real rows, real
+      # extensions), so a NOT NULL or type change that only breaks on data fails here.
+      # The branch is deleted when the PR closes (neon-cleanup.yml).
+      - id: neon
+        if: github.event_name == 'pull_request' && env.NEON_API_KEY != ''
+        uses: neondatabase/create-branch-action@v6
+        with:
+          project_id: ${{ vars.NEON_PROJECT_ID }}
+          branch_name: pr-${{ github.event.number }}
+          api_key: ${{ env.NEON_API_KEY }}
+      - if: steps.neon.outcome == 'success'
+        run: pnpm db:migrate
+        env:
+          DATABASE_URL: ${{ steps.neon.outputs.db_url }}
       - run: pnpm test
       # E2E on a freshly seeded DB (tests above truncate it).
       - run: pnpm e2e:seed
