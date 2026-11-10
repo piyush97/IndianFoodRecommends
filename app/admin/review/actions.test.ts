@@ -23,7 +23,8 @@ vi.mock("../../../db", async (importActual) => ({
   db: handle?.db,
 }));
 
-const { approveAction, rejectAction, mergeAction, resolveReportAction } = await import("./actions");
+const { approveAction, rejectAction, mergeAction, resolveReportAction, aliasMissAction } =
+  await import("./actions");
 
 const describeDb = handle ? describe : describe.skip;
 
@@ -122,6 +123,76 @@ describeDb("admin server actions", () => {
       expect(r.resolvedAt).not.toBeNull();
       expect(cache.revalidateTag).toHaveBeenCalledWith("public", "max");
       expect(cache.revalidatePath).toHaveBeenCalledWith("/admin/reports");
+    });
+  });
+
+  describe("aliasMissAction", () => {
+    beforeEach(async () => {
+      await db.insert(schema.dishes).values({ slug: "chole-bhature", name: "Chole Bhature" });
+      await db.insert(schema.searchMisses).values({ query: "chhole bature" });
+    });
+
+    const form = (query: unknown, dishSlug: unknown) => {
+      const f = new FormData();
+      if (query !== undefined) f.set("query", query as string);
+      if (dishSlug !== undefined) f.set("dishSlug", dishSlug as string);
+      return f;
+    };
+
+    async function untouched() {
+      expect(await db.select().from(schema.dishAliases)).toHaveLength(0);
+      expect((await db.select().from(schema.searchMisses)).map((m) => m.query)).toEqual([
+        "chhole bature",
+      ]);
+      expect(cache.revalidateTag).not.toHaveBeenCalled();
+    }
+
+    it("refuses without an admin session and writes nothing", async () => {
+      await expect(aliasMissAction(form("chhole bature", "chole-bhature"))).rejects.toThrow(
+        /forbidden/,
+      );
+      await untouched();
+    });
+
+    it.each([
+      ["empty query", "", "chole-bhature"],
+      ["blank query", "   ", "chole-bhature"],
+      ["punctuation-only query", "!!", "chole-bhature"],
+      ["too long query", "x".repeat(101), "chole-bhature"],
+      ["missing query", undefined, "chole-bhature"],
+      ["empty slug", "chhole bature", ""],
+      ["too long slug", "chhole bature", "x".repeat(81)],
+      ["missing slug", "chhole bature", undefined],
+    ])("rejects %s and writes nothing", async (_name, query, dishSlug) => {
+      gate.admin = true;
+      await expect(aliasMissAction(form(query, dishSlug))).rejects.toThrow();
+      await untouched();
+    });
+
+    it("rejects a file instead of a string", async () => {
+      gate.admin = true;
+      const f = form(undefined, "chole-bhature");
+      f.set("query", new File(["x"], "x.txt"));
+      await expect(aliasMissAction(f)).rejects.toThrow();
+      await untouched();
+    });
+
+    it("adds the alias, clears the miss and revalidates", async () => {
+      gate.admin = true;
+      await aliasMissAction(form("chhole bature", "chole-bhature"));
+      expect((await db.select().from(schema.dishAliases)).map((a) => a.alias)).toEqual([
+        "chhole bature",
+      ]);
+      expect(await db.select().from(schema.searchMisses)).toHaveLength(0);
+      expect(cache.revalidateTag).toHaveBeenCalledWith("public", "max");
+      expect(cache.revalidatePath).toHaveBeenCalledWith("/admin/searches");
+    });
+
+    it("an unknown dish changes nothing", async () => {
+      gate.admin = true;
+      await aliasMissAction(form("chhole bature", "nope"));
+      expect(await db.select().from(schema.dishAliases)).toHaveLength(0);
+      expect(await db.select().from(schema.searchMisses)).toHaveLength(1);
     });
   });
 });

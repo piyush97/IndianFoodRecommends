@@ -16,6 +16,7 @@ import {
 } from "../../../lib/review";
 import { resolvePlace } from "../../../lib/reports-admin";
 import { parseApproveForm, parseManualForm } from "../../../lib/review-form";
+import { addMissAsAlias } from "../../../lib/search-misses";
 
 // Server actions accept arbitrary client JSON: validate every argument.
 const Id = z.coerce.number().int().positive();
@@ -58,6 +59,20 @@ export async function resolveReportAction(
   await requireAdmin();
   await resolvePlace(db, PlaceId.parse(placeId), Outcome.parse(outcome));
   revalidatePath("/admin/reports");
+  revalidateTag("public", "max");
+}
+
+const MissQuery = z.string().trim().min(1).max(100);
+const DishSlug = z.string().trim().min(1).max(80);
+
+export async function aliasMissAction(form: FormData): Promise<void> {
+  await requireAdmin();
+  await addMissAsAlias(
+    db,
+    MissQuery.parse(form.get("query")),
+    DishSlug.parse(form.get("dishSlug")),
+  );
+  revalidatePath("/admin/searches");
   revalidateTag("public", "max");
 }
 

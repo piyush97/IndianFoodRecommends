@@ -5,11 +5,21 @@ import { normalizeName } from "./text";
 // same thing; "chicken biryani" and "mutton biryani" stay out of the "biryani" group because they
 // reach it through whole-word containment in expandQuery.
 export const SYNONYM_GROUPS: readonly (readonly string[])[] = [
-  ["pani puri", "gol gappe", "golgappa", "golgappe", "puchka", "phuchka", "पानी पूरी", "गोलगप्पे"],
+  [
+    "pani puri",
+    "gol gappe",
+    "golgappa",
+    "golgappe",
+    "panipuri",
+    "puchka",
+    "phuchka",
+    "पानी पूरी",
+    "गोलगप्पे",
+  ],
   ["chole bhature", "chhole bhature", "chole bhatoore", "छोले भटूरे"],
-  ["biryani", "biriyani", "briyani", "biriani", "बिरयानी"],
+  ["biryani", "biriyani", "briyani", "biriani", "बिरयानी", "बिरियानी"],
   ["momos", "momo", "मोमोज", "मोमो"],
-  ["vada pav", "wada pav", "vadapav", "vada pao", "वड़ा पाव"],
+  ["vada pav", "wada pav", "vadapav", "vada pao", "वड़ा पाव", "वडा पाव"],
   ["nihari", "nahari", "निहारी"],
   ["kathi roll", "kati roll", "काठी रोल"],
   ["haleem", "halim", "हलीम"],
