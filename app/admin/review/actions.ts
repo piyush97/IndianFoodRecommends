@@ -14,6 +14,7 @@ import {
   suggestLocation,
   type ApproveInput,
 } from "../../../lib/review";
+import { resolvePlace } from "../../../lib/reports-admin";
 import { parseApproveForm, parseManualForm } from "../../../lib/review-form";
 
 // Server actions accept arbitrary client JSON: validate every argument.
@@ -44,6 +45,19 @@ export async function mergeDishAction(fromId: number, intoId: number): Promise<v
   await requireAdmin();
   await mergeDishes(db, Id.parse(fromId), Id.parse(intoId));
   revalidatePath("/admin/dishes");
+  revalidateTag("public", "max");
+}
+
+const PlaceId = z.number().int().positive();
+const Outcome = z.enum(["open", "closed", "moved"]);
+
+export async function resolveReportAction(
+  placeId: number,
+  outcome: "open" | "closed" | "moved",
+): Promise<void> {
+  await requireAdmin();
+  await resolvePlace(db, PlaceId.parse(placeId), Outcome.parse(outcome));
+  revalidatePath("/admin/reports");
   revalidateTag("public", "max");
 }
 

@@ -137,6 +137,9 @@ async function Place({ params }: { params: Params }) {
               <span className="sr-only"> to {place.name}, opens Google Maps</span>
             </a>
           )}
+          <a href="#report" className={action}>
+            Closed or moved?
+          </a>
           <SaveButton slug={place.slug} placeName={place.name} />
           <ShareButton
             url={absoluteUrl(`/${data.city.slug}/place/${place.slug}`)}
