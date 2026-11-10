@@ -20,6 +20,9 @@ const card = (slug: string, lat: number, lng: number): PickCard => ({
   proof: { platform: "youtube", externalId: "x", tsSeconds: null, creator: "C" },
   score: 0,
   pickedOn: "2026-01-01",
+  status: "open",
+  statusChangedAt: null,
+  flagged: false,
 });
 
 const fetchMock = vi.fn();

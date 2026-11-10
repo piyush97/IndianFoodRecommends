@@ -4,9 +4,9 @@ import { schema, type Db } from "../db";
 export type Nearby = { slug: string; meters: number };
 
 /**
- * Places within `radiusKm` of a point that have an approved pick, nearest first. Uses the
- * `places_geom_idx` PostGIS GiST index: `ST_DWithin` narrows to the circle through it and `<->`
- * orders nearest-first through it, both in metres on a geography column.
+ * Places that are not closed within `radiusKm` of a point and have an approved pick, nearest
+ * first. Uses the `places_geom_idx` PostGIS GiST index: `ST_DWithin` narrows to the circle through
+ * it and `<->` orders nearest-first through it, both in metres on a geography column.
  */
 export async function nearbyPlaces(
   db: Db,
@@ -34,6 +34,7 @@ export async function nearbyPlaces(
     .where(
       and(
         sql`ST_DWithin(${p.geom}, ${here}, ${radiusM}::float8)`,
+        ne(p.status, "closed"),
         exceptSlug ? ne(p.slug, exceptSlug) : undefined,
         exists(
           db

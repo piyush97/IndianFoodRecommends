@@ -4,7 +4,7 @@ import { getWalks } from "../public/spatial";
 
 type Entry = { path: string; lastModified: Date };
 
-/** Every public URL with at least one approved pick from a creator who has not opted out. */
+/** Every public URL with at least one approved pick from a creator who has not opted out, at a place that is not closed. */
 export async function sitemapPaths(db: Db): Promise<Entry[]> {
   const rows = (await db.execute(sql`
     with visible as (
@@ -16,7 +16,7 @@ export async function sitemapPaths(db: Db): Promise<Entry[]> {
       join places p on p.id = r.place_id
       join dishes d on d.id = r.dish_id
       join cities ci on ci.id = p.city_id
-      where r.status = 'approved' and c.opted_out = false
+      where r.status = 'approved' and c.opted_out = false and p.status <> 'closed'
     )
     select '/' as path, max(at) as at from visible
     union all select '/about', max(at) from visible

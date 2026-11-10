@@ -3,6 +3,7 @@ import { directionsUrl, formatTs, sourceUrl } from "../lib/public/links";
 import type { PickCard } from "../lib/public/queries";
 import { LidCode } from "./LidCode";
 import { SaveButton } from "./SaveButton";
+import { TrustNotes } from "./TrustNotes";
 
 export function PickList({
   cards,
@@ -72,6 +73,7 @@ export function PickList({
                 {card.dishes.length > 0 && (
                   <p className="mt-0.5 text-sm text-muted">{card.dishes.join(" · ")}</p>
                 )}
+                <TrustNotes trust={card} />
                 {card.distanceM !== undefined && (
                   <p className="mt-1 text-sm text-muted">
                     {(card.distanceM / 1000).toFixed(1)} km {distanceLabel}

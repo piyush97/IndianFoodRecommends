@@ -18,8 +18,10 @@ function likePattern(q: string): string {
   return `%${q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
 }
 
-// A row is public when its pick is approved and its creator has not opted out.
-const VISIBLE = sql`r.status = 'approved' and c.opted_out = false`;
+// A row is public when its pick is approved, its creator has not opted out and its place is not
+// confirmed closed. Every query joins `places p`, so a dish or creator that only has closed places
+// cannot surface through one.
+const VISIBLE = sql`r.status = 'approved' and c.opted_out = false and p.status <> 'closed'`;
 
 export async function searchAll(db: Db, raw: string): Promise<SearchResults> {
   const q = normalizeName(raw.slice(0, 100));
@@ -62,6 +64,7 @@ export async function searchAll(db: Db, raw: string): Promise<SearchResults> {
       from creators c
       join sources s on s.creator_id = c.id
       join recommendations r on r.source_id = s.id
+      join places p on p.id = r.place_id
       where ${VISIBLE} and ${hit("c.name")}
       group by c.slug, c.name
       order by score desc, c.name

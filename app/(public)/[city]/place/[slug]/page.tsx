@@ -13,10 +13,12 @@ import { absoluteUrl } from "../../../../../lib/seo/site";
 import { EmbedFacade } from "../../../../../components/EmbedFacade";
 import { MapOnDemand } from "../../../../../components/PlaceMapLazy";
 import { ReportForm } from "../../../../../components/ReportForm";
+import { TrustNotes } from "../../../../../components/TrustNotes";
 import { Skeleton } from "../../../../../components/Skeleton";
 import {
   directionsUrl,
   googleMapsUrl,
+  monthYear,
   sourceUrl,
   swiggyUrl,
   zomatoUrl,
@@ -40,6 +42,8 @@ export async function generateMetadata({
     title: `${data.place.name}, ${where}: picked by ${creators} food ${creators === 1 ? "vlogger" : "vloggers"}`,
     description: `What food vloggers ordered at ${data.place.name}: ${data.dishes.map((d) => d.name).join(", ")}. Watch each video at the moment they eat it.`,
     alternates: { canonical: `/${data.city.slug}/place/${data.place.slug}` },
+    // A closed place stays reachable for shared links but must not be found through search engines.
+    ...(data.place.status === "closed" && { robots: { index: false } }),
   };
 }
 
@@ -49,14 +53,6 @@ export default function PlacePage({ params }: PageProps<"/[city]/place/[slug]">)
       <Place params={params} />
     </Suspense>
   );
-}
-
-function monthYear(date: string): string {
-  return new Date(`${date}T00:00:00Z`).toLocaleDateString("en-IN", {
-    month: "short",
-    year: "numeric",
-    timeZone: "UTC",
-  });
 }
 
 async function Place({ params }: { params: Params }) {
@@ -113,6 +109,13 @@ async function Place({ params }: { params: Params }) {
               size="lg"
             />
           </div>
+        </div>
+        <div
+          className={
+            place.status !== "open" || place.flagged ? "border-l-4 border-ink py-1 pl-3" : undefined
+          }
+        >
+          <TrustNotes trust={place} />
         </div>
         {place.approx && (
           <p className="text-sm text-muted">

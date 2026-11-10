@@ -1,5 +1,14 @@
 export type Platform = "youtube" | "instagram";
 
+/** "Mar 2026" from a YYYY-MM-DD date or an ISO timestamp. */
+export function monthYear(date: string): string {
+  return new Date(date.length === 10 ? `${date}T00:00:00Z` : date).toLocaleDateString("en-IN", {
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
 export function directionsUrl(lat: number | null, lng: number | null): string | null {
   if (lat === null || lng === null) return null;
   return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;

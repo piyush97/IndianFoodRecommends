@@ -24,11 +24,15 @@ describeDb("sitemapPaths", () => {
       { slug: "a", name: "A", cityId: 1, lat: 28.65, lng: 77.23 },
       { slug: "pending-only", name: "P", cityId: 1 },
       { slug: "gone-only", name: "G", cityId: 1 },
+      { slug: "closed-one", name: "Closed", cityId: 1, lat: 28.65, lng: 77.23, status: "closed" },
     ]);
+    await db.insert(schema.dishes).values({ slug: "closed-dish", name: "Closed Dish" });
+    await db.insert(schema.creators).values({ slug: "closed-vlogger", name: "Closed Vlogger" });
     await db.insert(schema.sources).values([
       { platform: "youtube", externalId: "v1", creatorId: 1 },
       { platform: "youtube", externalId: "v2", creatorId: 1 },
       { platform: "youtube", externalId: "v3", creatorId: 2 },
+      { platform: "youtube", externalId: "v4", creatorId: 3 },
     ]);
     await db.insert(schema.areas).values([
       {
@@ -46,6 +50,7 @@ describeDb("sitemapPaths", () => {
       { sourceId: 2, placeId: 1, dishId: 1, status: "approved", tsSeconds: 5 },
       { sourceId: 1, placeId: 2, dishId: 2, status: "pending" },
       { sourceId: 3, placeId: 3, dishId: 2, status: "approved" },
+      { sourceId: 4, placeId: 4, dishId: 3, status: "approved" },
     ]);
   });
 
@@ -69,6 +74,9 @@ describeDb("sitemapPaths", () => {
     expect(paths).not.toContain("/delhi/place/gone-only");
     expect(paths).not.toContain("/delhi/momos");
     expect(paths).not.toContain("/creator/gone");
+    expect(paths).not.toContain("/delhi/place/closed-one");
+    expect(paths).not.toContain("/delhi/closed-dish");
+    expect(paths).not.toContain("/creator/closed-vlogger");
     expect(paths).not.toContain("/delhi/area/empty");
     expect(new Set(paths).size).toBe(paths.length);
   });
