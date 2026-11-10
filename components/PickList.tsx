@@ -2,6 +2,7 @@ import Link from "next/link";
 import { directionsUrl, formatTs, sourceUrl } from "../lib/public/links";
 import type { PickCard } from "../lib/public/queries";
 import { LidCode } from "./LidCode";
+import { SaveButton } from "./SaveButton";
 
 export function PickList({
   cards,
@@ -107,6 +108,7 @@ export function PickList({
                   <span className="sr-only"> to {card.placeName}, opens Google Maps</span>
                 </a>
               )}
+              <SaveButton slug={card.placeSlug} placeName={card.placeName} />
             </div>
           </li>
         );

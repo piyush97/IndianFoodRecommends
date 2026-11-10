@@ -3,6 +3,7 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { CityTabs, CurrentCityTabs } from "../../components/CityTabs";
 import { HeaderSearch } from "../../components/HeaderSearch";
+import { ListLink } from "../../components/ListLink";
 import { SearchBar } from "../../components/SearchBar";
 import { cachedCities } from "./data";
 
@@ -18,12 +19,15 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
           >
             Indian Food <span className="text-accent">Recommends</span>
           </Link>
-          <Link
-            href="/submit"
-            className="min-h-11 shrink-0 content-center text-sm font-semibold whitespace-nowrap underline decoration-line underline-offset-4 hover:decoration-ink"
-          >
-            Suggest a pick
-          </Link>
+          <div className="flex items-center gap-4">
+            <ListLink />
+            <Link
+              href="/submit"
+              className="min-h-11 shrink-0 content-center text-sm font-semibold whitespace-nowrap underline decoration-line underline-offset-4 hover:decoration-ink"
+            >
+              Suggest a pick
+            </Link>
+          </div>
         </div>
         <Suspense
           fallback={

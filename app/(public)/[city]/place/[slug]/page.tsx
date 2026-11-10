@@ -7,6 +7,7 @@ import { JsonLd } from "../../../../../components/JsonLd";
 import { restaurantLd } from "../../../../../lib/seo/jsonld";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { SaveButton } from "../../../../../components/SaveButton";
 import { ShareButton } from "../../../../../components/ShareButton";
 import { absoluteUrl } from "../../../../../lib/seo/site";
 import { EmbedFacade } from "../../../../../components/EmbedFacade";
@@ -133,6 +134,7 @@ async function Place({ params }: { params: Params }) {
               <span className="sr-only"> to {place.name}, opens Google Maps</span>
             </a>
           )}
+          <SaveButton slug={place.slug} placeName={place.name} />
           <ShareButton
             url={absoluteUrl(`/${data.city.slug}/place/${place.slug}`)}
             title={place.name}
