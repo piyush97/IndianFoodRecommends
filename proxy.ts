@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse, type NextFetchEvent, type NextRequest } from "next/server";
 import { db } from "./db";
 import { isKnownPath, loadIndex, type PathIndex } from "./lib/seo/known-paths";
 
@@ -7,26 +7,41 @@ import { isKnownPath, loadIndex, type PathIndex } from "./lib/seo/known-paths";
 const TTL_MS = 60_000;
 const RETRY_MS = 10_000;
 let cached: { at: number; index: PathIndex } | null = null;
+let loading: Promise<PathIndex | null> | null = null;
 
-async function index(force: boolean): Promise<PathIndex | null> {
-  const now = Date.now();
-  if (cached && !force && now - cached.at < TTL_MS) return cached.index;
-  if (cached && force && now - cached.at < RETRY_MS) return cached.index;
-  try {
-    cached = { at: now, index: await loadIndex(db) };
-    return cached.index;
-  } catch (error) {
-    console.error("proxy: slug index failed, letting the request through", error);
-    return cached?.index ?? null;
-  }
+// One load at a time, shared by every request that needs it. A failure keeps the previous index.
+function refresh(): Promise<PathIndex | null> {
+  const at = Date.now();
+  loading ??= loadIndex(db)
+    .then(
+      (index) => (cached = { at, index }).index,
+      (error) => {
+        console.error("proxy: slug index failed, letting the request through", error);
+        return cached?.index ?? null;
+      },
+    )
+    .finally(() => {
+      loading = null;
+    });
+  return loading;
 }
 
-export async function proxy(request: NextRequest) {
+async function index(force: boolean): Promise<PathIndex | null> {
+  if (cached && Date.now() - cached.at < (force ? RETRY_MS : TTL_MS)) return cached.index;
+  return refresh();
+}
+
+export async function proxy(request: NextRequest, event: NextFetchEvent) {
   let segments: string[];
   try {
     segments = request.nextUrl.pathname.split("/").filter(Boolean).map(decodeURIComponent);
   } catch {
     return NextResponse.rewrite(new URL("/404", request.url), { status: 404 }); // malformed %-escape
+  }
+  // An expired index still vouches for the pages it lists: answer now, refresh after the response.
+  if (cached && Date.now() - cached.at >= TTL_MS && isKnownPath(segments, cached.index)) {
+    event.waitUntil(refresh());
+    return NextResponse.next();
   }
   let known = await index(false);
   if (!known) return NextResponse.next();
