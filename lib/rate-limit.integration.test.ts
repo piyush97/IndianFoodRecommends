@@ -1,6 +1,9 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { sql } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import type { Db } from "../db";
+import * as schema from "../db/schema";
 import { testDb } from "../db/test-db";
 import { takeToken } from "./rate-limit";
 
@@ -80,5 +83,23 @@ describeDb("takeToken", () => {
     expect(denied.ok).toBe(false);
     expect(denied.retryAfterMs).toBeGreaterThanOrEqual(1900);
     expect(denied.retryAfterMs).toBeLessThanOrEqual(2000);
+  });
+
+  it("lets a read-only preview session through instead of failing", async () => {
+    const client = postgres(process.env.DATABASE_URL_TEST!, {
+      max: 1,
+      prepare: false,
+      connection: { options: "-c default_transaction_read_only=on" },
+    });
+    try {
+      const readOnly = drizzle(client, { schema }) as unknown as Db;
+      const result = await takeToken(readOnly, `ro:${Date.now()}`, {
+        capacity: 1,
+        refillPerSecond: 0,
+      });
+      expect(result).toEqual({ ok: true, retryAfterMs: 0 });
+    } finally {
+      await client.end();
+    }
   });
 });

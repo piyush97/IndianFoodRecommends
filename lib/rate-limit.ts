@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import type { Db } from "../db";
+import { isReadOnlyError } from "../db/guard";
 
 export type RateLimitOptions = {
   /** Burst size: the most calls allowed back to back. */
@@ -32,6 +33,20 @@ export async function takeToken(
 ): Promise<RateLimitResult> {
   if (capacity <= 0) return { ok: false, retryAfterMs: NO_REFILL_MS };
 
+  try {
+    return await spendToken(db, key, { capacity, refillPerSecond });
+  } catch (error) {
+    // A read-only preview session cannot record the spend; allow the call, do not 500.
+    if (isReadOnlyError(error)) return { ok: true, retryAfterMs: 0 };
+    throw error;
+  }
+}
+
+async function spendToken(
+  db: Db,
+  key: string,
+  { capacity, refillPerSecond }: RateLimitOptions,
+): Promise<RateLimitResult> {
   const [row] = await db.execute<{ available: string | number; allowed: boolean }>(sql`
     with current as (
       select tokens, updated_at from rate_limits where key = ${key}

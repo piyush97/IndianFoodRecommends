@@ -43,7 +43,7 @@ Against a production build and the production database:
 
 | Metric                      | Result                                                      |
 | --------------------------- | ----------------------------------------------------------- |
-| Approved picks              | 454                                                         |
+| Approved picks              | 590 (2026-11-11; 454 at the first measurement)              |
 | Read page p95, single user  | 254–269 ms (home, place, dish), 709 ms city, 1362 ms search |
 | Database round trip (floor) | 232 ms                                                      |
 | Load test, 10 readers       | 0 failures in 1163 requests, p95 2.25 s                     |

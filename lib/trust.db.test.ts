@@ -96,6 +96,12 @@ describeDb("flaggedPlaceIds", () => {
     expect(await flaggedPlaceIds({} as Db, [], now)).toEqual(new Set());
   });
 
+  it("accepts more ids than Postgres allows bind parameters", async () => {
+    await reports(1, ["h1", "h2", "h3"]);
+    const many = [1, ...Array.from({ length: 70_000 }, (_, i) => 100_000 + i)];
+    expect(await flaggedPlaceIds(db, many, now)).toEqual(new Set([1]));
+  });
+
   it("says moved only when every counted report is a moved report", async () => {
     await reports(1, ["h1", "h2", "h3"], "moved");
     await reports(2, ["h1", "h2"], "closed");

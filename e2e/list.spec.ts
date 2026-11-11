@@ -14,7 +14,7 @@ test("save two places, open My list, share it, and a friend saves it all", async
   await expect(page.getByRole("link", { name: /^My list\s*2$/ })).toBeVisible();
 
   await page.getByRole("link", { name: /^My list/ }).click();
-  await expect(page).toHaveURL(/\/list\?p=kamla-nagar-dhaba%2Cchache-di-hatti$/);
+  await expect(page).toHaveURL(/\/list\?p=kamla-nagar-dhaba,chache-di-hatti$/);
   await expect(page.getByRole("link", { name: "Chache Di Hatti", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "Kamla Nagar Dhaba", exact: true })).toBeVisible();
 

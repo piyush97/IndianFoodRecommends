@@ -199,6 +199,40 @@ export const creators = [
     ytChannelId: "UCAqv9pvn1Fkd_gCRu3-ZASg",
     igHandle: null,
   },
+  // Jaipur and Lucknow were thin (14 and 44 picks). Each ID was fetched with yt-dlp on
+  // 2026-11-11 and its recent uploads are mostly named restaurants in that city.
+  {
+    slug: "wetubeboys",
+    name: "WeTubeBoys",
+    ytChannelId: "UCVa5_eIw2QvrM_dx-icHhOg",
+    igHandle: null,
+  },
+  {
+    slug: "chalo-dekhe-india",
+    name: "Chalo Dekhe India",
+    ytChannelId: "UCtWCM-6LcMUOInzA0Vy7tBQ",
+    igHandle: null,
+  },
+  {
+    slug: "life-of-garvit-chand",
+    name: "Life of Garvit Chand",
+    ytChannelId: "UCfvXVHHxbRkEHyRej5pQnSw",
+    igHandle: null,
+  },
+  {
+    slug: "foodie-sodi",
+    name: "Foodie Sodi",
+    ytChannelId: "UC7A_sqoWyegW8GpJsRJBNBw",
+    igHandle: null,
+  },
+  { slug: "trip4food", name: "Trip4Food", ytChannelId: "UCcmFqlKtrsrYU9BLw6Fg5DQ", igHandle: null },
+  {
+    slug: "the-punjabi-gabru",
+    name: "The Punjabi Gabru",
+    ytChannelId: "UC8X_sg3D8RqYhBDS-UlcnNQ",
+    igHandle: null,
+  },
+  { slug: "faiz-khan", name: "Faiz Khan", ytChannelId: "UC1RWcYfsXUPQ3nsrdwNjORw", igHandle: null },
   // Kolkata and Mumbai coverage (#39).
   { slug: "foodzpah", name: "FoodZpah", ytChannelId: "UCKieyGPRpMvIMn1b0rbKrqg", igHandle: null },
   {

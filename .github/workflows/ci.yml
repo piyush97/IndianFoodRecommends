@@ -83,7 +83,9 @@ jobs:
       # E2E on a freshly seeded DB (tests above truncate it).
       - run: pnpm e2e:seed
       - run: pnpm build
-      - run: pnpm exec playwright install --with-deps chromium
+      # The runner image already has Chromium's system libraries; when Ubuntu's apt mirrors are
+      # unreachable, `--with-deps` fails, so fall back to downloading only the browser.
+      - run: pnpm exec playwright install --with-deps chromium || pnpm exec playwright install chromium
       - run: pnpm e2e
       - uses: actions/upload-artifact@v4
         if: failure()

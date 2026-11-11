@@ -9,8 +9,10 @@ import { cachedWalks } from "../../data";
 type Props = PageProps<"/[city]/walks">;
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { city } = await params;
+  const name = cityBySlug(city)?.name ?? city;
   return {
-    title: `Food walks in ${cityBySlug(city)?.name ?? city}`,
+    title: `Food walks in ${name}`,
+    description: `Short food walks in ${name}: four or five places close together, each picked by food vloggers, with one Google Maps route.`,
     alternates: { canonical: `/${city}/walks` },
   };
 }

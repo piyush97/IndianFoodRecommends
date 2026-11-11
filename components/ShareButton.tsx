@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { withUtm } from "../lib/track";
 
 /** Native share sheet where the browser has one (phones, where WhatsApp lives); copy-link elsewhere. */
@@ -17,6 +17,7 @@ export function ShareButton({
 }) {
   const [note, setNote] = useState("");
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  useEffect(() => () => clearTimeout(timer.current), []);
 
   function say(message: string) {
     setNote(message);

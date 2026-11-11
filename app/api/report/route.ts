@@ -1,4 +1,5 @@
 import { db } from "../../../db";
+import { isReadOnlyError, READ_ONLY } from "../../../db/guard";
 import { createReport, hashIp } from "../../../lib/report";
 
 export async function POST(request: Request): Promise<Response> {
@@ -13,7 +14,13 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-  const result = await createReport(db, body, hashIp(ip, salt));
+  let result: Awaited<ReturnType<typeof createReport>>;
+  try {
+    result = await createReport(db, body, hashIp(ip, salt));
+  } catch (error) {
+    if (isReadOnlyError(error)) return Response.json({ error: READ_ONLY }, { status: 503 });
+    throw error;
+  }
   if (result.ok) return Response.json({ ok: true }, { status: 201 });
 
   const messages = {

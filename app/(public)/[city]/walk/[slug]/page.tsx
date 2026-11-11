@@ -14,6 +14,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const [walk] = await cachedWalks(city, slug);
   return {
     title: walk ? `${walk.name} in ${walk.cityName}` : "Walk not found",
+    ...(walk && {
+      description: `${walk.stops.length} stops picked by food vloggers in ${walk.cityName}, ${(walk.meters / 1000).toFixed(1)} km between pins: ${walk.stops.map((s) => s.placeName).join(", ")}.`,
+    }),
     alternates: { canonical: `/${city}/walk/${slug}` },
   };
 }

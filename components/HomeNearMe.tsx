@@ -10,6 +10,8 @@ type State = "idle" | "locating" | "loading" | "result" | "denied" | "failed";
 type Suggestion = { name: string; lat: number; lng: number };
 type Source = "device" | "local" | "openstreetmap";
 
+export const LOCATE_GIVE_UP_MS = 20_000;
+
 const PRIVACY: Record<Source, string> = {
   device: "Your location stays on this device.",
   local: "Matched against our own list of areas, nothing you typed left this site.",
@@ -65,9 +67,28 @@ export function HomeNearMe() {
     }
     inFlight.current = true;
     setState("locating");
+    // Some browsers never call back when the prompt is dismissed ("Not now"); the option
+    // timeout only starts after permission is granted. Free the button after LOCATE_GIVE_UP_MS.
+    let settled = false;
+    const giveUp = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      inFlight.current = false;
+      track("near-me", { result: "unavailable" });
+      setNote("Could not find your location. Type an area instead.");
+      setState("failed");
+    }, LOCATE_GIVE_UP_MS);
     navigator.geolocation.getCurrentPosition(
-      (pos) => void show({ lat: pos.coords.latitude, lng: pos.coords.longitude }, "device"),
+      (pos) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(giveUp);
+        void show({ lat: pos.coords.latitude, lng: pos.coords.longitude }, "device");
+      },
       (err) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(giveUp);
         inFlight.current = false;
         // Code 1 is the visitor saying no; 2 and 3 (no fix, timeout) are not a refusal.
         if (err.code === 1) {

@@ -26,8 +26,13 @@ test("says so, in the status region, when location is blocked", async ({ browser
   const context = await browser.newContext({ permissions: [] });
   const page = await context.newPage();
   await page.goto("/");
-  await page.getByRole("button", { name: "Picks near me" }).click();
-  await expect(page.getByRole("status")).toHaveText("Location is off. Type an area instead.");
+  // Under a loaded parallel run the first click can land before hydration attaches the handler.
+  await expect(async () => {
+    await page.getByRole("button", { name: "Picks near me" }).click();
+    await expect(page.getByRole("status")).toHaveText("Location is off. Type an area instead.", {
+      timeout: 1_000,
+    });
+  }).toPass({ timeout: 10_000 });
   await expect(page.getByLabel("Area or landmark")).toBeFocused();
   await context.close();
 });
