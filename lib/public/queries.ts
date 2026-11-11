@@ -210,7 +210,8 @@ export async function listActiveCities(db: Db) {
     .sort((a, b) => order.indexOf(a.slug) - order.indexOf(b.slug));
 }
 
-export async function getHome(db: Db, citySlug: string, now = new Date(), diet?: DietFilter) {
+/** One load for the home and city pages: both need the same rows and the full ranking. */
+async function cityPicks(db: Db, citySlug: string, now: Date, diet?: DietFilter) {
   const city = await findCity(db, citySlug);
   if (!city) return null;
   const rows = await visibleRows(db, {}, eq(schema.places.cityId, city.id), ...dietWhere(diet));
@@ -237,16 +238,21 @@ export async function getHome(db: Db, citySlug: string, now = new Date(), diet?:
     dishes,
     creators,
     recent,
-    top: ranked.slice(0, 6),
+    ranked,
   };
 }
 
+export async function getHome(db: Db, citySlug: string, now = new Date(), diet?: DietFilter) {
+  const picks = await cityPicks(db, citySlug, now, diet);
+  if (!picks) return null;
+  const { ranked, ...home } = picks;
+  return { ...home, top: ranked.slice(0, 6) };
+}
+
 export async function getCity(db: Db, citySlug: string, now = new Date(), diet?: DietFilter) {
-  const home = await getHome(db, citySlug, now, diet);
-  if (!home) return null;
-  const city = (await findCity(db, citySlug))!;
-  const rows = await visibleRows(db, {}, eq(schema.places.cityId, city.id), ...dietWhere(diet));
-  return { city: home.city, dishes: home.dishes, places: await cardsWithFlags(db, rows, now) };
+  const picks = await cityPicks(db, citySlug, now, diet);
+  if (!picks) return null;
+  return { city: picks.city, dishes: picks.dishes, places: picks.ranked };
 }
 
 export async function getDishInCity(db: Db, citySlug: string, dishSlug: string, now = new Date()) {
