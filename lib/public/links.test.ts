@@ -30,15 +30,37 @@ describe("app links", () => {
 });
 
 describe("directionsUrl", () => {
-  it("is null without coordinates", () => {
-    expect(directionsUrl(null, 77)).toBeNull();
-    expect(directionsUrl(28.6, null)).toBeNull();
+  const place = { name: "Chache Di Hatti", locality: "Kamla Nagar", city: "Delhi" };
+  const base = "https://www.google.com/maps/dir/?api=1&destination=";
+
+  it("uses coordinates for an exact pin", () => {
+    expect(directionsUrl({ ...place, lat: 28.6, lng: 77.2, approx: false })).toBe(
+      `${base}28.6,77.2`,
+    );
   });
 
-  it("builds a Google Maps directions link", () => {
-    expect(directionsUrl(28.6, 77.2)).toBe(
-      "https://www.google.com/maps/dir/?api=1&destination=28.6,77.2",
+  it("uses the name for an approximate pin even when coordinates exist", () => {
+    expect(directionsUrl({ ...place, lat: 28.6, lng: 77.2, approx: true })).toBe(
+      `${base}Chache%20Di%20Hatti%2C%20Kamla%20Nagar%2C%20Delhi`,
     );
+  });
+
+  it("uses the name when a coordinate is missing", () => {
+    const byName = `${base}Chache%20Di%20Hatti%2C%20Kamla%20Nagar%2C%20Delhi`;
+    expect(directionsUrl({ ...place, lat: null, lng: 77.2, approx: false })).toBe(byName);
+    expect(directionsUrl({ ...place, lat: 28.6, lng: null, approx: false })).toBe(byName);
+  });
+
+  it("drops a missing locality", () => {
+    expect(directionsUrl({ ...place, locality: null, lat: null, lng: null, approx: false })).toBe(
+      `${base}Chache%20Di%20Hatti%2C%20Delhi`,
+    );
+  });
+
+  it("encodes & and , in the name", () => {
+    expect(
+      directionsUrl({ ...place, name: "A&B, Sweets", lat: null, lng: null, approx: false }),
+    ).toBe(`${base}A%26B%2C%20Sweets%2C%20Kamla%20Nagar%2C%20Delhi`);
   });
 });
 
