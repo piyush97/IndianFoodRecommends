@@ -37,8 +37,12 @@ describe("track", () => {
 describe("withUtm", () => {
   it("adds utm and keeps existing params", () => {
     expect(withUtm("https://x.app/list?p=a,b", "whatsapp")).toBe(
-      "https://x.app/list?p=a%2Cb&utm_source=share&utm_medium=whatsapp",
+      "https://x.app/list?p=a,b&utm_source=share&utm_medium=whatsapp",
     );
+  });
+
+  it("leaves no escaped comma in a shared list link", () => {
+    expect(withUtm("https://x.app/list?p=a%2Cb", "copy")).not.toContain("%2C");
   });
 });
 

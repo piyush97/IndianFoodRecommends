@@ -1,11 +1,12 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /** Read-only field with a copy button; same "Link copied" status pattern as ShareButton. */
 export function CopyField({ label, value }: { label: string; value: string }) {
   const [note, setNote] = useState("");
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  useEffect(() => () => clearTimeout(timer.current), []);
 
   async function copy() {
     let message = "Link copied";

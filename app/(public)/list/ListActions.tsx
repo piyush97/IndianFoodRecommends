@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { listParam, MAX_LIST, readList, useEatList, writeList } from "../../../lib/eat-list";
+import { listPath } from "../../../lib/list-core";
 import { track, withUtm } from "../../../lib/track";
 
 const noopSubscribe = () => () => {};
@@ -54,8 +55,7 @@ function Redirect() {
   const hydrated = useHydrated();
   const list = useEatList();
   useEffect(() => {
-    if (hydrated && list.length > 0)
-      router.replace(`/list?p=${encodeURIComponent(listParam(list))}`);
+    if (hydrated && list.length > 0) router.replace(listPath(list));
   }, [hydrated, list, router]);
   if (!hydrated || list.length > 0) {
     return (

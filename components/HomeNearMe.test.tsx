@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { PickCard } from "../lib/public/queries";
 import { track } from "../lib/track";
-import { HomeNearMe } from "./HomeNearMe";
+import { HomeNearMe, LOCATE_GIVE_UP_MS } from "./HomeNearMe";
 
 vi.mock("../lib/track", () => ({ track: vi.fn() }));
 
@@ -155,6 +155,39 @@ describe("HomeNearMe", () => {
     await waitFor(() =>
       expect(document.activeElement).toBe(screen.getByLabelText("Area or landmark")),
     );
+  });
+
+  it("frees the button when the browser never answers the location prompt", () => {
+    vi.useFakeTimers();
+    try {
+      getCurrentPosition.mockImplementation(() => {});
+      render(<HomeNearMe />);
+      fireEvent.click(screen.getByRole("button", { name: "Picks near me" }));
+      expect(track).not.toHaveBeenCalled();
+      act(() => vi.advanceTimersByTime(LOCATE_GIVE_UP_MS));
+      expect(screen.getByText("Could not find your location. Type an area instead.")).toBeTruthy();
+      expect(track).toHaveBeenCalledWith("near-me", { result: "unavailable" });
+      expect(
+        (screen.getByRole("button", { name: "Picks near me" }) as HTMLButtonElement).disabled,
+      ).toBe(false);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("ignores a late position after giving up", () => {
+    vi.useFakeTimers();
+    try {
+      let late: ((p: unknown) => void) | undefined;
+      getCurrentPosition.mockImplementation((ok) => (late = ok));
+      render(<HomeNearMe />);
+      fireEvent.click(screen.getByRole("button", { name: "Picks near me" }));
+      act(() => vi.advanceTimersByTime(LOCATE_GIVE_UP_MS));
+      act(() => late?.({ coords: { latitude: 28.6, longitude: 77.2 } }));
+      expect(fetchMock).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("announces when the browser has no geolocation", async () => {

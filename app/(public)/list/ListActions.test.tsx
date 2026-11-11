@@ -13,7 +13,7 @@ vi.mock("../../../lib/track", async (orig) => ({
 
 import { ListActions } from "./ListActions";
 
-const URL_ = "https://x.app/list?p=a%2Cb";
+const URL_ = "https://x.app/list?p=a,b";
 const TEXT = "2 places to eat in Delhi, picked by 1 food vlogger";
 
 function view(slugs: string[], requested = slugs) {

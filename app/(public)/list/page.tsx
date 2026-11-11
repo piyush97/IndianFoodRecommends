@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { PageHead } from "../../../components/PageHead";
 import { PickList } from "../../../components/PickList";
 import { Skeleton } from "../../../components/Skeleton";
-import { listParam } from "../../../lib/list-core";
+import { listParam, listPath } from "../../../lib/list-core";
 import { listShareText, parseListParam } from "../../../lib/list-params";
 import { absoluteUrl } from "../../../lib/seo/site";
 import { cachedList } from "../data";
@@ -76,7 +76,7 @@ async function ListContent({ searchParams }: Pick<Props, "searchParams">) {
         slugs={slugs}
         requested={requested}
         text={text}
-        url={absoluteUrl(`/list?p=${encodeURIComponent(listParam(slugs))}`)}
+        url={absoluteUrl(listPath(slugs))}
       />
       <PickList cards={cards} numbered={false} headingLevel={2} emptyText="" />
     </div>

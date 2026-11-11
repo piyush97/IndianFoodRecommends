@@ -22,7 +22,9 @@ export async function flaggedPlaces(
     .from(r)
     .where(
       and(
-        inArray(r.placeId, placeIds),
+        // One array parameter, not one per id: the near-me index passes every place, and
+        // Postgres caps a statement at 65,535 parameters. Ids are integers, so the literal is safe.
+        sql`${r.placeId} = any(${`{${placeIds.map((id) => Math.trunc(id)).join(",")}}`}::int[])`,
         inArray(r.kind, ["closed", "moved"]),
         isNotNull(r.ipHash),
         gt(r.createdAt, since),

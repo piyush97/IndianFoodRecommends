@@ -27,7 +27,8 @@ export function withUtm(url: string, medium: "native" | "copy" | "whatsapp"): st
   const out = new URL(url);
   out.searchParams.set("utm_source", "share");
   out.searchParams.set("utm_medium", medium);
-  return out.toString();
+  // URLSearchParams escapes commas; keep `p=a,b` readable in a WhatsApp message.
+  return out.toString().replaceAll("%2C", ",");
 }
 
 export function resultBucket(n: number): "0" | "1-5" | "6+" {
