@@ -85,3 +85,51 @@ node scripts/check-migrations.mjs origin/main
 emitted where work is slow and external: `db.search` around the search query set
 and `nominatim.search` around the geocoder call. Worker commands are recorded in
 `worker_runs` and listed at `/admin/ops`.
+
+## Deployed site, measured 2026-11-11
+
+Lighthouse 13.6 (mobile emulation, simulated throttling) against the production
+deployment on `indian-food-recommends.vercel.app`, after the growth features shipped:
+
+| Page                      | Performance | Accessibility | Best practices | SEO | CLS | LCP   | TBT    |
+| ------------------------- | ----------- | ------------- | -------------- | --- | --- | ----- | ------ |
+| `/`                       | 91          | 100           | 96             | 100 | 0   | 1.0 s | 190 ms |
+| `/delhi`                  | 94          | 100           | 96             | 91  | 0   | 2.7 s | 190 ms |
+| `/list?p=<3 places>`      | 96          | 100           | 96             | 91  | 0   | 2.6 s | 110 ms |
+| `/delhi/place/rpjs-shack` | 97          | 100           | 96             | 91  | 0   | 2.6 s | 30 ms  |
+
+All pages meet the Lighthouse mobile >= 90 and CLS 0 targets in `PRODUCT.md`.
+
+- **Best practices 96:** the only failing audit is a console error from loading
+  `cloud.umami.is/script.js` in the test environment, which cannot reach Umami.
+- **SEO 91:** the description `<meta>` streams after `<head>` for clients Next.js
+  does not list as HTML-limited. Real crawlers on that list (Googlebot's renderer,
+  Bingbot, WhatsApp, Facebook, Twitter, Slack) receive it in `<head>`; check with
+  `curl -A WhatsApp/2 <url> | sed 's#</head>.*##' | grep description`.
+
+```bash
+# Needs Chromium; Playwright's copy works.
+CHROME_PATH=$(ls -d ~/.cache/ms-playwright/chromium-*/chrome-linux64/chrome | tail -1) \
+  npx lighthouse https://indian-food-recommends.vercel.app/delhi --quiet \
+  --only-categories=performance,accessibility,best-practices,seo \
+  --chrome-flags="--headless=new --no-sandbox"
+```
+
+Data at the same time: 590 approved picks across 552 places, 36 active creators.
+
+```bash
+psql "$DATABASE_URL" -Atc "select count(*) from recommendations where status='approved'"
+psql "$DATABASE_URL" -Atc "select count(*) from places p where exists
+  (select 1 from recommendations r where r.place_id=p.id and r.status='approved')"
+```
+
+## Preview deployments are read-only
+
+Vercel previews receive production's `DATABASE_URL` from the Neon integration.
+`db/guard.ts` makes every preview session read-only
+(`options=-c default_transaction_read_only=on`), so an admin action, report or
+suggestion tried on a preview cannot change production rows: report and suggest
+answer 503 with a message, and the search and geocode rate limit is skipped
+instead of failing. Set `PREVIEW_DB_WRITES=1` on a preview that points at its
+own Neon branch to allow writes there. Verified by `db/guard.test.ts` against a
+real Postgres.
