@@ -9,9 +9,20 @@ export function monthYear(date: string): string {
   });
 }
 
-export function directionsUrl(lat: number | null, lng: number | null): string | null {
-  if (lat === null || lng === null) return null;
-  return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+/** Coordinates only for an exact pin; otherwise Google resolves the shop by name. */
+export function directionsUrl(p: {
+  name: string;
+  locality: string | null;
+  city: string;
+  lat: number | null;
+  lng: number | null;
+  approx: boolean;
+}): string {
+  const exact = !p.approx && p.lat !== null && p.lng !== null;
+  const destination = exact
+    ? `${p.lat},${p.lng}`
+    : encodeURIComponent([p.name, p.locality, p.city].filter(Boolean).join(", "));
+  return `https://www.google.com/maps/dir/?api=1&destination=${destination}`;
 }
 
 const q = (s: string) => encodeURIComponent(s);

@@ -60,7 +60,7 @@ async function Place({ params }: { params: Params }) {
   const data = await cachedPlace(city, slug);
   if (!data) notFound();
   const { place } = data;
-  const directions = directionsUrl(place.lat, place.lng);
+  const directions = directionsUrl({ ...place, city: data.city.name });
   const vloggers = new Set(data.proofs.map((p) => p.creator.slug)).size;
   const where = [place.locality, data.city.name].filter(Boolean).join(", ");
   const findOn = [
@@ -125,20 +125,18 @@ async function Place({ params }: { params: Params }) {
           </p>
         )}
         <div className="flex flex-wrap items-center gap-2">
-          {directions && (
-            <a
-              href={directions}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={action}
-              data-umami-event="directions"
-              data-umami-event-place={place.slug}
-            >
-              <ArrowIcon />
-              Directions
-              <span className="sr-only"> to {place.name}, opens Google Maps</span>
-            </a>
-          )}
+          <a
+            href={directions}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={action}
+            data-umami-event="directions"
+            data-umami-event-place={place.slug}
+          >
+            <ArrowIcon />
+            Directions
+            <span className="sr-only"> to {place.name}, opens Google Maps</span>
+          </a>
           <a href="#report" className={action}>
             Closed or moved?
           </a>

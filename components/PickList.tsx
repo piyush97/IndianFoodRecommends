@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cityBySlug } from "../lib/cities";
 import { directionsUrl, formatTs, sourceUrl } from "../lib/public/links";
 import type { PickCard } from "../lib/public/queries";
 import { LidCode } from "./LidCode";
@@ -32,7 +33,14 @@ export function PickList({
   return (
     <ol className="border-t-2 border-ink">
       {cards.map((card, i) => {
-        const directions = directionsUrl(card.lat, card.lng);
+        const directions = directionsUrl({
+          name: card.placeName,
+          locality: card.locality,
+          city: cityBySlug(card.citySlug)?.name ?? card.citySlug,
+          lat: card.lat,
+          lng: card.lng,
+          approx: card.approx,
+        });
         const ts = formatTs(card.proof.tsSeconds);
         const n = card.creators.length;
         const platform = card.proof.platform === "youtube" ? "YouTube" : "Instagram";
@@ -99,20 +107,18 @@ export function PickList({
                   by {card.proof.creator}, opens {platform}
                 </span>
               </a>
-              {directions && (
-                <a
-                  href={directions}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-line"
-                  data-umami-event="directions"
-                  data-umami-event-place={card.placeSlug}
-                >
-                  <ArrowIcon />
-                  Directions
-                  <span className="sr-only"> to {card.placeName}, opens Google Maps</span>
-                </a>
-              )}
+              <a
+                href={directions}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-line"
+                data-umami-event="directions"
+                data-umami-event-place={card.placeSlug}
+              >
+                <ArrowIcon />
+                Directions
+                <span className="sr-only"> to {card.placeName}, opens Google Maps</span>
+              </a>
               <SaveButton slug={card.placeSlug} placeName={card.placeName} />
             </div>
           </li>

@@ -64,6 +64,20 @@ async function Results({ searchParams }: Pick<Props, "searchParams">) {
 
   if (!query.trim()) return <EmptyQuery />;
 
+  // Search is the heaviest read path; cap it per client in Postgres.
+  const limit = await takeToken(db, clientKey({ headers: await headers() }, "search"), {
+    capacity: 30,
+    refillPerSecond: 30 / 60,
+  });
+  if (!limit.ok) {
+    return (
+      <p className="border-y border-line py-6 text-muted" role="status">
+        Too many searches from this connection. Try again in {Math.ceil(limit.retryAfterMs / 1000)}{" "}
+        seconds.
+      </p>
+    );
+  }
+
   const nearby = await nearAreaSearch(db, query, city || undefined, diet);
   if (nearby)
     return (
@@ -111,20 +125,6 @@ async function Results({ searchParams }: Pick<Props, "searchParams">) {
         />
       </>
     );
-
-  // Search is the heaviest read path; cap it per client in Postgres.
-  const limit = await takeToken(db, clientKey({ headers: await headers() }, "search"), {
-    capacity: 30,
-    refillPerSecond: 30 / 60,
-  });
-  if (!limit.ok) {
-    return (
-      <p className="border-y border-line py-6 text-muted" role="status">
-        Too many searches from this connection. Try again in {Math.ceil(limit.retryAfterMs / 1000)}{" "}
-        seconds.
-      </p>
-    );
-  }
 
   const res = await withSpan("db.search", () => searchAll(db, query), {
     "search.length": query.length,

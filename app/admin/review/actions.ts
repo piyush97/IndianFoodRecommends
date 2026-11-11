@@ -39,6 +39,7 @@ export async function mergeAction(fromId: number, intoId: number): Promise<void>
   await requireAdmin();
   await mergePlaces(db, Id.parse(fromId), Id.parse(intoId));
   revalidatePath("/admin/review");
+  revalidatePath("/admin/places");
   revalidateTag("public", "max");
 }
 
