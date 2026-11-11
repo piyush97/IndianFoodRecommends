@@ -1,10 +1,11 @@
-import { and, eq, inArray, type SQL } from "drizzle-orm";
+import { and, eq, inArray, ne, type SQL } from "drizzle-orm";
 import { schema, type Db } from "../../db";
 import type { Platform } from "./links";
 import { CITIES } from "../cities";
 import { rankScore } from "./rank";
 import type { DietFilter } from "../diet";
 import { nearbyPlaces } from "../geo";
+import { flaggedPlaces } from "../trust";
 
 /** A place near another one; `meters` is null when either pin is only neighbourhood-level. */
 export type NearbyCard = PickCard & { meters: number | null };
@@ -25,7 +26,17 @@ export type PickCard = {
   pickedOn: string;
   /** Straight-line distance from an area search; approximate pins remain labelled. */
   distanceM?: number;
+  /** "closed" only reaches a card on an eat list; every other path filters closed places out. */
+  status: PlaceStatus;
+  /** When an admin last changed `status`, ISO 8601. */
+  statusChangedAt: string | null;
+  /** Three or more distinct visitors reported it closed or moved and nobody has resolved that yet. */
+  flagged: boolean;
+  /** What the flagging reports say: "moved" only when every one of them says moved. */
+  flagKind?: "closed" | "moved";
 };
+
+export type PlaceStatus = "open" | "closed" | "moved";
 
 type City = { slug: string; name: string };
 
@@ -51,6 +62,8 @@ type Row = {
   osmId: string | null;
   googlePlaceId: string | null;
   lastVerified: string | null;
+  status: PlaceStatus;
+  statusChangedAt: Date | null;
   dishSlug: string;
   dishName: string;
 };
@@ -65,7 +78,12 @@ async function findCity(db: Db, slug: string): Promise<(City & { id: number }) |
 
 const dietWhere = (diet?: DietFilter): SQL[] => (diet ? [eq(schema.dishes.diet, diet)] : []);
 
-async function visibleRows(db: Db, ...filters: SQL[]): Promise<Row[]> {
+/** Closed places are hidden unless `includeClosed`: only a place page and a shared list still show them. */
+async function visibleRows(
+  db: Db,
+  opts: { includeClosed?: boolean },
+  ...filters: SQL[]
+): Promise<Row[]> {
   const r = schema.recommendations;
   const s = schema.sources;
   const c = schema.creators;
@@ -93,6 +111,8 @@ async function visibleRows(db: Db, ...filters: SQL[]): Promise<Row[]> {
       osmId: p.osmId,
       googlePlaceId: p.googlePlaceId,
       lastVerified: p.lastVerified,
+      status: p.status,
+      statusChangedAt: p.statusChangedAt,
       dishSlug: d.slug,
       dishName: d.name,
     })
@@ -102,7 +122,14 @@ async function visibleRows(db: Db, ...filters: SQL[]): Promise<Row[]> {
     .innerJoin(p, eq(p.id, r.placeId))
     .innerJoin(d, eq(d.id, r.dishId))
     .innerJoin(schema.cities, eq(schema.cities.id, p.cityId))
-    .where(and(eq(r.status, "approved"), eq(c.optedOut, false), ...filters))
+    .where(
+      and(
+        eq(r.status, "approved"),
+        eq(c.optedOut, false),
+        opts.includeClosed ? undefined : ne(p.status, "closed"),
+        ...filters,
+      ),
+    )
     .orderBy(r.id);
 }
 
@@ -110,8 +137,12 @@ function pickedAt(row: Row): Date {
   return row.publishedOn ? new Date(`${row.publishedOn}T00:00:00Z`) : row.createdAt;
 }
 
-/** Groups rows by place, ranked by distinct creators then recency. */
-function toCards(rows: Row[], now: Date): PickCard[] {
+/** Groups rows by place, ranked by distinct creators then recency. `flags` comes from one `flaggedPlaces` call. */
+function toCards(
+  rows: Row[],
+  now: Date,
+  flags: Map<number, "closed" | "moved"> = new Map(),
+): PickCard[] {
   const byPlace = new Map<string, Row[]>();
   for (const row of rows) byPlace.set(row.placeSlug, [...(byPlace.get(row.placeSlug) ?? []), row]);
 
@@ -138,9 +169,19 @@ function toCards(rows: Row[], now: Date): PickCard[] {
       },
       score: rankScore(creators.size, newest, now),
       pickedOn: newest.toISOString().slice(0, 10),
+      status: first.status,
+      statusChangedAt: first.statusChangedAt?.toISOString() ?? null,
+      flagged: flags.has(first.placeId),
+      ...(flags.has(first.placeId) && { flagKind: flags.get(first.placeId) }),
     };
   });
   return cards.sort((a, b) => b.score - a.score || a.placeName.localeCompare(b.placeName));
+}
+
+/** `toCards` with visitor flags for every place in `rows`, read in a single query. */
+async function cardsWithFlags(db: Db, rows: Row[], now: Date): Promise<PickCard[]> {
+  const flags = await flaggedPlaces(db, [...new Set(rows.map((r) => r.placeId))], now);
+  return toCards(rows, now, flags);
 }
 
 function countBy<K extends string>(rows: Row[], key: (r: Row) => K) {
@@ -151,7 +192,7 @@ function countBy<K extends string>(rows: Row[], key: (r: Row) => K) {
 
 /** Cities with at least one visible pick, in registry order. */
 export async function listActiveCities(db: Db) {
-  const rows = await visibleRows(db);
+  const rows = await visibleRows(db, {});
   const counts = new Map<string, { slug: string; name: string; picks: number }>();
   for (const r of rows) {
     const entry = counts.get(r.citySlug) ?? { slug: r.citySlug, name: "", picks: 0 };
@@ -172,7 +213,7 @@ export async function listActiveCities(db: Db) {
 export async function getHome(db: Db, citySlug: string, now = new Date(), diet?: DietFilter) {
   const city = await findCity(db, citySlug);
   if (!city) return null;
-  const rows = await visibleRows(db, eq(schema.places.cityId, city.id), ...dietWhere(diet));
+  const rows = await visibleRows(db, {}, eq(schema.places.cityId, city.id), ...dietWhere(diet));
 
   const dishNames = new Map(rows.map((r) => [r.dishSlug, r.dishName]));
   const creatorNames = new Map(rows.map((r) => [r.creatorSlug, r.creatorName]));
@@ -187,7 +228,7 @@ export async function getHome(db: Db, citySlug: string, now = new Date(), diet?:
     (a, b) => (b.reviewedAt ?? b.createdAt).getTime() - (a.reviewedAt ?? a.createdAt).getTime(),
   );
   const recentPlaces = [...new Set(latestFirst.map((r) => r.placeSlug))].slice(0, 6);
-  const ranked = toCards(rows, now);
+  const ranked = await cardsWithFlags(db, rows, now);
   const cards = new Map(ranked.map((c) => [c.placeSlug, c]));
   const recent = recentPlaces.map((slug) => cards.get(slug)!);
 
@@ -204,8 +245,8 @@ export async function getCity(db: Db, citySlug: string, now = new Date(), diet?:
   const home = await getHome(db, citySlug, now, diet);
   if (!home) return null;
   const city = (await findCity(db, citySlug))!;
-  const rows = await visibleRows(db, eq(schema.places.cityId, city.id), ...dietWhere(diet));
-  return { city: home.city, dishes: home.dishes, places: toCards(rows, now) };
+  const rows = await visibleRows(db, {}, eq(schema.places.cityId, city.id), ...dietWhere(diet));
+  return { city: home.city, dishes: home.dishes, places: await cardsWithFlags(db, rows, now) };
 }
 
 export async function getDishInCity(db: Db, citySlug: string, dishSlug: string, now = new Date()) {
@@ -218,13 +259,14 @@ export async function getDishInCity(db: Db, citySlug: string, dishSlug: string, 
   if (!dish) return null;
   const rows = await visibleRows(
     db,
+    {},
     eq(schema.places.cityId, city.id),
     eq(schema.dishes.slug, dishSlug),
   );
   return {
     city: { slug: city.slug, name: city.name },
     dish,
-    places: toCards(rows, now),
+    places: await cardsWithFlags(db, rows, now),
     creatorCount: new Set(rows.map((r) => r.creatorSlug)).size,
   };
 }
@@ -240,8 +282,9 @@ export async function getDishPicks(
   diet?: DietFilter,
 ) {
   if (dishSlugs.length === 0) return [];
-  return toCards(
-    await visibleRows(db, inArray(schema.dishes.slug, dishSlugs), ...dietWhere(diet)),
+  return cardsWithFlags(
+    db,
+    await visibleRows(db, {}, inArray(schema.dishes.slug, dishSlugs), ...dietWhere(diet)),
     now,
   );
 }
@@ -257,11 +300,34 @@ export async function getPlaceCards(
   if (placeSlugs.length === 0) return [];
   const rows = await visibleRows(
     db,
+    {},
     inArray(schema.places.slug, placeSlugs),
     ...dietWhere(diet),
     ...(dishSlugs ? [inArray(schema.dishes.slug, dishSlugs)] : []),
   );
-  return toCards(rows, now);
+  return cardsWithFlags(db, rows, now);
+}
+
+/** Every visible place as a card, for the on-device near-me index. */
+export async function getAllCards(db: Db, now: Date = new Date()): Promise<PickCard[]> {
+  return cardsWithFlags(db, await visibleRows(db, {}), now);
+}
+
+/**
+ * Shared-list cards in the order of `slugs`. Unknown, unapproved and opted-out places are simply
+ * absent. A place closed after it was saved or shared stays, labelled closed.
+ */
+export async function getListCards(
+  db: Db,
+  slugs: string[],
+  now: Date = new Date(),
+): Promise<PickCard[]> {
+  const wanted = [...new Set(slugs)].slice(0, 30);
+  if (wanted.length === 0) return [];
+  const rows = await visibleRows(db, { includeClosed: true }, inArray(schema.places.slug, wanted));
+  return (await cardsWithFlags(db, rows, now)).sort(
+    (a, b) => wanted.indexOf(a.placeSlug) - wanted.indexOf(b.placeSlug),
+  );
 }
 
 /** Other places with approved picks within 1.5 km of a pin, nearest first. */
@@ -303,13 +369,17 @@ async function nearbyCards(
 export async function getPlace(db: Db, citySlug: string, placeSlug: string, now = new Date()) {
   const city = await findCity(db, citySlug);
   if (!city) return null;
+  // Direct links and shared pages keep working after a place closes, so this one includes closed.
   const rows = await visibleRows(
     db,
+    { includeClosed: true },
     eq(schema.places.cityId, city.id),
     eq(schema.places.slug, placeSlug),
   );
   if (rows.length === 0) return null;
   const first = rows[0];
+  const flags = await flaggedPlaces(db, [first.placeId], now);
+  const newest = new Date(Math.max(...rows.map((r) => pickedAt(r).getTime())));
 
   const creatorsPerDish = new Map<string, { slug: string; name: string; creators: Set<string> }>();
   for (const row of rows) {
@@ -333,6 +403,11 @@ export async function getPlace(db: Db, citySlug: string, placeSlug: string, now 
       lng: first.lng,
       approx: first.osmId?.startsWith("approx:") ?? false,
       lastVerified: first.lastVerified,
+      status: first.status,
+      statusChangedAt: first.statusChangedAt?.toISOString() ?? null,
+      flagged: flags.has(first.placeId),
+      flagKind: flags.get(first.placeId),
+      pickedOn: newest.toISOString().slice(0, 10),
       // "none" marks a lookup that found no confident match.
       googlePlaceId: first.googlePlaceId === "none" ? null : first.googlePlaceId,
     },
@@ -373,7 +448,7 @@ export async function getCreator(db: Db, slug: string, dishSlug?: string, now = 
     .where(eq(schema.creators.slug, slug));
   if (!creator || creator.optedOut) return null;
 
-  const rows = await visibleRows(db, eq(schema.creators.slug, slug));
+  const rows = await visibleRows(db, {}, eq(schema.creators.slug, slug));
   const dishes = [...new Map(rows.map((r) => [r.dishSlug, r.dishName]))]
     .map(([s, name]) => ({ slug: s, name }))
     .sort((a, b) => a.name.localeCompare(b.name));
@@ -387,7 +462,7 @@ export async function getCreator(db: Db, slug: string, dishSlug?: string, now = 
       igHandle: creator.igHandle,
     },
     dishes,
-    picks: toCards(shown, now),
+    picks: await cardsWithFlags(db, shown, now),
     total: rows.length,
   };
 }

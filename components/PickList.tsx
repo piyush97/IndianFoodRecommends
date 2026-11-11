@@ -2,18 +2,23 @@ import Link from "next/link";
 import { directionsUrl, formatTs, sourceUrl } from "../lib/public/links";
 import type { PickCard } from "../lib/public/queries";
 import { LidCode } from "./LidCode";
+import { SaveButton } from "./SaveButton";
+import { TrustNotes } from "./TrustNotes";
 
 export function PickList({
   cards,
   emptyText,
   numbered = true,
   headingLevel = 3,
+  distanceLabel = "from area centre",
 }: {
   cards: PickCard[];
   emptyText: string;
   numbered?: boolean;
   /** 2 when the list sits directly under the page h1, 3 under a section h2. */
   headingLevel?: 2 | 3;
+  /** Where `distanceM` is measured from. */
+  distanceLabel?: string;
 }) {
   const Heading = headingLevel === 2 ? "h2" : "h3";
   if (cards.length === 0) {
@@ -68,9 +73,10 @@ export function PickList({
                 {card.dishes.length > 0 && (
                   <p className="mt-0.5 text-sm text-muted">{card.dishes.join(" · ")}</p>
                 )}
+                <TrustNotes trust={card} />
                 {card.distanceM !== undefined && (
                   <p className="mt-1 text-sm text-muted">
-                    {(card.distanceM / 1000).toFixed(1)} km from area centre
+                    {(card.distanceM / 1000).toFixed(1)} km {distanceLabel}
                     {card.approx ? " (approximate pin)" : ""}
                   </p>
                 )}
@@ -107,6 +113,7 @@ export function PickList({
                   <span className="sr-only"> to {card.placeName}, opens Google Maps</span>
                 </a>
               )}
+              <SaveButton slug={card.placeSlug} placeName={card.placeName} />
             </div>
           </li>
         );

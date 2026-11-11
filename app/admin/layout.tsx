@@ -36,6 +36,9 @@ async function AdminGate({ children }: { children: React.ReactNode }) {
           <Link href="/admin/review" className="min-h-11 content-center underline">
             Review
           </Link>
+          <Link href="/admin/reports" className="min-h-11 content-center underline">
+            Reports
+          </Link>
           <Link href="/admin/stale" className="min-h-11 content-center underline">
             Stale places
           </Link>

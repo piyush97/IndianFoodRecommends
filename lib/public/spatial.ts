@@ -170,7 +170,8 @@ const areaFields = sql`a.id, a.slug, a.name, a.lat, a.lng, a.osm_id as "osmId",
 const areaContains = sql`case when a.boundary is not null
   then ST_Covers(a.boundary,p.geom::geometry)
   else ST_DWithin(p.geom,ST_SetSRID(ST_MakePoint(a.lng,a.lat),4326)::geography,1000) end`;
-const visible = sql`r.status='approved' and c.opted_out=false`;
+// Every query using this aliases `places` as p, so closed places never reach a map, area or walk.
+const visible = sql`r.status='approved' and c.opted_out=false and p.status<>'closed'`;
 
 export async function getArea(db: Db, city: string, slug: string): Promise<Area | null> {
   const [row] = await db.execute<Area>(sql`select ${areaFields} from areas a

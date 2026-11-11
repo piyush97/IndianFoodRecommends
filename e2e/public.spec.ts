@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("search → ranked places → place → watch the moment", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("searchbox", { name: "Search dish, place or creator" }).fill("chole bature");
-  await page.getByRole("button", { name: "Search" }).click();
+  await page.getByRole("button", { name: "Search", exact: true }).click();
 
   // Search lists the dish's places directly, ranked by creator count.
   await expect(page.getByRole("heading", { level: 2, name: "Chole Bhature" })).toBeVisible();

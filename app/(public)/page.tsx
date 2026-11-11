@@ -3,6 +3,7 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { ROUTE } from "../../components/LidCode";
 import { DishRow } from "../../components/DishRow";
+import { HomeNearMe } from "../../components/HomeNearMe";
 import { PickList } from "../../components/PickList";
 import { Skeleton } from "../../components/Skeleton";
 import { cachedCities, cachedHome } from "./data";
@@ -16,6 +17,7 @@ export default function Home() {
           Ranked by how many creators picked each place, with the video moment.
         </p>
       </section>
+      <HomeNearMe />
       <Suspense fallback={<Skeleton />}>
         <HomeLists />
       </Suspense>

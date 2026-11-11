@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { CopyField } from "../../../../../components/CopyField";
 import { Skeleton } from "../../../../../components/Skeleton";
 import { escapeXml } from "../../../../../lib/badge";
 import { absoluteUrl } from "../../../../../lib/seo/site";
@@ -25,6 +26,7 @@ async function Kit({ params }: Pick<PageProps<"/creator/[slug]/kit">, "params">)
   const data = await cachedCreator(slug);
   if (!data) notFound();
   const page = absoluteUrl(`/creator/${slug}`);
+  const tracked = `${page}?utm_source=creator&utm_campaign=${slug}`;
   const badge = absoluteUrl(`/creator/${slug}/badge`);
   const snippet = `<a href="${page}"><img src="${badge}" alt="${escapeXml(data.creator.name)} on Indian Food Recommends" height="28"></a>`;
 
@@ -43,6 +45,28 @@ async function Kit({ params }: Pick<PageProps<"/creator/[slug]/kit">, "params">)
           <input readOnly value={page} className="field font-normal" />
         </label>
       </div>
+
+      <div className="flex flex-col gap-2">
+        <h2 className="type-lid border-b-2 border-ink pb-2 text-[1.75rem]">Link for your bio</h2>
+        <p className="text-sm text-muted">
+          Visits through this link show up as coming from creators, so you can see what it brings.
+        </p>
+        <CopyField label="Tracked link" value={tracked} />
+      </div>
+
+      {data.picks.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <h2 className="type-lid border-b-2 border-ink pb-2 text-[1.75rem]">Story image</h2>
+          <p className="text-sm text-muted">Your top picks as a 1080x1920 image for a story.</p>
+          <a
+            href={`/creator/${slug}/story`}
+            download={`${slug}-story.png`}
+            className="btn btn-ink self-start"
+          >
+            Download story
+          </a>
+        </div>
+      )}
 
       <div className="flex flex-col gap-2">
         <h2 className="type-lid border-b-2 border-ink pb-2 text-[1.75rem]">

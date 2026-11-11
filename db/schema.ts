@@ -87,6 +87,7 @@ export const places = pgTable(
     /** Google place ID: the one Google Maps field we may store. "none" = looked up, no confident match. */
     googlePlaceId: text("google_place_id"),
     status: placeStatus("status").notNull().default("open"),
+    statusChangedAt: timestamp("status_changed_at", { withTimezone: true }),
     lastVerified: date("last_verified"),
     createdAt,
   },
@@ -303,8 +304,12 @@ export const reports = pgTable(
     message: text("message"),
     ipHash: text("ip_hash"),
     createdAt,
+    resolvedAt: timestamp("resolved_at", { withTimezone: true }),
   },
-  (t) => [index("reports_ip_created_idx").on(t.ipHash, t.createdAt)],
+  (t) => [
+    index("reports_ip_created_idx").on(t.ipHash, t.createdAt),
+    index("reports_place_open_idx").on(t.placeId, t.resolvedAt, t.createdAt),
+  ],
 );
 
 export const ingestRuns = pgTable(

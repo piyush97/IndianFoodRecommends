@@ -28,7 +28,23 @@ export const OG_ROUTE: Record<string, { bg: string; fg: string; code: string }> 
 // Archivo, the site's typeface, as two static cuts (condensed 800 for the lid voice, regular
 // 500 for sentences). Bundled so the card never waits on a font download.
 
-const lid = { fontFamily: "Archivo Lid", textTransform: "uppercase" as const, lineHeight: 0.95 };
+export const lid = {
+  fontFamily: "Archivo Lid",
+  textTransform: "uppercase" as const,
+  lineHeight: 0.95,
+};
+
+export async function ogFonts() {
+  // Literal paths so Vercel's file tracing ships the fonts with the function.
+  const [lidFont, bodyFont] = await Promise.all([
+    readFile(join(process.cwd(), "lib/seo/fonts/Archivo-Lid.ttf")),
+    readFile(join(process.cwd(), "lib/seo/fonts/Archivo-Body.ttf")),
+  ]);
+  return [
+    { name: "Archivo Lid", data: lidFont, weight: 800 as const, style: "normal" as const },
+    { name: "Archivo Body", data: bodyFont, weight: 500 as const, style: "normal" as const },
+  ];
+}
 
 /**
  * Shared 1200x630 share card in the site's look: cotton ground, condensed ink title, painted
@@ -44,11 +60,7 @@ export async function ogCard({
   subline?: string;
   lid?: { city: string; count: number; label?: string };
 }) {
-  // Literal paths so Vercel's file tracing ships the fonts with the function.
-  const [lidFont, bodyFont] = await Promise.all([
-    readFile(join(process.cwd(), "lib/seo/fonts/Archivo-Lid.ttf")),
-    readFile(join(process.cwd(), "lib/seo/fonts/Archivo-Body.ttf")),
-  ]);
+  const fonts = await ogFonts();
   const t = title.slice(0, 90);
   const route = tile && (OG_ROUTE[tile.city] ?? OG_ROUTE.delhi);
   const size = t.length <= 14 ? 168 : t.length <= 30 ? 124 : 92;
@@ -162,10 +174,7 @@ export async function ogCard({
     </div>,
     {
       ...ogSize,
-      fonts: [
-        { name: "Archivo Lid", data: lidFont, weight: 800, style: "normal" },
-        { name: "Archivo Body", data: bodyFont, weight: 500, style: "normal" },
-      ],
+      fonts,
     },
   );
 }

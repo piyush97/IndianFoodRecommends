@@ -14,4 +14,18 @@ test("creator kit shows a working badge and snippet", async ({ page, request }) 
     page.getByRole("img", { name: "E2E Creator on Indian Food Recommends" }),
   ).toBeVisible();
   await expect(page.getByLabel("HTML to paste")).toHaveValue(/\/creator\/e2e-creator\/badge/);
+
+  const story = page.getByRole("link", { name: "Download story" });
+  await expect(story).toHaveAttribute("href", "/creator/e2e-creator/story");
+  await expect(story).toHaveAttribute("download", "e2e-creator-story.png");
+  const png = await request.get("/creator/e2e-creator/story");
+  expect(png.status()).toBe(200);
+  expect(png.headers()["content-type"]).toBe("image/png");
+  expect((await request.get("/creator/nobody/story")).status()).toBe(404);
+
+  await expect(page.getByLabel("Tracked link")).toHaveValue(
+    /\/creator\/e2e-creator\?utm_source=creator&utm_campaign=e2e-creator$/,
+  );
+  await page.getByRole("button", { name: "Copy link" }).click();
+  await expect(page.getByRole("status")).toHaveText(/Link copied|Could not copy/);
 });
