@@ -61,4 +61,18 @@ describe("POST /api/submit", () => {
     createSubmission.mockResolvedValue({ ok: false, status: 429 });
     expect((await POST(req({ url: "u" }))).status).toBe(429);
   });
+
+  it("answers 503 with a message when a read-only preview refuses the write", async () => {
+    checkBotId.mockResolvedValue({ isBot: false });
+    createSubmission.mockRejectedValue(new Error("failed query", { cause: { code: "25006" } }));
+    const res = await POST(req({ url: "u" }));
+    expect(res.status).toBe(503);
+    expect((await res.json()).error).toMatch(/read-only/);
+  });
+
+  it("still surfaces other database errors", async () => {
+    checkBotId.mockResolvedValue({ isBot: false });
+    createSubmission.mockRejectedValue(new Error("connection reset"));
+    await expect(POST(req({ url: "u" }))).rejects.toThrow("connection reset");
+  });
 });

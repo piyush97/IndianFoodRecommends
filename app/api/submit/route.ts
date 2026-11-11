@@ -1,5 +1,6 @@
 import { checkBotId } from "botid/server";
 import { db } from "../../../db";
+import { isReadOnlyError, READ_ONLY } from "../../../db/guard";
 import { hashIp } from "../../../lib/report";
 import { createSubmission } from "../../../lib/submit";
 
@@ -30,7 +31,13 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-  const result = await createSubmission(db, body, hashIp(ip, salt));
+  let result: Awaited<ReturnType<typeof createSubmission>>;
+  try {
+    result = await createSubmission(db, body, hashIp(ip, salt));
+  } catch (error) {
+    if (isReadOnlyError(error)) return Response.json({ error: READ_ONLY }, { status: 503 });
+    throw error;
+  }
   if (result.ok) return Response.json({ ok: true }, { status: 201 });
   return Response.json({ error: MESSAGES[result.status] }, { status: result.status });
 }
