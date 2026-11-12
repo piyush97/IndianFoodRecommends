@@ -43,7 +43,8 @@ export default function About() {
         </ol>
         <p>
           Places are ranked by how many different creators picked them. Newer picks get a small
-          boost. Nobody pays for placement.
+          boost. Ties go to the place with more videos, then more dishes, then an exact location.
+          Nobody pays for placement.
         </p>
       </section>
 

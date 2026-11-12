@@ -12,6 +12,7 @@ const card = (slug: string, lat: number | null, lng: number | null, approx = fal
   approx,
   creators: [],
   dishes: [],
+  videos: 1,
   proof: { platform: "youtube", externalId: "x", tsSeconds: null, creator: "c" },
   score: 0,
   pickedOn: "2026-01-01",
