@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security issue
+    url: https://github.com/piyush97/IndianFoodRecommends/security/advisories/new
+    about: Report privately. Do not open a public issue.
+  - name: Creator opt-out
+    url: https://indian-food-recommends.vercel.app/about
+    about: How a creator gets their picks removed.
+  - name: Wrong or closed place
+    url: https://indian-food-recommends.vercel.app/about
+    about: Use the "Closed or moved?" link on the place page instead of an issue.

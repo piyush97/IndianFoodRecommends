@@ -2,6 +2,19 @@
   "name": "indian-food-recommends",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
+  "description": "Where Indian food vloggers say to eat, ranked by distinct creators, with the source moment.",
+  "homepage": "https://indian-food-recommends.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/piyush97/IndianFoodRecommends.git"
+  },
+  "bugs": {
+    "url": "https://github.com/piyush97/IndianFoodRecommends/issues"
+  },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
