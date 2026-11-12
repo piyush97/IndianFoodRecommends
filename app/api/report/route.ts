@@ -1,8 +1,17 @@
+import { checkBotId } from "botid/server";
 import { db } from "../../../db";
 import { isReadOnlyError, READ_ONLY } from "../../../db/guard";
+import { clientIp } from "../../../lib/rate-limit";
 import { createReport, hashIp } from "../../../lib/report";
 
 export async function POST(request: Request): Promise<Response> {
+  // Vercel BotID: same invisible challenge as /api/submit. Skip off Vercel,
+  // where the check cannot classify anyone and would only break local/CI.
+  if (process.env.VERCEL === "1") {
+    const verification = await checkBotId();
+    if (verification.isBot) return Response.json({ error: "Request blocked." }, { status: 403 });
+  }
+
   const salt = process.env.REPORT_SALT;
   if (!salt) return Response.json({ error: "Reports are not configured" }, { status: 503 });
 
@@ -13,7 +22,7 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  const ip = clientIp(request);
   let result: Awaited<ReturnType<typeof createReport>>;
   try {
     result = await createReport(db, body, hashIp(ip, salt));
