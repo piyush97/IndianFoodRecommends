@@ -110,3 +110,27 @@ describe("classifyVideo", () => {
     expect(String(error)).not.toContain("secret-key");
   });
 });
+
+describe("classifyVideo validation", () => {
+  const good = {
+    names_place: { noul: 0.8 },
+    negative: { noul: 0.1 },
+    city: { choice: "other", confidence: 0.92 },
+  };
+  const fetchFor = (over: object = {}) =>
+    (async () => new Response(JSON.stringify({ answers: { ...good, ...over } }))) as typeof fetch;
+
+  const malformed: Array<[string, object]> = [
+    ["missing noul", { names_place: {} }],
+    ["string score", { negative: { noul: "0.1" } }],
+    ["score above one", { names_place: { noul: 1.2 } }],
+    ["unknown city choice", { city: { choice: "delhi", confidence: 0.9 } }],
+    ["missing city confidence", { city: { choice: "other" } }],
+  ];
+
+  it.each(malformed)("rejects malformed answers: %s", async (_name, over) => {
+    await expect(
+      classifyVideo(video, { apiKey: "k", fetchImpl: fetchFor(over) }),
+    ).rejects.toThrow();
+  });
+});

@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { CITIES } from "./cities";
 import type { ExtractedPick } from "./llm/extract";
 
@@ -33,6 +34,15 @@ export function shouldExtract(
   return { extract: true };
 }
 
+const Noul = z.object({ noul: z.number().min(0).max(1) });
+const CityAnswer = z.object({
+  choice: z.enum(["covered", "other", "unknown"]),
+  confidence: z.number().min(0).max(1),
+});
+const Answers = z.object({
+  answers: z.object({ names_place: Noul, negative: Noul, city: CityAnswer }),
+});
+
 export async function classifyVideo(
   video: Video,
   opts: { apiKey: string; fetchImpl?: typeof fetch },
@@ -67,13 +77,7 @@ export async function classifyVideo(
     }),
   });
   if (!res.ok) throw new Error(`Jev request failed with status ${res.status}`);
-  const body = (await res.json()) as {
-    answers: {
-      names_place: { noul: number };
-      negative: { noul: number };
-      city: { choice: VideoVerdict["city"]; confidence: number };
-    };
-  };
+  const body = Answers.parse(await res.json());
   return {
     namesPlace: body.answers.names_place.noul,
     negative: body.answers.negative.noul,
