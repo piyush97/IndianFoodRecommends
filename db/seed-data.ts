@@ -247,6 +247,32 @@ export const creators = [
     ytChannelId: "UCmpl1CVoCCiNlVk4WKY65Vw",
     igHandle: null,
   },
+  // Nov 2026: Delhi coverage. IDs from yt-dlp channel listings (latest 100 uploads each);
+  // each has 35+ Delhi/NCR uploads that name specific shops, dhabas or restaurants.
+  {
+    slug: "beyond-hungry",
+    name: "BEYOND HUNGRY",
+    ytChannelId: "UCVqAuZdTN8oiGf1ouv05yGg",
+    igHandle: null,
+  },
+  {
+    slug: "shoaib-arora",
+    name: "Shoaib Arora",
+    ytChannelId: "UCTv78rh_eLqvDRE9yWSZNaA",
+    igHandle: null,
+  },
+  {
+    slug: "foodkars",
+    name: "Foodkars",
+    ytChannelId: "UCq8p9kZeUf1p8biIcL1-q2A",
+    igHandle: null,
+  },
+  {
+    slug: "chatora-point",
+    name: "Chatora Point",
+    ytChannelId: "UCuvxfdasfGw6cEeseKwMe6g",
+    igHandle: null,
+  },
 ];
 
 export const dishes: SeedDish[] = [
