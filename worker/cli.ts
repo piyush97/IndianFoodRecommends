@@ -20,6 +20,7 @@ import { refreshHeatmap, refreshWalks } from "../lib/worker/geo";
 import { recordRun } from "../lib/worker/run-log";
 import { retryUnchecked } from "../lib/worker/retry-unchecked";
 import { dedupePlaces } from "../lib/worker/dedupe-places";
+import { pruneRateLimits } from "../lib/rate-limit";
 
 // With a TypeSafe key, Jev screens each video before the LLM reads it.
 function extractor() {
@@ -39,6 +40,7 @@ async function ingest(): Promise<void> {
   await diet().catch((error) => console.error("diet:", error));
   await areas().catch((error) => console.error("areas:", error));
   await geo().catch((error) => console.error("geo:", error));
+  await pruneRateLimits(db).catch((error) => console.error("prune rate limits:", error));
 }
 
 async function geo(): Promise<void> {
