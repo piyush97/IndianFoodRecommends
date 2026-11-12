@@ -2,7 +2,7 @@ import { and, eq, inArray, ne, type SQL } from "drizzle-orm";
 import { schema, type Db } from "../../db";
 import type { Platform } from "./links";
 import { CITIES } from "../cities";
-import { rankScore } from "./rank";
+import { compareCards, rankScore } from "./rank";
 import type { DietFilter } from "../diet";
 import { nearbyPlaces } from "../geo";
 import { flaggedPlaces } from "../trust";
@@ -20,6 +20,8 @@ export type PickCard = {
   approx: boolean;
   creators: { slug: string; name: string }[];
   dishes: string[];
+  /** Distinct videos that picked this place. */
+  videos: number;
   proof: { platform: Platform; externalId: string; tsSeconds: number | null; creator: string };
   score: number;
   /** Newest pick date for this place, YYYY-MM-DD. */
@@ -137,7 +139,7 @@ function pickedAt(row: Row): Date {
   return row.publishedOn ? new Date(`${row.publishedOn}T00:00:00Z`) : row.createdAt;
 }
 
-/** Groups rows by place, ranked by distinct creators then recency. `flags` comes from one `flaggedPlaces` call. */
+/** Groups rows by place, ranked by `compareCards`. `flags` comes from one `flaggedPlaces` call. */
 function toCards(
   rows: Row[],
   now: Date,
@@ -161,6 +163,7 @@ function toCards(
       approx: first.osmId?.startsWith("approx:") ?? false,
       creators: [...creators].map(([slug, name]) => ({ slug, name })),
       dishes: [...new Set(group.map((g) => g.dishName))],
+      videos: new Set(group.map((g) => g.externalId)).size,
       proof: {
         platform: proof.platform,
         externalId: proof.externalId,
@@ -175,7 +178,7 @@ function toCards(
       ...(flags.has(first.placeId) && { flagKind: flags.get(first.placeId) }),
     };
   });
-  return cards.sort((a, b) => b.score - a.score || a.placeName.localeCompare(b.placeName));
+  return cards.sort(compareCards);
 }
 
 /** `toCards` with visitor flags for every place in `rows`, read in a single query. */

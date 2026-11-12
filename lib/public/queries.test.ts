@@ -254,4 +254,36 @@ describeDb("public queries", () => {
       await db.delete(schema.reports);
     });
   });
+
+  describe("places tied on creators", () => {
+    beforeAll(async () => {
+      await truncateAll(db);
+      await db.insert(schema.cities).values({ slug: "delhi", name: "Delhi" });
+      await db.insert(schema.creators).values({ slug: "one", name: "One" });
+      await db.insert(schema.dishes).values({ slug: "momos", name: "Momos", diet: "veg" });
+      // Same creator count and same newest pick; Alpha sorts first by name but has less evidence.
+      await db.insert(schema.places).values([
+        { slug: "alpha", name: "Alpha", cityId: 1, osmId: "node/1" },
+        { slug: "zeta", name: "Zeta", cityId: 1, osmId: "node/2" },
+      ]);
+      await db.insert(schema.sources).values([
+        { platform: "youtube", externalId: "w1", creatorId: 1, publishedOn: "2026-11-01" },
+        { platform: "youtube", externalId: "w2", creatorId: 1, publishedOn: "2026-10-01" },
+      ]);
+      const ok = { status: "approved" as const, dishId: 1 };
+      await db.insert(schema.recommendations).values([
+        { ...ok, sourceId: 1, placeId: 1 },
+        { ...ok, sourceId: 1, placeId: 2 },
+        { ...ok, sourceId: 2, placeId: 2 },
+      ]);
+    });
+
+    it("orders by distinct videos before the alphabet and reports the count", async () => {
+      const city = await getCity(db, "delhi", now);
+      expect(city?.places.map((p) => [p.placeSlug, p.score, p.videos])).toEqual([
+        ["zeta", 15, 2],
+        ["alpha", 15, 1],
+      ]);
+    });
+  });
 });
