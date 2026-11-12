@@ -23,6 +23,12 @@ describe("normalizeName", () => {
   it("keeps Devanagari characters and only folds whitespace", () => {
     expect(normalizeName("चाचे दी हट्टी")).toBe("चाचे दी हट्टी");
   });
+
+  it("keeps Arabic, Greek and Cyrillic letters", () => {
+    expect(normalizeName("کریم")).toBe("کریم");
+    expect(normalizeName("Καφές")).toBe("καφες");
+    expect(normalizeName("Москва")).toBe("москва");
+  });
 });
 
 describe("canonicalDishName", () => {
