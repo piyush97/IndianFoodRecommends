@@ -3,7 +3,7 @@ import { schema, type Db } from "../db";
 import { testDb, truncateAll } from "../db/test-db";
 import type { ExtractedPick } from "./llm/extract";
 import type { Upload } from "./youtube";
-import { autoReviewPending, decidePick, type PickCheck } from "./auto-review";
+import { autoReviewPending, checkPick, decidePick, type PickCheck } from "./auto-review";
 
 const pick: ExtractedPick = {
   place_name: "Chache Di Hatti",
@@ -200,4 +200,48 @@ describeDb("autoReviewPending rejection reasons", () => {
       expect(review).toMatchObject({ reason: "no-place-name", check: null });
     },
   );
+});
+
+describe("checkPick", () => {
+  const video = { title: "t", description: "d" };
+  const payload = (over: object = {}) =>
+    new Response(
+      JSON.stringify({
+        answers: {
+          grounded: { noul: 0.9 },
+          dish_grounded: { noul: 0.8 },
+          is_venue: { noul: 0.7 },
+          recommends: { noul: 0.6 },
+          city: { choice: "delhi", confidence: 0.95 },
+          ...over,
+        },
+      }),
+    );
+  const fetchFor = (over: object) => (async () => payload(over)) as typeof fetch;
+
+  it("maps well-formed answers", async () => {
+    await expect(checkPick(video, pick, { apiKey: "k", fetchImpl: fetchFor({}) })).resolves.toEqual(
+      {
+        grounded: 0.9,
+        dishGrounded: 0.8,
+        isVenue: 0.7,
+        recommends: 0.6,
+        city: "delhi",
+        cityConfidence: 0.95,
+      },
+    );
+  });
+
+  const malformed: Array<[string, object]> = [
+    ["missing noul", { grounded: {} }],
+    ["string score", { grounded: { noul: "0.9" } }],
+    ["score above one", { recommends: { noul: 1.2 } }],
+    ["missing city confidence", { city: { choice: "delhi" } }],
+  ];
+
+  it.each(malformed)("rejects malformed answers: %s", async (_name, over) => {
+    await expect(
+      checkPick(video, pick, { apiKey: "k", fetchImpl: fetchFor(over) }),
+    ).rejects.toThrow();
+  });
 });

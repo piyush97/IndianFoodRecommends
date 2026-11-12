@@ -11,7 +11,7 @@ import { classifyVideo, gatedExtract } from "../lib/jev";
 import { readLocalities, syncAreas } from "../lib/areas";
 import { fillDiets } from "../lib/diet";
 import { extractPicks } from "../lib/llm/extract";
-import { listArchive, listUploadsWithFallback as listUploads } from "../lib/youtube";
+import { getUpload, listArchive, listUploadsWithFallback as listUploads } from "../lib/youtube";
 import { runIngest } from "../lib/worker/ingest";
 import { runEval, type Labelled } from "../lib/worker/eval";
 import { notifyRevalidate } from "../lib/revalidate-client";
@@ -20,6 +20,7 @@ import { refreshHeatmap, refreshWalks } from "../lib/worker/geo";
 import { recordRun } from "../lib/worker/run-log";
 import { retryUnchecked } from "../lib/worker/retry-unchecked";
 import { dedupePlaces } from "../lib/worker/dedupe-places";
+import { pruneRateLimits } from "../lib/rate-limit";
 
 // With a TypeSafe key, Jev screens each video before the LLM reads it.
 function extractor() {
@@ -32,11 +33,14 @@ function extractor() {
 async function ingest(): Promise<void> {
   const summary = await runIngest({ db, listUploads, extract: extractor(), now: () => new Date() });
   console.log(JSON.stringify(summary));
+  // An ingest that errored and ingested nothing should fire the alert; one bad video among successes should not.
+  if (summary.errors > 0 && summary.videos === 0) process.exitCode = 1;
   await review();
   // Labelling is a nicety: a failure must not fail the ingest or fire the alert.
   await diet().catch((error) => console.error("diet:", error));
   await areas().catch((error) => console.error("areas:", error));
   await geo().catch((error) => console.error("geo:", error));
+  await pruneRateLimits(db).catch((error) => console.error("prune rate limits:", error));
 }
 
 async function geo(): Promise<void> {
@@ -63,6 +67,7 @@ async function diet(): Promise<void> {
 
 const reviewDeps = (apiKey: string): AutoReviewDeps => ({
   db,
+  getUpload,
   listUploads: (channelId) => listUploads(channelId),
   // Archive reaches past the feed's latest 15, which is what makes retry-unchecked worthwhile.
   listArchive: (channelId) => listArchive(channelId, 100),
@@ -141,34 +146,41 @@ async function evaluate(): Promise<void> {
   if (result.precision < 0.85) process.exitCode = 2;
 }
 
+/** Imports the OSM area list; a per-area error fails the run. */
+async function osmAreas(): Promise<void> {
+  const result = await importOsmAreas(db, process.argv[3]);
+  console.log(JSON.stringify({ osmAreas: result }));
+  if (result.some((r) => r.error)) process.exitCode = 1;
+  if (result.some((r) => r.areas)) await notifyRevalidate(["public"]);
+}
+
+const commands: Record<string, () => Promise<void>> = {
+  ingest,
+  eval: evaluate,
+  geo,
+  review,
+  "retry-unchecked": retry,
+  diet,
+  areas,
+  "dedupe-places": dedupe,
+  "osm-areas": osmAreas,
+};
+
 const command = process.argv[2] ?? "ingest";
-const run =
-  command === "eval"
-    ? evaluate
-    : command === "geo"
-      ? geo
-      : command === "osm-areas"
-        ? async () => {
-            const result = await importOsmAreas(db, process.argv[3]);
-            console.log(JSON.stringify({ osmAreas: result }));
-            if (result.some((r) => r.error)) process.exitCode = 1;
-            if (result.some((r) => r.areas)) await notifyRevalidate(["public"]);
-          }
-        : command === "review"
-          ? review
-          : command === "retry-unchecked"
-            ? retry
-            : command === "diet"
-              ? diet
-              : command === "areas"
-                ? areas
-                : command === "dedupe-places"
-                  ? dedupe
-                  : ingest;
+const run = commands[command];
+// Unknown commands must fail before any DB work: a typo used to run a full ingest.
+if (!run) {
+  console.error(
+    `unknown worker command "${command}"; expected one of: ${Object.keys(commands).join(", ")}`,
+  );
+  process.exit(2);
+}
 
 // Every command is recorded so /admin/ops shows the last runs and any failure.
-recordRun(db, process.argv[2] ?? "ingest", async () => {
+recordRun(db, command, async () => {
   await run();
+  // A command that set a failing exit code is a failed run, so /admin/ops and the alert agree.
+  if (process.exitCode) throw new Error(`${command} exited with code ${process.exitCode}`);
   return { ok: true };
 })
   .catch((error) => {

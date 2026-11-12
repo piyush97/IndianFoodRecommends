@@ -5,7 +5,7 @@ import postgres from "postgres";
 import type { Db } from "../db";
 import * as schema from "../db/schema";
 import { testDb } from "../db/test-db";
-import { takeToken } from "./rate-limit";
+import { pruneRateLimits, takeToken } from "./rate-limit";
 
 const handle = testDb();
 const describeDb = handle ? describe : describe.skip;
@@ -101,5 +101,35 @@ describeDb("takeToken", () => {
     } finally {
       await client.end();
     }
+  });
+
+  it("never overspends a bucket under concurrent calls", async () => {
+    const key = `race:${Date.now()}`;
+    await reset(key);
+    const opts = { capacity: 3, refillPerSecond: 0 };
+
+    const results = await Promise.all(Array.from({ length: 10 }, () => takeToken(db, key, opts)));
+
+    expect(results.filter((result) => result.ok).length).toBe(3);
+  });
+
+  it("pruneRateLimits drops stale buckets and keeps recent ones", async () => {
+    const stale = `prune:stale:${Date.now()}`;
+    const fresh = `prune:fresh:${Date.now()}`;
+    for (const key of [stale, fresh]) {
+      await db.execute(sql`
+        insert into rate_limits (key, tokens, updated_at)
+        values (${key}, 1, now() - (${key === stale ? "2 days" : "1 hour"})::interval)
+      `);
+    }
+    await pruneRateLimits(db);
+    const [row] = await db.execute<{ stale: number; fresh: number }>(sql`
+      select
+        count(*) filter (where key = ${stale})::int as stale,
+        count(*) filter (where key = ${fresh})::int as fresh
+      from rate_limits
+    `);
+    expect(Number(row.stale)).toBe(0);
+    expect(Number(row.fresh)).toBe(1);
   });
 });

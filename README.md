@@ -62,18 +62,21 @@ The database needs PostGIS and pg_trgm; `db/migrations/` creates both. Easiest l
 
 ## Environment
 
-| Variable                                   | Required   | What it is                                           |
-| ------------------------------------------ | ---------- | ---------------------------------------------------- |
-| `DATABASE_URL`                             | yes        | Postgres (PostGIS + pg_trgm)                         |
-| `DATABASE_URL_TEST`                        | for tests  | Separate database; integration tests skip without it |
-| `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL` | for ingest | Any OpenAI-compatible endpoint for pick extraction   |
-| `TYPESAFE_API_KEY`                         | for ingest | Verifier that checks a pick against its video        |
-| `REPORT_SALT`                              | yes        | Salt for hashing reporter addresses                  |
-| `AUTH_SECRET`, `AUTH_TRUST_HOST`           | for admin  | Admin sign-in                                        |
-| `ADMIN_EMAILS`                             | for admin  | Who may open `/admin`                                |
-| `REVALIDATE_SECRET`                        | yes        | Worker to site cache revalidation                    |
-| `SITE_URL`                                 | yes        | Canonical origin                                     |
-| `YTDLP_BIN`                                | optional   | Archive access past the feed window                  |
+| Variable                                   | Required   | What it is                                              |
+| ------------------------------------------ | ---------- | ------------------------------------------------------- |
+| `DATABASE_URL`                             | yes        | Postgres (PostGIS + pg_trgm)                            |
+| `DATABASE_URL_TEST`                        | for tests  | Separate database; integration tests skip without it    |
+| `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL` | for ingest | Any OpenAI-compatible endpoint for pick extraction      |
+| `TYPESAFE_API_KEY`                         | for ingest | Verifier that checks a pick against its video           |
+| `REPORT_SALT`                              | yes        | Salt for hashing reporter addresses                     |
+| `AUTH_SECRET`, `AUTH_TRUST_HOST`           | for admin  | Admin sign-in                                           |
+| `ADMIN_EMAILS`                             | for admin  | Who may open `/admin`                                   |
+| `REVALIDATE_SECRET`                        | yes        | Worker to site cache revalidation                       |
+| `SITE_URL`                                 | for ingest | Worker-to-site cache revalidation origin                |
+| `NEXT_PUBLIC_SITE_URL`                     | yes        | Canonical origin for share links, OG images and sitemap |
+| `NOMINATIM_USER_AGENT`                     | optional   | Contact string sent to OpenStreetMap Nominatim          |
+| `NEXT_PUBLIC_OPTOUT_EMAIL`                 | optional   | Creator opt-out contact; unset shows "coming soon"      |
+| `YTDLP_BIN`                                | optional   | Archive access past the feed window                     |
 
 `GOOGLE_MAPS_API_KEY` and `NEXT_PUBLIC_UMAMI_WEBSITE_ID` are optional; without them the rating
 line and analytics are simply absent.

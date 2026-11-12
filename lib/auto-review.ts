@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { schema, type Db } from "../db";
 import { CITIES, cityBySlug, cityFromName, type City } from "./cities";
@@ -95,6 +96,18 @@ export function decidePick(pick: Reviewable, check: PickCheck): Decision {
   return { approve: true, city: city.slug };
 }
 
+const Noul = z.object({ noul: z.number().min(0).max(1) });
+const CityAnswer = z.object({ choice: z.string(), confidence: z.number().min(0).max(1) });
+const Answers = z.object({
+  answers: z.object({
+    grounded: Noul,
+    dish_grounded: Noul,
+    is_venue: Noul,
+    recommends: Noul,
+    city: CityAnswer,
+  }),
+});
+
 export async function checkPick(
   video: { title: string; description: string },
   pick: ExtractedPick,
@@ -143,11 +156,7 @@ export async function checkPick(
     }),
   });
   if (!res.ok) throw new Error(`Jev request failed with status ${res.status}`);
-  const { answers } = (await res.json()) as {
-    answers: Record<"grounded" | "dish_grounded" | "is_venue" | "recommends", { noul: number }> & {
-      city: { choice: string; confidence: number };
-    };
-  };
+  const { answers } = Answers.parse(await res.json());
   return {
     grounded: answers.grounded.noul,
     dishGrounded: answers.dish_grounded.noul,
@@ -165,6 +174,7 @@ export type AutoReviewDeps = {
   listUploads: (channelId: string) => Promise<Upload[]>;
   /** Deeper lookup, tried once per channel when a pending pick's video is outside the feed window. */
   listArchive?: (channelId: string) => Promise<Upload[]>;
+  getUpload?: (channelId: string, videoId: string) => Promise<Upload | undefined>;
   check: (video: { title: string; description: string }, pick: ExtractedPick) => Promise<PickCheck>;
   geocode?: (query: string) => Promise<{ lat: number; lng: number; osmId: string } | null>;
 };
@@ -192,6 +202,10 @@ export async function autoReviewPending(deps: AutoReviewDeps): Promise<AutoRevie
       deepened.add(channelId);
       for (const u of await deps.listArchive(channelId).catch(() => [])) feed.set(u.videoId, u);
     }
+    if (!feed.has(videoId) && deps.getUpload) {
+      const video = await deps.getUpload(channelId, videoId);
+      if (video) feed.set(videoId, video);
+    }
     return feed.get(videoId);
   }
 
@@ -216,44 +230,42 @@ export async function autoReviewPending(deps: AutoReviewDeps): Promise<AutoRevie
     );
 
   for (const row of pending) {
-    const extracted = (row.extracted ?? {}) as ExtractedPick & { suggestions?: Suggestions };
-    if (!extracted.place_name || !extracted.dishes?.length) {
-      await settle(db, row.id, extracted, { approve: false, reason: "no-place-name" });
-      summary.rejected++;
-      continue;
-    }
-
-    const video = await videoText(row.channelId, row.videoId);
-    if (!video) {
-      // Feed only lists the latest 15 uploads; without the text we cannot verify.
-      await settle(db, row.id, extracted, { approve: false, reason: "no-video-text" });
-      summary.rejected++;
-      continue;
-    }
-
-    let check: PickCheck;
     try {
-      check = await deps.check(video, extracted);
-    } catch (error) {
-      console.error(`auto-review: Jev failed for rec ${row.id}, retry next run:`, error);
-      summary.skipped++;
-      continue;
-    }
+      const extracted = (row.extracted ?? {}) as ExtractedPick & { suggestions?: Suggestions };
+      if (!extracted.place_name || !extracted.dishes?.length) {
+        await settle(db, row.id, extracted, { approve: false, reason: "no-place-name" });
+        summary.rejected++;
+        continue;
+      }
 
-    const decision = decidePick(extracted, check);
-    if (decision.approve) {
-      const cityId = cityIds.get(decision.city);
-      if (cityId === undefined) {
-        console.error(`auto-review: city ${decision.city} is not seeded, retry next run`);
-        summary.skipped++;
-      } else if (
-        await publish(deps, row.id, cityId, cityBySlug(decision.city)!, extracted, check)
-      ) {
-        summary.approved++;
-      } else summary.rejected++;
-    } else {
-      await settle(db, row.id, extracted, decision, check);
-      summary.rejected++;
+      const video = await videoText(row.channelId, row.videoId);
+      if (!video) {
+        // Feed only lists the latest 15 uploads; without the text we cannot verify.
+        await settle(db, row.id, extracted, { approve: false, reason: "no-video-text" });
+        summary.rejected++;
+        continue;
+      }
+
+      const check = await deps.check(video, extracted);
+      const decision = decidePick(extracted, check);
+      if (decision.approve) {
+        const cityId = cityIds.get(decision.city);
+        if (cityId === undefined) {
+          console.error(`auto-review: city ${decision.city} is not seeded, retry next run`);
+          summary.skipped++;
+        } else if (
+          await publish(deps, row.id, cityId, cityBySlug(decision.city)!, extracted, check)
+        ) {
+          summary.approved++;
+        } else summary.rejected++;
+      } else {
+        await settle(db, row.id, extracted, decision, check);
+        summary.rejected++;
+      }
+    } catch (error) {
+      // One bad pick (Jev, yt-dlp, a non-duplicate DB error) must not block the rest.
+      console.error(`auto-review: rec ${row.id} failed, retry next run:`, error);
+      summary.skipped++;
     }
   }
   await syncSubmissions(db);

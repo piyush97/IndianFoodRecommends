@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { schema, type Db } from "../db";
 import { testDb, truncateAll } from "../db/test-db";
@@ -37,10 +38,10 @@ describeDb("autoReviewPending", () => {
     await handle?.close();
   });
 
-  async function pending(extracted: object) {
+  async function pending(extracted: object, sourceId = 1) {
     const [row] = await db
       .insert(schema.recommendations)
-      .values({ sourceId: 1, confidence: 0.9, extracted })
+      .values({ sourceId, confidence: 0.9, extracted })
       .returning();
     return row.id;
   }
@@ -60,6 +61,21 @@ describeDb("autoReviewPending", () => {
     listUploads: async () => [upload("v1")],
     check: async () => check,
     geocode: async () => ({ lat: 28.68, lng: 77.2, osmId: "1" }),
+  });
+
+  it("recovers a video beyond the archive window by its ID", async () => {
+    await pending(base);
+    const summary = await autoReviewPending({
+      ...deps(),
+      listUploads: async () => [],
+      listArchive: async () => [],
+      getUpload: async (channel, id) => {
+        expect(channel).toBe("UC1");
+        expect(id).toBe("v1");
+        return upload(id);
+      },
+    });
+    expect(summary.approved).toBe(1);
   });
 
   it("approves a good pick and creates the geocoded place and dish", async () => {
@@ -243,6 +259,31 @@ describeDb("autoReviewPending", () => {
     expect(summary.skipped).toBe(1);
     const [rec] = await db.select().from(schema.recommendations);
     expect(rec.status).toBe("pending");
+  });
+
+  it("keeps reviewing after one pick throws, leaving only that pick pending", async () => {
+    await db.insert(schema.sources).values({ platform: "youtube", externalId: "v2", creatorId: 1 });
+    const broken = await pending(base);
+    const working = await pending({ ...base, place_name: "Bademiya", dishes: ["Biryani"] }, 2);
+    const summary = await autoReviewPending({
+      ...deps(),
+      listUploads: async () => [],
+      getUpload: async (_channel, id) => {
+        if (id === "v1") throw new Error("yt-dlp timed out");
+        return upload(id);
+      },
+    });
+    expect(summary).toEqual({ approved: 1, rejected: 0, skipped: 1 });
+    const [failed] = await db
+      .select()
+      .from(schema.recommendations)
+      .where(eq(schema.recommendations.id, broken));
+    expect(failed.status).toBe("pending");
+    const [approved] = await db
+      .select()
+      .from(schema.recommendations)
+      .where(eq(schema.recommendations.id, working));
+    expect(approved.status).toBe("approved");
   });
 
   it("rejects a pick whose video is no longer in the feed", async () => {
