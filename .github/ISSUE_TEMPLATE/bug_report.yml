@@ -1,0 +1,57 @@
+name: Bug report
+description: Something is broken or shows the wrong thing
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Please do not paste API keys, tokens or database URLs.
+        Security problems go through SECURITY.md, not this form.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you saw, and what you expected instead.
+      placeholder: On /delhi/place/... the Directions button went to the wrong area.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open ...
+        2. Tap ...
+        3. See ...
+    validations:
+      required: true
+  - type: input
+    id: url
+    attributes:
+      label: Page or URL
+      placeholder: https://indian-food-recommends.vercel.app/...
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Public page
+        - Search
+        - Map or directions
+        - Data or ranking (wrong place, wrong creator count)
+        - Admin
+        - Worker or ingest
+        - Build, CI or local setup
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device and browser
+      placeholder: Pixel 7, Chrome 130, 360 px wide
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: Screenshots, console errors, or the worker log line.

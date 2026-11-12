@@ -46,3 +46,14 @@ playwright-report
 .impeccable/review/
 .impeccable/build/
 review-shots/
+
+# python tooling
+__pycache__/
+*.pyc
+
+# local agent tooling (never part of the project)
+.agents/
+.claude/
+.hermes/
+.serena/
+skills-lock.json

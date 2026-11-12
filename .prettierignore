@@ -3,3 +3,9 @@ node_modules
 pnpm-lock.yaml
 db/migrations
 .superpowers
+
+# local agent tooling
+.agents
+.claude
+.hermes
+.serena

@@ -1,0 +1,46 @@
+name: Feature or data request
+description: Suggest a page, a city, a creator, or a behaviour change
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve
+      description: Describe the moment where this is missing, not only the feature.
+      placeholder: I want to eat biryani near me and cannot tell which picks are walkable.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What you have in mind
+      description: Keep it concrete. If it changes ranking or what gets published, say so.
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind of change
+      options:
+        - New page or feature
+        - Ranking or ordering
+        - Data quality (duplicate place, wrong dish, wrong pin)
+        - Add a city
+        - Add a creator or channel
+        - Developer experience or CI
+        - Other
+    validations:
+      required: true
+  - type: checkboxes
+    id: rules
+    attributes:
+      label: Product rules
+      description: These are not negotiable; a proposal that breaks one needs to say why.
+      options:
+        - label: Every published pick keeps its source link and creator credit
+        - label: Nothing gets a rating, price or opening hours we cannot verify
+        - label: Ranking stays explainable in one line and is not paid
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What you tried or considered
