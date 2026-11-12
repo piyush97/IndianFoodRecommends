@@ -84,6 +84,28 @@ describeDb("precomputed food geography", () => {
     expect(n).toBe(1);
   });
 
+  it("returns two walks that share places with each walk's stops in order", async () => {
+    await db.delete(schema.foodWalks);
+    await db.insert(schema.foodWalks).values([
+      { cityId: 1, slug: "a-walk", name: "A walk", stopIds: [1, 2, 3, 4], meters: 300 },
+      { cityId: 1, slug: "b-walk", name: "B walk", stopIds: [1, 2, 3, 7], meters: 300 },
+    ]);
+    const walks = await getWalks(db, "delhi");
+    expect(walks.map((w) => w.slug)).toEqual(["a-walk", "b-walk"]);
+    expect(walks[0].stops.map((p) => p.placeSlug)).toEqual([
+      "exact-0",
+      "exact-1",
+      "exact-2",
+      "exact-3",
+    ]);
+    expect(walks[1].stops.map((p) => p.placeSlug)).toEqual([
+      "exact-0",
+      "exact-1",
+      "exact-2",
+      "isolated",
+    ]);
+  });
+
   it("precomputes H3 polygons when available and excludes opted-out creators at read time", async () => {
     const result = await refreshHeatmap(db, "delhi");
     const [{ available }] = await db.execute<{ available: boolean }>(

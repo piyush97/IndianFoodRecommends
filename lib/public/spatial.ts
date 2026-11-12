@@ -36,20 +36,22 @@ export async function getWalks(db: Db, city?: string, slug?: string): Promise<Fo
       and p.geom is not null and p.osm_id is not null and p.osm_id not like 'approx:%'
       and exists (select 1 from recommendations r join sources s on s.id=r.source_id join creators c on c.id=s.creator_id
         where r.place_id=p.id and r.status='approved' and c.opted_out=false))) order by w.slug`);
+  const ids = [...new Set(rows.flatMap((r) => r.stopIds))];
+  if (ids.length === 0) return [];
+  const places = await db.execute<{ id: number; slug: string }>(
+    sql`select id,slug from places where id in (${sql.join(
+      ids.map((id) => sql`${id}`),
+      sql`,`,
+    )})`,
+  );
+  const byId = new Map(places.map((p) => [p.id, p.slug]));
+  const cards = await getPlaceCards(
+    db,
+    places.map((p) => p.slug),
+  );
+  const bySlug = new Map(cards.map((p) => [p.placeSlug, p]));
   const out: FoodWalk[] = [];
   for (const row of rows) {
-    const places = await db.execute<{ id: number; slug: string }>(
-      sql`select id,slug from places where id in (${sql.join(
-        row.stopIds.map((id) => sql`${id}`),
-        sql`,`,
-      )})`,
-    );
-    const byId = new Map(places.map((p) => [p.id, p.slug]));
-    const cards = await getPlaceCards(
-      db,
-      places.map((p) => p.slug),
-    );
-    const bySlug = new Map(cards.map((p) => [p.placeSlug, p]));
     const stops = row.stopIds.flatMap((id) => {
       const card = bySlug.get(byId.get(id)!);
       return card ? [card] : [];
