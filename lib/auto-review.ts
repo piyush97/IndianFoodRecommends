@@ -165,6 +165,7 @@ export type AutoReviewDeps = {
   listUploads: (channelId: string) => Promise<Upload[]>;
   /** Deeper lookup, tried once per channel when a pending pick's video is outside the feed window. */
   listArchive?: (channelId: string) => Promise<Upload[]>;
+  getUpload?: (channelId: string, videoId: string) => Promise<Upload | undefined>;
   check: (video: { title: string; description: string }, pick: ExtractedPick) => Promise<PickCheck>;
   geocode?: (query: string) => Promise<{ lat: number; lng: number; osmId: string } | null>;
 };
@@ -191,6 +192,10 @@ export async function autoReviewPending(deps: AutoReviewDeps): Promise<AutoRevie
     if (!feed.has(videoId) && deps.listArchive && !deepened.has(channelId)) {
       deepened.add(channelId);
       for (const u of await deps.listArchive(channelId).catch(() => [])) feed.set(u.videoId, u);
+    }
+    if (!feed.has(videoId) && deps.getUpload) {
+      const video = await deps.getUpload(channelId, videoId);
+      if (video) feed.set(videoId, video);
     }
     return feed.get(videoId);
   }

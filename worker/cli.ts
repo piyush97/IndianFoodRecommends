@@ -11,7 +11,7 @@ import { classifyVideo, gatedExtract } from "../lib/jev";
 import { readLocalities, syncAreas } from "../lib/areas";
 import { fillDiets } from "../lib/diet";
 import { extractPicks } from "../lib/llm/extract";
-import { listArchive, listUploadsWithFallback as listUploads } from "../lib/youtube";
+import { getUpload, listArchive, listUploadsWithFallback as listUploads } from "../lib/youtube";
 import { runIngest } from "../lib/worker/ingest";
 import { runEval, type Labelled } from "../lib/worker/eval";
 import { notifyRevalidate } from "../lib/revalidate-client";
@@ -63,6 +63,7 @@ async function diet(): Promise<void> {
 
 const reviewDeps = (apiKey: string): AutoReviewDeps => ({
   db,
+  getUpload,
   listUploads: (channelId) => listUploads(channelId),
   // Archive reaches past the feed's latest 15, which is what makes retry-unchecked worthwhile.
   listArchive: (channelId) => listArchive(channelId, 100),
