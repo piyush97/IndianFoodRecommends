@@ -62,6 +62,21 @@ describeDb("autoReviewPending", () => {
     geocode: async () => ({ lat: 28.68, lng: 77.2, osmId: "1" }),
   });
 
+  it("recovers a video beyond the archive window by its ID", async () => {
+    await pending(base);
+    const summary = await autoReviewPending({
+      ...deps(),
+      listUploads: async () => [],
+      listArchive: async () => [],
+      getUpload: async (channel, id) => {
+        expect(channel).toBe("UC1");
+        expect(id).toBe("v1");
+        return upload(id);
+      },
+    });
+    expect(summary.approved).toBe(1);
+  });
+
   it("approves a good pick and creates the geocoded place and dish", async () => {
     await pending(base);
     expect(await autoReviewPending(deps())).toEqual({ approved: 1, rejected: 0, skipped: 0 });

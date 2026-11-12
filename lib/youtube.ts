@@ -1,5 +1,27 @@
 export type YtFetch = typeof fetch;
 
+/** Recover an older video directly; channel ownership must match before review. */
+export async function getUpload(channelId: string, videoId: string): Promise<Upload | undefined> {
+  if (!/^[A-Za-z0-9_-]{11}$/.test(videoId)) return undefined;
+  const { execFile } = await import("node:child_process");
+  const { promisify } = await import("node:util");
+  const { stdout } = await promisify(execFile)(
+    process.env.YTDLP_BIN ?? "yt-dlp",
+    [
+      "--skip-download",
+      "--no-playlist",
+      "--no-warnings",
+      "--print",
+      "%(.{id,channel_id,upload_date,title,description})j",
+      `https://www.youtube.com/watch?v=${videoId}`,
+    ],
+    { maxBuffer: 4 * 1024 * 1024, timeout: 120_000 },
+  );
+  const row = JSON.parse(stdout.trim());
+  if (row.channel_id !== channelId || row.id !== videoId) return undefined;
+  return parseYtDlp(JSON.stringify(row))[0];
+}
+
 export type Upload = {
   videoId: string;
   publishedAt: Date;
