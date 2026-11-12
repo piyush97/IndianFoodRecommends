@@ -52,13 +52,23 @@ export async function mergeDishAction(fromId: number, intoId: number): Promise<v
 
 const PlaceId = z.number().int().positive().max(2_147_483_647);
 const Outcome = z.enum(["open", "closed", "moved"]);
+// Bound action arguments cross the server-action boundary as strings.
+const SeenThrough = z.string().datetime().optional();
 
 export async function resolveReportAction(
   placeId: number,
   outcome: "open" | "closed" | "moved",
+  seenThrough?: string,
 ): Promise<void> {
   await requireAdmin();
-  await resolvePlace(db, PlaceId.parse(placeId), Outcome.parse(outcome));
+  const seen = SeenThrough.parse(seenThrough);
+  await resolvePlace(
+    db,
+    PlaceId.parse(placeId),
+    Outcome.parse(outcome),
+    new Date(),
+    seen ? new Date(seen) : undefined,
+  );
   revalidatePath("/admin/reports");
   revalidateTag("public", "max");
 }

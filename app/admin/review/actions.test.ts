@@ -114,6 +114,26 @@ describeDb("admin server actions", () => {
       },
     );
 
+    it("rejects a malformed rendered timestamp and writes nothing", async () => {
+      gate.admin = true;
+      await expect(resolveReportAction(1, "closed", "nope")).rejects.toThrow();
+      await untouched();
+      expect(cache.revalidateTag).not.toHaveBeenCalled();
+    });
+
+    it("resolves only reports created up to the rendered timestamp", async () => {
+      gate.admin = true;
+      const seen = new Date("2026-10-01T00:00:00.000Z");
+      await db
+        .insert(schema.reports)
+        .values({ placeId: 1, kind: "moved", createdAt: new Date("2026-09-01T00:00:00.000Z") });
+      await resolveReportAction(1, "closed", seen.toISOString());
+      const rows = await db.select().from(schema.reports).orderBy(schema.reports.createdAt);
+      expect(rows[0].resolvedAt).not.toBeNull();
+      expect(rows[1].resolvedAt).toBeNull();
+      expect(cache.revalidateTag).toHaveBeenCalledWith("public", "max");
+    });
+
     it("resolves the place and revalidates the public cache and the queue", async () => {
       gate.admin = true;
       await resolveReportAction(1, "closed");

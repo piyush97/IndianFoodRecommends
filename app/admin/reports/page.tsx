@@ -22,14 +22,17 @@ export default function ReportsPage() {
 
 async function ReportQueue() {
   await requireAdminPage();
+  // Snapshot the render time so choices below only resolve reports the admin could see.
+  const seenThrough = new Date().toISOString();
   const groups = await openReports(db);
 
   return (
     <section className="flex flex-col gap-6">
       <h1 className="text-2xl font-semibold">Reports</h1>
       <p className="text-muted">
-        Visitor reports that are not resolved yet. Any choice resolves every open report for that
-        place and sets its last verified date to today.
+        Visitor reports that are not resolved yet. Any choice sets the place status and today&apos;s
+        last verified date, and resolves the reports listed here; reports that arrive after this
+        page loaded stay open.
       </p>
       {groups.length === 0 ? (
         <p>No open reports.</p>
@@ -58,7 +61,10 @@ async function ReportQueue() {
             </ul>
             <div className="flex flex-wrap gap-2">
               {OUTCOMES.map(([outcome, label]) => (
-                <form key={outcome} action={resolveReportAction.bind(null, place.id, outcome)}>
+                <form
+                  key={outcome}
+                  action={resolveReportAction.bind(null, place.id, outcome, seenThrough)}
+                >
                   <button
                     type="submit"
                     className="min-h-11 rounded-[var(--radius-step)] border border-line px-3 focus-visible:outline-2 focus-visible:outline-accent"
