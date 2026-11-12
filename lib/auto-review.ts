@@ -221,44 +221,42 @@ export async function autoReviewPending(deps: AutoReviewDeps): Promise<AutoRevie
     );
 
   for (const row of pending) {
-    const extracted = (row.extracted ?? {}) as ExtractedPick & { suggestions?: Suggestions };
-    if (!extracted.place_name || !extracted.dishes?.length) {
-      await settle(db, row.id, extracted, { approve: false, reason: "no-place-name" });
-      summary.rejected++;
-      continue;
-    }
-
-    const video = await videoText(row.channelId, row.videoId);
-    if (!video) {
-      // Feed only lists the latest 15 uploads; without the text we cannot verify.
-      await settle(db, row.id, extracted, { approve: false, reason: "no-video-text" });
-      summary.rejected++;
-      continue;
-    }
-
-    let check: PickCheck;
     try {
-      check = await deps.check(video, extracted);
-    } catch (error) {
-      console.error(`auto-review: Jev failed for rec ${row.id}, retry next run:`, error);
-      summary.skipped++;
-      continue;
-    }
+      const extracted = (row.extracted ?? {}) as ExtractedPick & { suggestions?: Suggestions };
+      if (!extracted.place_name || !extracted.dishes?.length) {
+        await settle(db, row.id, extracted, { approve: false, reason: "no-place-name" });
+        summary.rejected++;
+        continue;
+      }
 
-    const decision = decidePick(extracted, check);
-    if (decision.approve) {
-      const cityId = cityIds.get(decision.city);
-      if (cityId === undefined) {
-        console.error(`auto-review: city ${decision.city} is not seeded, retry next run`);
-        summary.skipped++;
-      } else if (
-        await publish(deps, row.id, cityId, cityBySlug(decision.city)!, extracted, check)
-      ) {
-        summary.approved++;
-      } else summary.rejected++;
-    } else {
-      await settle(db, row.id, extracted, decision, check);
-      summary.rejected++;
+      const video = await videoText(row.channelId, row.videoId);
+      if (!video) {
+        // Feed only lists the latest 15 uploads; without the text we cannot verify.
+        await settle(db, row.id, extracted, { approve: false, reason: "no-video-text" });
+        summary.rejected++;
+        continue;
+      }
+
+      const check = await deps.check(video, extracted);
+      const decision = decidePick(extracted, check);
+      if (decision.approve) {
+        const cityId = cityIds.get(decision.city);
+        if (cityId === undefined) {
+          console.error(`auto-review: city ${decision.city} is not seeded, retry next run`);
+          summary.skipped++;
+        } else if (
+          await publish(deps, row.id, cityId, cityBySlug(decision.city)!, extracted, check)
+        ) {
+          summary.approved++;
+        } else summary.rejected++;
+      } else {
+        await settle(db, row.id, extracted, decision, check);
+        summary.rejected++;
+      }
+    } catch (error) {
+      // One bad pick (Jev, yt-dlp, a non-duplicate DB error) must not block the rest.
+      console.error(`auto-review: rec ${row.id} failed, retry next run:`, error);
+      summary.skipped++;
     }
   }
   await syncSubmissions(db);
