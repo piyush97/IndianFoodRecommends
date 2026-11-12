@@ -19,6 +19,7 @@ import { importOsmAreas } from "../lib/worker/osm-areas";
 import { refreshHeatmap, refreshWalks } from "../lib/worker/geo";
 import { recordRun } from "../lib/worker/run-log";
 import { retryUnchecked } from "../lib/worker/retry-unchecked";
+import { dedupePlaces } from "../lib/worker/dedupe-places";
 
 // With a TypeSafe key, Jev screens each video before the LLM reads it.
 function extractor() {
@@ -112,6 +113,20 @@ async function review(): Promise<void> {
   if (n > 0) process.exitCode = 1;
 }
 
+/** Lists places that are one shop under two names; `--apply` merges them. */
+async function dedupe(): Promise<void> {
+  const apply = process.argv.includes("--apply");
+  const groups = await dedupePlaces(db, { apply });
+  for (const { keep, merge } of groups) {
+    const show = (p: typeof keep) => `${p.name} [${p.locality ?? "-"}] #${p.id} (${p.picks})`;
+    console.log(`keep ${show(keep)} <- ${merge.map(show).join(", ")}`);
+  }
+  const merged = groups.reduce((n, g) => n + g.merge.length, 0);
+  console.log(JSON.stringify({ dedupePlaces: { groups: groups.length, merged, applied: apply } }));
+  if (apply && merged > 0)
+    console.log(JSON.stringify({ revalidated: await notifyRevalidate(["public"]) }));
+}
+
 async function evaluate(): Promise<void> {
   const file = process.argv[3] ?? "worker/eval/labelled.json";
   const labelled = JSON.parse(await readFile(file, "utf8")) as Labelled[];
@@ -147,7 +162,9 @@ const run =
               ? diet
               : command === "areas"
                 ? areas
-                : ingest;
+                : command === "dedupe-places"
+                  ? dedupe
+                  : ingest;
 
 // Every command is recorded so /admin/ops shows the last runs and any failure.
 recordRun(db, process.argv[2] ?? "ingest", async () => {

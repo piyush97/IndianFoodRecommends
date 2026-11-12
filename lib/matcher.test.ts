@@ -2,7 +2,7 @@ import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { eq } from "drizzle-orm";
 import { schema, type Db } from "../db";
 import { testDb, truncateAll } from "../db/test-db";
-import { matchDish, matchPlace } from "./matcher";
+import { matchDish, matchPlace, samePlace } from "./matcher";
 
 const handle = testDb();
 const describeDb = handle ? describe : describe.skip;
@@ -79,5 +79,36 @@ describeDb("matcher", () => {
   it("normalizes case and extra spaces before comparing", async () => {
     const matches = await matchPlace(db, "  CHACHE   di hatti ", delhiId);
     expect(matches[0].name).toBe("Chache Di Hatti");
+  });
+});
+
+describe("samePlace", () => {
+  type P = { name: string; locality: string | null };
+  const p = (name: string, locality: string | null = null): P => ({ name, locality });
+  // Real same-city pairs from production.
+  const cases: [P, P, boolean][] = [
+    [p("Arsalan"), p("Arsalan Biryani"), true],
+    [p("Shadab"), p("Hotel Shadab", "Gachibowli"), true],
+    [p("Dilruba Cabin", "North Kolkata"), p("Dilruba Restaurant (Cabin)", "North Kolkata"), true],
+    [p("Mann-O-Salwa"), p("Mann o Salwa"), true],
+    [p("Mahaveer Rabdi Bhandar"), p("Mahaveer Rabri Bhandar", "Masala Chowk"), true],
+    [p("Rameshwaram Café"), p("Rameshwaram Cafe", "Indiranagar"), true],
+    [p("National Economy"), p("National Economic Restaurant", "North Kolkata"), true],
+    [p("MTR", "Doddamavalli"), p("MTR (Mavalli Tiffin Rooms)", "Doddamavalli, Lal Bagh"), true],
+    [p("MTR Lalbagh (Mavalli Tiffin Rooms)", "Doddamavalli, Lal Bagh"), p("MTR"), true],
+    [p("Karim's", "Ganganagar"), p("Karim's Madhyamgram", "Madhyamgram"), false],
+    [p("Dada Boudi", "Madhyamgram"), p("Dada Boudi Biriyani", "Barrackpore"), false],
+    [p("Kake Di Hatti", "Chandni Chowk"), p("Kake Da Hotel"), false],
+    [p("Vijaya Akka Kadai"), p("Kavitha Akka Kadai"), false],
+    [p("Akka Kadai"), p("Vijaya Akka Kadai"), false],
+    [p("Rupa Restaurant"), p("India Restaurant"), false],
+    [p("Restaurant"), p("Restaurant"), false],
+    [p("Biryani", "Anna Nagar"), p("Biryani", "T Nagar"), false],
+    [p("Hyderabad House", "Banjara Hills"), p("Hyderabad House", "Kukatpally"), false],
+  ];
+
+  it.each(cases)("%o vs %o is %s", (a, b, same) => {
+    expect(samePlace(a, b)).toBe(same);
+    expect(samePlace(b, a)).toBe(same);
   });
 });
