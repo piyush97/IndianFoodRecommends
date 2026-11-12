@@ -82,14 +82,39 @@ export async function pruneRateLimits(db: Db): Promise<void> {
 }
 
 /**
- * Client key for the limit. Vercel sets x-forwarded-for; the browser sets
+ * Client IP for the limit. Vercel sets x-forwarded-for; the browser sets
  * nothing, so unknown clients share one bucket rather than escaping the limit.
+ * IPv6 is grouped by /64, the smallest block a single customer is normally
+ * given, so rotating addresses inside one allocation cannot reset the limit.
+ * IPv4-mapped IPv6 is treated as the IPv4 address it carries.
  */
+export function clientIp(
+  request: Request | { headers: { get(name: string): string | null } },
+): string {
+  const forwarded = request.headers.get("x-forwarded-for");
+  const ip = forwarded?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "unknown";
+
+  const mapped = /^::ffff:(\d+\.\d+\.\d+\.\d+)$/i.exec(ip);
+  if (mapped) return mapped[1];
+  if (!ip.includes(":") || ip === "::1") return ip;
+
+  const bare = ip.includes("%") ? ip.slice(0, ip.indexOf("%")) : ip;
+  const [head = "", tail = ""] = bare.split("::");
+  const headGroups = head ? head.split(":") : [];
+  const tailGroups = tail ? tail.split(":") : [];
+  const missing = Math.max(0, 8 - headGroups.length - tailGroups.length);
+  const groups = [...headGroups, ...Array<string>(missing).fill("0"), ...tailGroups];
+  const prefix = groups
+    .slice(0, 4)
+    .map((group) => group.toLowerCase().replace(/^0+(?=.)/, ""))
+    .join(":");
+  return `${prefix}::/64`;
+}
+
+/** Client key for the limit, built from the shared client IP. */
 export function clientKey(
   request: Request | { headers: { get(name: string): string | null } },
   scope: string,
 ): string {
-  const forwarded = request.headers.get("x-forwarded-for");
-  const ip = forwarded?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "unknown";
-  return `${scope}:${ip}`;
+  return `${scope}:${clientIp(request)}`;
 }
