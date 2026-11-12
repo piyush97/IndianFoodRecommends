@@ -1,6 +1,7 @@
 import { checkBotId } from "botid/server";
 import { db } from "../../../db";
 import { isReadOnlyError, READ_ONLY } from "../../../db/guard";
+import { clientIp } from "../../../lib/rate-limit";
 import { hashIp } from "../../../lib/report";
 import { createSubmission } from "../../../lib/submit";
 
@@ -30,7 +31,7 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ error: MESSAGES[400] }, { status: 400 });
   }
 
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  const ip = clientIp(request);
   let result: Awaited<ReturnType<typeof createSubmission>>;
   try {
     result = await createSubmission(db, body, hashIp(ip, salt));
