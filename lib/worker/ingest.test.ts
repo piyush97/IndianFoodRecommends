@@ -122,6 +122,39 @@ describeDb("runIngest", () => {
     expect(retry).toEqual({ videos: 1, picks: 1, errors: 0 });
   });
 
+  it("retries an older video after a newer one advanced the cursor", async () => {
+    const older = {
+      ...upload("vidOld", "Old Delhi"),
+      publishedAt: new Date("2026-11-01T10:00:00Z"),
+    };
+    const newer = {
+      ...upload("vidNew", "New Delhi"),
+      publishedAt: new Date("2026-11-05T10:00:00Z"),
+    };
+    const all = [older, newer];
+    const listUploads: Parameters<typeof runIngest>[0]["listUploads"] = async (_id, opts) => {
+      const since = opts?.since;
+      return since ? all.filter((u) => u.publishedAt >= since) : all;
+    };
+
+    const first = await runIngest(
+      deps({
+        listUploads,
+        extract: async ({ title }) => {
+          if (title === "Old Delhi") throw new Error("bad json");
+          return [PICK];
+        },
+      }),
+    );
+    expect(first.errors).toBe(1);
+    expect((await db.select().from(schema.sources)).map((s) => s.externalId)).toEqual(["vidNew"]);
+
+    const retry = await runIngest(deps({ listUploads }));
+    expect(retry).toEqual({ videos: 1, picks: 1, errors: 0 });
+    const stored = (await db.select().from(schema.sources)).map((s) => s.externalId);
+    expect(stored.sort()).toEqual(["vidNew", "vidOld"]);
+  });
+
   it("keeps going when one channel feed fails", async () => {
     await db
       .insert(schema.creators)
