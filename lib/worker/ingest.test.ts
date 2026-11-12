@@ -200,13 +200,19 @@ describeDb("runIngest", () => {
     const gate = new Promise<void>((resolve) => {
       release = resolve;
     });
+    let locked!: () => void;
+    const holding = new Promise<void>((resolve) => {
+      locked = resolve;
+    });
     const slow = deps({
       listUploads: async () => {
+        locked(); // the advisory lock is held by now
         await gate;
         return [upload("vid1", "Delhi tour")];
       },
     });
     const first = runIngest(slow);
+    await holding;
     const second = await runIngest(deps());
     release();
     await first;
