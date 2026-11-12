@@ -87,7 +87,7 @@ jobs:
       # unreachable, `--with-deps` fails, so fall back to downloading only the browser.
       - run: pnpm exec playwright install --with-deps chromium || pnpm exec playwright install chromium
       - run: pnpm e2e
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: playwright-traces
