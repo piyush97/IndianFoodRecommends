@@ -1,8 +1,8 @@
 import { desc, eq, sql } from "drizzle-orm";
 import type { Metadata } from "next";
-import { connection } from "next/server";
 import { Suspense } from "react";
 import { db, schema } from "../../../db";
+import { requireAdminPage } from "../../../lib/auth";
 
 export const metadata: Metadata = { title: "Ops", robots: { index: false, follow: false } };
 
@@ -20,7 +20,7 @@ export default function OpsPage() {
 }
 
 async function Runs() {
-  await connection();
+  await requireAdminPage();
   const runs = await db
     .select()
     .from(schema.workerRuns)
