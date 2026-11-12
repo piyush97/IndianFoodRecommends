@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { schema, type Db } from "../db";
 import { CITIES, cityBySlug, cityFromName, type City } from "./cities";
@@ -95,6 +96,18 @@ export function decidePick(pick: Reviewable, check: PickCheck): Decision {
   return { approve: true, city: city.slug };
 }
 
+const Noul = z.object({ noul: z.number().min(0).max(1) });
+const CityAnswer = z.object({ choice: z.string(), confidence: z.number().min(0).max(1) });
+const Answers = z.object({
+  answers: z.object({
+    grounded: Noul,
+    dish_grounded: Noul,
+    is_venue: Noul,
+    recommends: Noul,
+    city: CityAnswer,
+  }),
+});
+
 export async function checkPick(
   video: { title: string; description: string },
   pick: ExtractedPick,
@@ -143,11 +156,7 @@ export async function checkPick(
     }),
   });
   if (!res.ok) throw new Error(`Jev request failed with status ${res.status}`);
-  const { answers } = (await res.json()) as {
-    answers: Record<"grounded" | "dish_grounded" | "is_venue" | "recommends", { noul: number }> & {
-      city: { choice: string; confidence: number };
-    };
-  };
+  const { answers } = Answers.parse(await res.json());
   return {
     grounded: answers.grounded.noul,
     dishGrounded: answers.dish_grounded.noul,
