@@ -19,6 +19,9 @@ const ZERO: IngestSummary = { videos: 0, picks: 0, errors: 0 };
 // First run per creator: the feed holds at most 15 uploads anyway, so look back a year
 // to cover creators who post monthly.
 const FIRST_RUN_WINDOW_MS = 365 * 24 * 60 * 60 * 1000;
+// A partial run can leave older uploads unstored while a newer one advances the
+// newest stored date, so creators with history are re-listed from a fixed lookback.
+const RECHECK_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 
 export async function runIngest(deps: IngestDeps): Promise<IngestSummary> {
   const connection = await deps.db.$client.reserve();
@@ -62,7 +65,7 @@ async function ingest({ db, listUploads, extract, now }: IngestDeps): Promise<In
         .limit(1);
 
       const since = latest?.publishedOn
-        ? new Date(`${latest.publishedOn}T00:00:00Z`)
+        ? new Date(now().getTime() - RECHECK_WINDOW_MS)
         : new Date(now().getTime() - FIRST_RUN_WINDOW_MS);
 
       let uploads: Upload[];
