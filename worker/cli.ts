@@ -1,7 +1,12 @@
 import { readFile } from "node:fs/promises";
 import { and, eq, lt, sql } from "drizzle-orm";
 import { db, schema } from "../db";
-import { autoReviewPending, checkPick, geocodeIndia } from "../lib/auto-review";
+import {
+  autoReviewPending,
+  checkPick,
+  geocodeIndia,
+  type AutoReviewDeps,
+} from "../lib/auto-review";
 import { classifyVideo, gatedExtract } from "../lib/jev";
 import { readLocalities, syncAreas } from "../lib/areas";
 import { fillDiets } from "../lib/diet";
@@ -13,6 +18,7 @@ import { notifyRevalidate } from "../lib/revalidate-client";
 import { importOsmAreas } from "../lib/worker/osm-areas";
 import { refreshHeatmap, refreshWalks } from "../lib/worker/geo";
 import { recordRun } from "../lib/worker/run-log";
+import { retryUnchecked } from "../lib/worker/retry-unchecked";
 
 // With a TypeSafe key, Jev screens each video before the LLM reads it.
 function extractor() {
@@ -54,6 +60,30 @@ async function diet(): Promise<void> {
     console.log(JSON.stringify({ revalidated: await notifyRevalidate(["public"]) }));
 }
 
+const reviewDeps = (apiKey: string): AutoReviewDeps => ({
+  db,
+  listUploads: (channelId) => listUploads(channelId),
+  // Archive reaches past the feed's latest 15, which is what makes retry-unchecked worthwhile.
+  listArchive: (channelId) => listArchive(channelId, 100),
+  check: (video, pick) => checkPick(video, pick, { apiKey }),
+  geocode: geocodeIndia,
+});
+
+/** Re-checks LLM picks rejected because their video text was never found. */
+async function retry(): Promise<void> {
+  const apiKey = process.env.TYPESAFE_API_KEY;
+  if (!apiKey) {
+    console.log("retry-unchecked: TYPESAFE_API_KEY unset, nothing re-opened");
+    return;
+  }
+  const retried = await retryUnchecked(reviewDeps(apiKey));
+  console.log(JSON.stringify({ retryUnchecked: retried }));
+  if (retried.approved > 0) {
+    const ok = await notifyRevalidate(["public"]);
+    console.log(JSON.stringify({ revalidated: ok }));
+  }
+}
+
 /** Decides every pending pick. Fails the run (and so fires the alert) when LLM picks stay pending over 48 h. */
 async function review(): Promise<void> {
   // No human queue: Jev verifies each pick and code approves or rejects it.
@@ -62,13 +92,7 @@ async function review(): Promise<void> {
     console.log("auto-review: TYPESAFE_API_KEY unset, picks stay pending");
     return;
   }
-  const review = await autoReviewPending({
-    db,
-    listUploads: (channelId) => listUploads(channelId),
-    listArchive: (channelId) => listArchive(channelId, 100),
-    check: (video, pick) => checkPick(video, pick, { apiKey }),
-    geocode: geocodeIndia,
-  });
+  const review = await autoReviewPending(reviewDeps(apiKey));
   console.log(JSON.stringify({ autoReview: review }));
   if (review.approved > 0) {
     const ok = await notifyRevalidate(["public"]);
@@ -117,11 +141,13 @@ const run =
           }
         : command === "review"
           ? review
-          : command === "diet"
-            ? diet
-            : command === "areas"
-              ? areas
-              : ingest;
+          : command === "retry-unchecked"
+            ? retry
+            : command === "diet"
+              ? diet
+              : command === "areas"
+                ? areas
+                : ingest;
 
 // Every command is recorded so /admin/ops shows the last runs and any failure.
 recordRun(db, process.argv[2] ?? "ingest", async () => {

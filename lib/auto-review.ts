@@ -37,7 +37,11 @@ export type Decision =
         | "city-mismatch"
         | "dish-not-grounded"
         | "generic-dish"
-        | "duplicate";
+        | "duplicate"
+        // Never checked: the video text was in neither the feed nor the archive. Retryable.
+        | "no-video-text"
+        // Never checked: the LLM gave no place name or no dish.
+        | "no-place-name";
     };
 
 const MIN_LLM_CONFIDENCE = 0.5;
@@ -214,7 +218,7 @@ export async function autoReviewPending(deps: AutoReviewDeps): Promise<AutoRevie
   for (const row of pending) {
     const extracted = (row.extracted ?? {}) as ExtractedPick & { suggestions?: Suggestions };
     if (!extracted.place_name || !extracted.dishes?.length) {
-      await settle(db, row.id, extracted, { approve: false, reason: "not-grounded" });
+      await settle(db, row.id, extracted, { approve: false, reason: "no-place-name" });
       summary.rejected++;
       continue;
     }
@@ -222,7 +226,7 @@ export async function autoReviewPending(deps: AutoReviewDeps): Promise<AutoRevie
     const video = await videoText(row.channelId, row.videoId);
     if (!video) {
       // Feed only lists the latest 15 uploads; without the text we cannot verify.
-      await settle(db, row.id, extracted, { approve: false, reason: "not-grounded" });
+      await settle(db, row.id, extracted, { approve: false, reason: "no-video-text" });
       summary.rejected++;
       continue;
     }

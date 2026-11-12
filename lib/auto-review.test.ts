@@ -1,6 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { afterAll, beforeEach, describe, expect, it } from "vitest";
+import { schema, type Db } from "../db";
+import { testDb, truncateAll } from "../db/test-db";
 import type { ExtractedPick } from "./llm/extract";
-import { decidePick, type PickCheck } from "./auto-review";
+import type { Upload } from "./youtube";
+import { autoReviewPending, decidePick, type PickCheck } from "./auto-review";
 
 const pick: ExtractedPick = {
   place_name: "Chache Di Hatti",
@@ -135,4 +138,66 @@ describe("decidePick", () => {
       });
     });
   });
+});
+
+const handle = testDb();
+const describeDb = handle ? describe : describe.skip;
+
+describeDb("autoReviewPending rejection reasons", () => {
+  const db = handle?.db as Db;
+
+  beforeEach(async () => {
+    await truncateAll(db);
+    await db.insert(schema.cities).values({ slug: "delhi", name: "Delhi" });
+    await db.insert(schema.creators).values({ slug: "a", name: "A", ytChannelId: "UC1" });
+    await db.insert(schema.sources).values({ platform: "youtube", externalId: "v1", creatorId: 1 });
+  });
+
+  afterAll(async () => {
+    await handle?.close();
+  });
+
+  const video: Upload = { videoId: "v1", publishedAt: new Date(), title: "D", description: "H" };
+  const deps = {
+    listUploads: async (): Promise<Upload[]> => [],
+    listArchive: async (): Promise<Upload[]> => [],
+    check: async () => good,
+    geocode: async () => null,
+  };
+
+  async function rejectedFor(extracted: object, over: Partial<typeof deps> = {}) {
+    await db.insert(schema.recommendations).values({ sourceId: 1, confidence: 0.9, extracted });
+    await autoReviewPending({ ...deps, db, ...over });
+    const [rec] = await db.select().from(schema.recommendations);
+    expect(rec.status).toBe("rejected");
+    return (rec.extracted as { autoReview: { reason: string; check: unknown } }).autoReview;
+  }
+
+  it("rejects a pick with no video text, even in the archive, as no-video-text", async () => {
+    let checked = false;
+    const review = await rejectedFor(pick, {
+      check: async () => {
+        checked = true;
+        return good;
+      },
+    });
+    expect(review).toMatchObject({ reason: "no-video-text", check: null });
+    expect(checked).toBe(false);
+  });
+
+  it("keeps not-grounded for a pick the verifier rejected", async () => {
+    const review = await rejectedFor(pick, {
+      listUploads: async () => [video],
+      check: async () => ({ ...good, grounded: 0.1 }),
+    });
+    expect(review).toMatchObject({ reason: "not-grounded", check: { grounded: 0.1 } });
+  });
+
+  it.each([{ place_name: "" }, { dishes: [] }])(
+    "rejects an incomplete pick %o as no-place-name, unchecked",
+    async (over) => {
+      const review = await rejectedFor({ ...pick, ...over }, { listUploads: async () => [video] });
+      expect(review).toMatchObject({ reason: "no-place-name", check: null });
+    },
+  );
 });
