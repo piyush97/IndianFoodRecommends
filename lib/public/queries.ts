@@ -1,4 +1,4 @@
-import { and, eq, inArray, ne, type SQL } from "drizzle-orm";
+import { and, eq, inArray, ne, sql, type SQL } from "drizzle-orm";
 import { schema, type Db } from "../../db";
 import type { Platform } from "./links";
 import { CITIES } from "../cities";
@@ -195,22 +195,28 @@ function countBy<K extends string>(rows: Row[], key: (r: Row) => K) {
 
 /** Cities with at least one visible pick, in registry order. */
 export async function listActiveCities(db: Db) {
-  const rows = await visibleRows(db, {});
-  const counts = new Map<string, { slug: string; name: string; picks: number }>();
-  for (const r of rows) {
-    const entry = counts.get(r.citySlug) ?? { slug: r.citySlug, name: "", picks: 0 };
-    entry.picks++;
-    counts.set(r.citySlug, entry);
-  }
-  const names = new Map(
-    (
-      await db.select({ slug: schema.cities.slug, name: schema.cities.name }).from(schema.cities)
-    ).map((c) => [c.slug, c.name] as const),
-  );
+  const r = schema.recommendations;
+  const s = schema.sources;
+  const c = schema.creators;
+  const p = schema.places;
+  const d = schema.dishes;
+  // This repeats the visibleRows filter so the whole count is one aggregate; change both together.
+  const rows = await db
+    .select({
+      slug: schema.cities.slug,
+      name: schema.cities.name,
+      picks: sql<number>`count(*)::int`,
+    })
+    .from(r)
+    .innerJoin(s, eq(s.id, r.sourceId))
+    .innerJoin(c, eq(c.id, s.creatorId))
+    .innerJoin(p, eq(p.id, r.placeId))
+    .innerJoin(d, eq(d.id, r.dishId))
+    .innerJoin(schema.cities, eq(schema.cities.id, p.cityId))
+    .where(and(eq(r.status, "approved"), eq(c.optedOut, false), ne(p.status, "closed")))
+    .groupBy(schema.cities.slug, schema.cities.name);
   const order = CITIES.map((c) => c.slug);
-  return [...counts.values()]
-    .map((c) => ({ ...c, name: names.get(c.slug) ?? c.slug }))
-    .sort((a, b) => order.indexOf(a.slug) - order.indexOf(b.slug));
+  return rows.sort((a, b) => order.indexOf(a.slug) - order.indexOf(b.slug));
 }
 
 /** One load for the home and city pages: both need the same rows and the full ranking. */
