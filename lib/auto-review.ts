@@ -2,7 +2,7 @@ import { and, eq, inArray, sql } from "drizzle-orm";
 import { schema, type Db } from "../db";
 import { CITIES, cityBySlug, cityFromName, type City } from "./cities";
 import type { ExtractedPick } from "./llm/extract";
-import type { Match } from "./matcher";
+import { findSamePlace, type Match } from "./matcher";
 import { insertWithSlug, suggestLocation } from "./review";
 import { canonicalDishName, normalizeName, slugify } from "./text";
 import type { Upload } from "./youtube";
@@ -371,11 +371,12 @@ async function publish(
   pick: ExtractedPick & { suggestions?: Suggestions },
   check: PickCheck,
 ): Promise<boolean> {
-  // Suggestions were matched against the city the LLM named; reuse them only for that city.
-  const sameCity = cityFromName(pick.city)?.slug === city.slug;
-  const placeMatch = sameCity
-    ? pick.suggestions?.places?.find((m) => m.score >= REUSE_MATCH_SCORE)
-    : undefined;
+  // Looked up now in the approved city: ingest-time suggestions miss places created since.
+  const placeMatch = await findSamePlace(
+    deps.db,
+    { name: pick.place_name, locality: pick.locality },
+    cityId,
+  );
   const dishMatch = pick.suggestions?.dishes?.find((m) => m.score >= REUSE_MATCH_SCORE);
   const dishName = canonicalDishName(pick.dishes[0]);
 
@@ -384,19 +385,6 @@ async function publish(
 
   return deps.db
     .transaction(async (tx) => {
-      // Same-name place created earlier in this run is not in the stored suggestions.
-      const [sameName] = placeMatch
-        ? []
-        : await tx
-            .select({ id: schema.places.id })
-            .from(schema.places)
-            .where(
-              and(
-                eq(schema.places.cityId, cityId),
-                sql`lower(${schema.places.name}) = ${pick.place_name.trim().toLowerCase()}`,
-              ),
-            )
-            .limit(1);
       const [sameDish] = dishMatch
         ? []
         : await tx
@@ -407,7 +395,6 @@ async function publish(
 
       const placeId =
         placeMatch?.id ??
-        sameName?.id ??
         (await insertWithSlug(
           tx,
           async (slug) => {

@@ -139,6 +139,40 @@ describeDb("autoReviewPending", () => {
     expect(aliases.map((a) => a.alias)).toContain("Chachey di Hatti");
   });
 
+  it("files two creators' picks of one shop under one place, though named differently", async () => {
+    await db.insert(schema.creators).values({ slug: "b", name: "B", ytChannelId: "UC2" });
+    await db.insert(schema.sources).values({ platform: "youtube", externalId: "v2", creatorId: 2 });
+    await pending({ ...base, place_name: "Arsalan", locality: null });
+    await db.insert(schema.recommendations).values({
+      sourceId: 2,
+      confidence: 0.9,
+      extracted: { ...base, place_name: "Arsalan Biryani", locality: null },
+    });
+    const summary = await autoReviewPending({
+      ...deps(),
+      listUploads: async (channel: string) => [upload(channel === "UC1" ? "v1" : "v2")],
+    });
+    expect(summary).toEqual({ approved: 2, rejected: 0, skipped: 0 });
+    const places = await db.select().from(schema.places);
+    expect(places.map((p) => p.name)).toEqual(["Arsalan"]);
+    const recs = await db.select().from(schema.recommendations);
+    expect(recs.map((r) => r.placeId)).toEqual([places[0].id, places[0].id]);
+    const aliases = await db.select().from(schema.placeAliases);
+    expect(aliases.map((a) => a.alias)).toEqual(["Arsalan Biryani"]);
+  });
+
+  it("keeps a branch named after its locality apart from the main shop", async () => {
+    await db
+      .insert(schema.places)
+      .values({ slug: "karims", name: "Karim's", cityId: 1, locality: "Ganganagar" });
+    await pending({ ...base, place_name: "Karim's Madhyamgram", locality: "Madhyamgram" });
+    await autoReviewPending(deps());
+    expect((await db.select().from(schema.places)).map((p) => p.name).sort()).toEqual([
+      "Karim's",
+      "Karim's Madhyamgram",
+    ]);
+  });
+
   it("rejects the second of two identical picks from one video", async () => {
     await pending(base);
     await pending(base);
