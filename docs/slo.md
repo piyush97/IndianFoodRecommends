@@ -26,7 +26,7 @@ before it is a code problem.
 | Search payload                                 | < 60 KB          | 39 KB                                                               | Met                  |
 | Daily ingest completes                         | < 15 min         | average 8.5 min, worst 65 min                                       | Met on average       |
 | Ingest runs that never finish                  | 0                | 2 stale `running` rows before the fix                               | Fixed, see below     |
-| Migrations apply to an empty database          | exit 0           | exit 0, 16 migrations, 19 tables                                    | Met                  |
+| Migrations apply to an empty database          | exit 0           | exit 0, 17 migrations, 18 tables                                    | Met                  |
 | Unsafe migrations reaching review              | 0                | `scripts/check-migrations.mjs` fails the PR                         | Met                  |
 
 ### Where the target is missed, and why
