@@ -104,6 +104,16 @@ describeDb("reports admin", () => {
       expect(rows[1].resolvedAt).toEqual(now);
     });
 
+    it("resolves only reports created up to the rendered snapshot", async () => {
+      await report(1, { createdAt: earlier });
+      await report(1, { kind: "wrong-info", createdAt: daysAgo(-1) });
+      await resolvePlace(db, 1, "closed", now, now);
+      const rows = await db.select().from(schema.reports).orderBy(schema.reports.createdAt);
+      expect(rows[0].resolvedAt).toEqual(now);
+      expect(rows[1].resolvedAt).toBeNull();
+      expect((await place(1)).status).toBe("closed");
+    });
+
     it("throws for an unknown place and writes nothing", async () => {
       await report(1);
       await expect(resolvePlace(db, 999, "closed", now)).rejects.toThrow(/place 999 not found/);

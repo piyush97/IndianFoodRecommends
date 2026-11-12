@@ -1,4 +1,4 @@
-import { and, desc, eq, isNull } from "drizzle-orm";
+import { and, desc, eq, isNull, lte } from "drizzle-orm";
 import { schema, type Db } from "../db";
 import { flaggedPlaceIds } from "./trust";
 
@@ -52,12 +52,16 @@ export async function openReports(db: Db, now = new Date()): Promise<OpenReportG
   return out.sort((a, b) => Number(b.flagged) - Number(a.flagged));
 }
 
-/** One transaction: set the status, stamp the verification date, resolve every open report. */
+/**
+ * One transaction: set the status, stamp the verification date, resolve the open reports that
+ * existed when the admin's page was rendered (`seenThrough`); reports that arrive later stay open.
+ */
 export async function resolvePlace(
   db: Db,
   placeId: number,
   outcome: "open" | "closed" | "moved",
   now = new Date(),
+  seenThrough?: Date,
 ): Promise<void> {
   await db.transaction(async (tx) => {
     const [place] = await tx
@@ -78,6 +82,12 @@ export async function resolvePlace(
     await tx
       .update(schema.reports)
       .set({ resolvedAt: now })
-      .where(and(eq(schema.reports.placeId, placeId), isNull(schema.reports.resolvedAt)));
+      .where(
+        and(
+          eq(schema.reports.placeId, placeId),
+          isNull(schema.reports.resolvedAt),
+          seenThrough && lte(schema.reports.createdAt, seenThrough),
+        ),
+      );
   });
 }
