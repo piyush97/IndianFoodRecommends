@@ -23,8 +23,8 @@ const NO_REFILL_MS = 60_000;
  * across serverless cold starts and across instances, unlike an in-process
  * counter. One row per key; the refill is computed from `updated_at`.
  *
- * The whole check is a single statement, so two concurrent calls cannot both
- * spend the same token.
+ * The whole check is a single upsert: `on conflict do update` takes the row
+ * lock, so concurrent calls queue behind it and cannot both spend one token.
  */
 export async function takeToken(
   db: Db,
@@ -47,29 +47,37 @@ async function spendToken(
   key: string,
   { capacity, refillPerSecond }: RateLimitOptions,
 ): Promise<RateLimitResult> {
-  const [row] = await db.execute<{ available: string | number; allowed: boolean }>(sql`
-    with current as (
-      select tokens, updated_at from rate_limits where key = ${key}
-    ),
-    calc as (
-      select least(
-        ${capacity}::float8,
-        coalesce(current.tokens, ${capacity}::float8)
-          + extract(epoch from (now() - coalesce(current.updated_at, now()))) * ${refillPerSecond}::float8
-      ) as available
-      from (values (1)) as one left join current on true
-    ),
-    spend as (
-      insert into rate_limits (key, tokens, updated_at)
-      select ${key}, calc.available - 1, now() from calc where calc.available >= 1
-      on conflict (key) do update set tokens = excluded.tokens, updated_at = excluded.updated_at
-      returning 1
-    )
-    select calc.available, exists (select 1 from spend) as allowed from calc
+  // One statement: the inserted/updated row is locked, so a concurrent caller
+  // waits and then re-evaluates the condition against the winner's tokens.
+  const [row] = await db.execute<{ allowed: boolean }>(sql`
+    insert into rate_limits (key, tokens, updated_at)
+    values (${key}, ${capacity}::float8 - 1, now())
+    on conflict (key) do update
+      set tokens = least(
+            ${capacity}::float8,
+            rate_limits.tokens
+              + extract(epoch from (now() - rate_limits.updated_at)) * ${refillPerSecond}::float8
+          ) - 1,
+          updated_at = now()
+      where least(
+            ${capacity}::float8,
+            rate_limits.tokens
+              + extract(epoch from (now() - rate_limits.updated_at)) * ${refillPerSecond}::float8
+          ) >= 1
+    returning 1 as allowed
   `);
 
-  const available = Number(row?.available ?? 0);
   if (row?.allowed) return { ok: true, retryAfterMs: 0 };
+
+  // Denied: report the delay from the stored balance.
+  const [current] = await db.execute<{ available: string | number }>(sql`
+    select least(
+      ${capacity}::float8,
+      tokens + extract(epoch from (now() - updated_at)) * ${refillPerSecond}::float8
+    ) as available
+    from rate_limits where key = ${key}
+  `);
+  const available = Number(current?.available ?? 0);
 
   if (refillPerSecond <= 0) return { ok: false, retryAfterMs: NO_REFILL_MS };
   const retryAfterMs = Math.ceil(((1 - available) / refillPerSecond) * 1000);
