@@ -10,6 +10,14 @@ is the count of distinct creators who recommended the place, never payment or an
 ratings. Picks are pulled from creator uploads, checked against the video before publishing, and
 a creator can opt out.
 
+## Screenshots
+
+| Home: picks ranked by creator count | Place page: what creators ordered |
+| --- | --- |
+| ![Home page listing Delhi picks with creator avatars and counts](docs/screenshots/home.png) | ![Nand Di Hatti place page with directions and dishes creators ordered](docs/screenshots/place.png) |
+| **Creators directory** | **Mobile city page** |
+| ![Creators directory with channel avatars and pick counts](docs/screenshots/creators.png) | <img src="docs/screenshots/mobile.png" alt="Delhi city page on a phone with diet filter and list or map toggle" width="300"> |
+
 ## What is built
 
 - **Public:** home, city, dish-in-city, place, creator, neighbourhood, food walk, search
