@@ -12,6 +12,7 @@ import {
   getListCards,
   getPlace,
   listActiveCities,
+  listCreators,
 } from "../../lib/public/queries";
 
 // Cached reads for public pages. Every entry carries the `public` tag so the
@@ -58,6 +59,13 @@ export async function cachedCreator(slug: string, dish?: string) {
   cacheTag("public", `creator:${slug}`);
   return getCreator(db, slug, dish);
 }
+export async function cachedCreators() {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("public");
+  return listCreators(db);
+}
+
 export async function cachedAreas(city: string) {
   "use cache";
   cacheLife("hours");

@@ -86,6 +86,12 @@ async function HomeLists() {
             </li>
           ))}
         </ul>
+        <Link
+          href="/creators"
+          className="inline-flex min-h-11 items-center self-start font-semibold underline decoration-line underline-offset-4 hover:decoration-ink"
+        >
+          All creators
+        </Link>
       </section>
     </>
   );

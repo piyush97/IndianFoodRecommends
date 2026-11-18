@@ -116,6 +116,20 @@ describe("listUploads", () => {
   });
 });
 
+describe("timeouts", () => {
+  it("passes an abort signal to every outbound request", async () => {
+    const seen: Array<AbortSignal | undefined> = [];
+    const spy: YtFetch = vi.fn(async (_url: string | URL | Request, init?: RequestInit) => {
+      seen.push(init?.signal ?? undefined);
+      return new Response(FEED);
+    }) as unknown as YtFetch;
+    await listUploads("UC2UWtuZR3kH-5C26HVMMB6A", { fetchImpl: spy });
+    await channelAvatar("UC2UWtuZR3kH-5C26HVMMB6A", spy);
+    expect(seen).toHaveLength(2);
+    for (const signal of seen) expect(signal).toBeInstanceOf(AbortSignal);
+  });
+});
+
 describe("parseYtDlp", () => {
   it("reads yt-dlp JSON lines and skips broken or dateless rows", () => {
     const lines = [

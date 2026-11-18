@@ -18,14 +18,25 @@ describeDb("nearbyPlaces", () => {
   beforeAll(async () => {
     await truncateAll(db);
     await db.insert(schema.cities).values({ slug: "delhi", name: "Delhi" });
-    await db.insert(schema.creators).values({ slug: "one", name: "One" });
+    await db.insert(schema.creators).values([
+      { slug: "one", name: "One" },
+      { slug: "two", name: "Two", optedOut: true },
+    ]);
     await db.insert(schema.dishes).values({ slug: "chole", name: "Chole" });
-    await db.insert(schema.sources).values({
-      platform: "youtube",
-      externalId: "v1",
-      creatorId: 1,
-      publishedOn: "2026-11-01",
-    });
+    await db.insert(schema.sources).values([
+      {
+        platform: "youtube",
+        externalId: "v1",
+        creatorId: 1,
+        publishedOn: "2026-11-01",
+      },
+      {
+        platform: "youtube",
+        externalId: "v2",
+        creatorId: 2,
+        publishedOn: "2026-11-01",
+      },
+    ]);
     await db.insert(schema.places).values([
       { slug: "self", name: "Self", cityId: 1, lat: 28.6, lng: 77.2 },
       { slug: "near", name: "Near", cityId: 1, lat: 28.605, lng: 77.2 },
@@ -35,6 +46,7 @@ describeDb("nearbyPlaces", () => {
       { slug: "far", name: "Far", cityId: 1, lat: 28.7, lng: 77.2 },
       { slug: "nopin", name: "No pin", cityId: 1 },
       { slug: "pending", name: "Pending", cityId: 1, lat: 28.601, lng: 77.2 },
+      { slug: "optout", name: "Opted out", cityId: 1, lat: 28.62, lng: 77.2 },
     ]);
     const ok = { sourceId: 1, dishId: 1, status: "approved" as const };
     await db.insert(schema.recommendations).values([
@@ -45,6 +57,7 @@ describeDb("nearbyPlaces", () => {
       { ...ok, placeId: 5 },
       { ...ok, placeId: 6 },
       { ...ok, placeId: 7, status: "pending" },
+      { ...ok, sourceId: 2, placeId: 8 },
     ]);
   });
   afterAll(() => handle?.close());
@@ -71,6 +84,12 @@ describeDb("nearbyPlaces", () => {
   it("skips places without an approved pick and places without a pin", async () => {
     const found = await nearbyPlaces(db, { ...ORIGIN, radiusKm: 50, limit: 10 });
     expect(found.map((f) => f.slug)).toEqual(["self", "near", "mid", "corner", "far"]);
+  });
+
+  it("skips places whose only approved pick is from an opted-out creator", async () => {
+    const found = await nearbyPlaces(db, { ...ORIGIN, radiusKm: 50, limit: 10 });
+    expect(found.map((f) => f.slug)).not.toContain("optout");
+    expect(found.map((f) => f.slug)).toContain("far");
   });
 
   it("is answered through places_geom_idx", async () => {
