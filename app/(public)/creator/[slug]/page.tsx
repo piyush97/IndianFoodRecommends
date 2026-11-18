@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { CreatorAvatar } from "../../../../components/CreatorAvatar";
 import { PickList } from "../../../../components/PickList";
 import { Skeleton } from "../../../../components/Skeleton";
 import { cachedCreator } from "../../data";
@@ -45,7 +46,10 @@ async function Creator({ params, searchParams }: Props) {
   return (
     <>
       <section className="flex flex-col gap-2">
-        <h1 className="type-lid text-[2.6rem] sm:text-[3.2rem]">{creator.name}</h1>
+        <div className="flex items-center gap-3">
+          <CreatorAvatar name={creator.name} avatarUrl={creator.avatarUrl} size={64} />
+          <h1 className="type-lid text-[2.6rem] sm:text-[3.2rem]">{creator.name}</h1>
+        </div>
         <p className="text-muted">
           {data.total} {data.total === 1 ? "pick" : "picks"}
         </p>

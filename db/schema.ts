@@ -40,6 +40,7 @@ export const creators = pgTable(
     slug: text("slug").notNull().unique(),
     name: text("name").notNull(),
     ytChannelId: text("yt_channel_id").unique(),
+    avatarUrl: text("avatar_url"),
     igHandle: text("ig_handle"),
     optedOut: boolean("opted_out").notNull().default(false),
     createdAt,

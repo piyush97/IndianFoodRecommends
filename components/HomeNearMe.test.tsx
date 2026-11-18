@@ -15,7 +15,7 @@ const card = (slug: string, lat: number, lng: number): PickCard => ({
   lat,
   lng,
   approx: false,
-  creators: [{ slug: "c", name: "C" }],
+  creators: [{ slug: "c", name: "C", avatarUrl: null }],
   dishes: [],
   videos: 1,
   proof: { platform: "youtube", externalId: "x", tsSeconds: null, creator: "C" },

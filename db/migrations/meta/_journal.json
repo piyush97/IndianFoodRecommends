@@ -120,6 +120,13 @@
       "when": 1794341687577,
       "tag": "0016_sturdy_black_cat",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1795003989850,
+      "tag": "0017_ambitious_smiling_tiger",
+      "breakpoints": true
     }
   ]
 }

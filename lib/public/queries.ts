@@ -18,7 +18,7 @@ export type PickCard = {
   lat: number | null;
   lng: number | null;
   approx: boolean;
-  creators: { slug: string; name: string }[];
+  creators: { slug: string; name: string; avatarUrl: string | null }[];
   dishes: string[];
   /** Distinct videos that picked this place. */
   videos: number;
@@ -56,6 +56,7 @@ type Row = {
   citySlug: string;
   creatorSlug: string;
   creatorName: string;
+  creatorAvatarUrl: string | null;
   placeSlug: string;
   placeName: string;
   locality: string | null;
@@ -105,6 +106,7 @@ async function visibleRows(
       citySlug: schema.cities.slug,
       creatorSlug: c.slug,
       creatorName: c.name,
+      creatorAvatarUrl: c.avatarUrl,
       placeSlug: p.slug,
       placeName: p.name,
       locality: p.locality,
@@ -150,7 +152,12 @@ function toCards(
 
   const cards = [...byPlace.values()].map((group): PickCard => {
     const first = group[0];
-    const creators = new Map(group.map((g) => [g.creatorSlug, g.creatorName]));
+    const creators = new Map(
+      group.map((g) => [
+        g.creatorSlug,
+        { slug: g.creatorSlug, name: g.creatorName, avatarUrl: g.creatorAvatarUrl },
+      ]),
+    );
     const newest = new Date(Math.max(...group.map((g) => pickedAt(g).getTime())));
     const proof = group.find((g) => g.tsSeconds !== null) ?? first;
     return {
@@ -161,7 +168,7 @@ function toCards(
       lat: first.lat,
       lng: first.lng,
       approx: first.osmId?.startsWith("approx:") ?? false,
-      creators: [...creators].map(([slug, name]) => ({ slug, name })),
+      creators: [...creators.values()],
       dishes: [...new Set(group.map((g) => g.dishName))],
       videos: new Set(group.map((g) => g.externalId)).size,
       proof: {
@@ -226,12 +233,17 @@ async function cityPicks(db: Db, citySlug: string, now: Date, diet?: DietFilter)
   const rows = await visibleRows(db, {}, eq(schema.places.cityId, city.id), ...dietWhere(diet));
 
   const dishNames = new Map(rows.map((r) => [r.dishSlug, r.dishName]));
-  const creatorNames = new Map(rows.map((r) => [r.creatorSlug, r.creatorName]));
+  const creatorDetails = new Map(
+    rows.map((r) => [
+      r.creatorSlug,
+      { slug: r.creatorSlug, name: r.creatorName, avatarUrl: r.creatorAvatarUrl },
+    ]),
+  );
   const dishes = [...countBy(rows, (r) => r.dishSlug)]
     .map(([slug, picks]) => ({ slug, name: dishNames.get(slug)!, picks }))
     .sort((a, b) => b.picks - a.picks || a.name.localeCompare(b.name));
   const creators = [...countBy(rows, (r) => r.creatorSlug)]
-    .map(([slug, picks]) => ({ slug, name: creatorNames.get(slug)!, picks }))
+    .map(([slug, picks]) => ({ ...creatorDetails.get(slug)!, picks }))
     .sort((a, b) => b.picks - a.picks || a.name.localeCompare(b.name));
 
   const latestFirst = [...rows].sort(
@@ -456,6 +468,7 @@ export async function getCreator(db: Db, slug: string, dishSlug?: string, now = 
       slug: schema.creators.slug,
       name: schema.creators.name,
       ytChannelId: schema.creators.ytChannelId,
+      avatarUrl: schema.creators.avatarUrl,
       igHandle: schema.creators.igHandle,
       optedOut: schema.creators.optedOut,
     })
@@ -474,6 +487,7 @@ export async function getCreator(db: Db, slug: string, dishSlug?: string, now = 
       slug: creator.slug,
       name: creator.name,
       ytChannelId: creator.ytChannelId,
+      avatarUrl: creator.avatarUrl,
       igHandle: creator.igHandle,
     },
     dishes,
