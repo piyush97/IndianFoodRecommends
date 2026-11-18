@@ -9,15 +9,19 @@ on:
 jobs:
   delete-branch:
     runs-on: ubuntu-latest
-    env:
-      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
     # A fork's pull request has no access to secrets; that must not fail the run.
     continue-on-error: true
     steps:
+      # Compute presence without putting the key itself in the environment.
+      - name: Check for the Neon API key
+        id: neon-key
+        env:
+          NEON_KEY_PRESENT: ${{ secrets.NEON_API_KEY != '' }}
+        run: echo "has_key=$NEON_KEY_PRESENT" >> "$GITHUB_OUTPUT"
       - name: Delete the PR's Neon branch
-        if: env.NEON_API_KEY != ''
+        if: github.event.pull_request.head.repo.full_name == github.repository && steps.neon-key.outputs.has_key == 'true'
         uses: neondatabase/delete-branch-action@v3
         with:
           project_id: ${{ vars.NEON_PROJECT_ID }}
           branch: pr-${{ github.event.number }}
-          api_key: ${{ env.NEON_API_KEY }}
+          api_key: ${{ secrets.NEON_API_KEY }}
