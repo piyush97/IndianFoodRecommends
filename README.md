@@ -12,11 +12,11 @@ a creator can opt out.
 
 ## Screenshots
 
-| Home: picks ranked by creator count | Place page: what creators ordered |
-| --- | --- |
-| ![Home page listing Delhi picks with creator avatars and counts](docs/screenshots/home.png) | ![Nand Di Hatti place page with directions and dishes creators ordered](docs/screenshots/place.png) |
-| **Creators directory** | **Mobile city page** |
-| ![Creators directory with channel avatars and pick counts](docs/screenshots/creators.png) | <img src="docs/screenshots/mobile.png" alt="Delhi city page on a phone with diet filter and list or map toggle" width="300"> |
+| Home: picks ranked by creator count                                                         | Place page: what creators ordered                                                                                            |
+| ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| ![Home page listing Delhi picks with creator avatars and counts](docs/screenshots/home.png) | ![Nand Di Hatti place page with directions and dishes creators ordered](docs/screenshots/place.png)                          |
+| **Creators directory**                                                                      | **Mobile city page**                                                                                                         |
+| ![Creators directory with channel avatars and pick counts](docs/screenshots/creators.png)   | <img src="docs/screenshots/mobile.png" alt="Delhi city page on a phone with diet filter and list or map toggle" width="300"> |
 
 ## What is built
 
