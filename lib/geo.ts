@@ -26,6 +26,8 @@ export async function nearbyPlaces(
 ): Promise<Nearby[]> {
   const p = schema.places;
   const r = schema.recommendations;
+  const s = schema.sources;
+  const c = schema.creators;
   const here = sql`ST_SetSRID(ST_MakePoint(${lng}::float8, ${lat}::float8), 4326)::geography`;
   const radiusM = radiusKm * 1000;
   const rows = await db
@@ -40,7 +42,9 @@ export async function nearbyPlaces(
           db
             .select({ one: sql`1` })
             .from(r)
-            .where(and(eq(r.placeId, p.id), eq(r.status, "approved"))),
+            .innerJoin(s, eq(s.id, r.sourceId))
+            .innerJoin(c, eq(c.id, s.creatorId))
+            .where(and(eq(r.placeId, p.id), eq(r.status, "approved"), eq(c.optedOut, false))),
         ),
       ),
     )
