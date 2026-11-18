@@ -66,6 +66,7 @@ describeDb("runIngest", () => {
       now,
       listUploads: async () => [upload("vid1", "Delhi tour"), upload("vid2", "Old Delhi")],
       extract: async () => [PICK],
+      channelAvatar: async () => undefined,
       ...overrides,
     };
   }
@@ -79,6 +80,26 @@ describeDb("runIngest", () => {
     expect(recs).toHaveLength(2);
     expect(recs.every((r) => r.status === "pending" && r.origin === "llm")).toBe(true);
     expect(recs[0].placeId).toBeNull();
+  });
+
+  it("stores a channel avatar without letting an avatar failure stop uploads", async () => {
+    const url = "https://yt3.googleusercontent.com/avatar";
+    await runIngest(deps({ channelAvatar: async () => url }));
+    const [creator] = await db.select().from(schema.creators);
+    expect(creator.avatarUrl).toBe(url);
+
+    await runIngest(
+      deps({
+        channelAvatar: async () => {
+          throw new Error("avatar unavailable");
+        },
+        listUploads: async () => [upload("vid3", "Another tour")],
+      }),
+    );
+    expect((await db.select().from(schema.creators))[0].avatarUrl).toBe(url);
+    expect((await db.select().from(schema.sources)).map((source) => source.externalId)).toContain(
+      "vid3",
+    );
   });
 
   it("backfills a new creator's feed up to a year back", async () => {

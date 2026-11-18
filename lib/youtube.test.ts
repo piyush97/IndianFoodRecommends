@@ -1,5 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
-import { feedUrl, listUploads, parseFeed, parseYtDlp, type YtFetch } from "./youtube";
+import {
+  channelAvatar,
+  feedUrl,
+  listUploads,
+  parseFeed,
+  parseYtDlp,
+  type YtFetch,
+} from "./youtube";
 
 const FEED = `<?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns:yt="http://www.youtube.com/xml/schemas/2015" xmlns:media="http://search.yahoo.com/mrss/" xmlns="http://www.w3.org/2005/Atom">
@@ -41,6 +48,38 @@ describe("feedUrl", () => {
     expect(feedUrl("UC2UWtuZR3kH-5C26HVMMB6A")).toBe(
       "https://www.youtube.com/feeds/videos.xml?channel_id=UC2UWtuZR3kH-5C26HVMMB6A",
     );
+  });
+});
+
+describe("channelAvatar", () => {
+  const page = (url: string) =>
+    `<html><head><meta property="og:image" content="${url}"><meta name="twitter:image" content="https://example.com/x.jpg"></head></html>`;
+
+  it("returns the og:image when it comes from a YouTube image host", async () => {
+    const url = "https://yt3.googleusercontent.com/avatar=s176-c-k-c0x00ffffff-no-rj";
+    await expect(
+      channelAvatar("UC2UWtuZR3kH-5C26HVMMB6A", fetchReturning(page(url))),
+    ).resolves.toBe(url);
+  });
+
+  it("accepts the legacy ggpht host", async () => {
+    const url = "https://yt3.ggpht.com/avatar";
+    await expect(channelAvatar("UCabc", fetchReturning(page(url)))).resolves.toBe(url);
+  });
+
+  it("ignores an og:image from any other host", async () => {
+    await expect(
+      channelAvatar("UCabc", fetchReturning(page("https://evil.example/avatar.jpg"))),
+    ).resolves.toBeUndefined();
+  });
+
+  it("returns undefined for a failed response, a missing tag or a thrown request", async () => {
+    await expect(channelAvatar("UCabc", fetchReturning("", 404))).resolves.toBeUndefined();
+    await expect(channelAvatar("UCabc", fetchReturning("<html></html>"))).resolves.toBeUndefined();
+    const failing = vi.fn(async () => {
+      throw new Error("network down");
+    }) as unknown as YtFetch;
+    await expect(channelAvatar("UCabc", failing)).resolves.toBeUndefined();
   });
 });
 

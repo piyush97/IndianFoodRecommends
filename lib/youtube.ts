@@ -53,6 +53,33 @@ export function feedUrl(channelId: string): string {
   return `https://www.youtube.com/feeds/videos.xml?channel_id=${encodeURIComponent(channelId)}`;
 }
 
+const AVATAR_HOSTS = new Set(["yt3.googleusercontent.com", "yt3.ggpht.com"]);
+
+function metaOgImage(html: string): string | undefined {
+  for (const [tag] of html.matchAll(/<meta\b[^>]*>/gi)) {
+    if (!/\bproperty\s*=\s*(["'])og:image\1/i.test(tag)) continue;
+    const content = /\bcontent\s*=\s*(["'])([\s\S]*?)\1/i.exec(tag);
+    if (content) return decodeEntities(content[2]).trim();
+  }
+  return undefined;
+}
+
+/** A channel's public avatar URL from its page, only from YouTube's image hosts. */
+export async function channelAvatar(
+  channelId: string,
+  fetchImpl: YtFetch = fetch,
+): Promise<string | undefined> {
+  try {
+    const res = await fetchImpl(`https://www.youtube.com/channel/${encodeURIComponent(channelId)}`);
+    if (!res.ok) return undefined;
+    const url = metaOgImage(await res.text());
+    if (!url) return undefined;
+    return AVATAR_HOSTS.has(new URL(url).hostname) ? url : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export function parseFeed(xml: string): Upload[] {
   const uploads: Upload[] = [];
   for (const [, entry] of xml.matchAll(ENTRIES)) {

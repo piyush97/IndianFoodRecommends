@@ -63,7 +63,11 @@ describe("nearMe", () => {
   const o = { lat: 28.6562, lng: 77.2303 }; // Chandni Chowk
   const at = (slug: string, lat: number, lng: number, n = 1): PickCard => ({
     ...card(slug, lat, lng),
-    creators: Array.from({ length: n }, (_, i) => ({ slug: `c${i}`, name: "" })),
+    creators: Array.from({ length: n }, (_, i) => ({
+      slug: `c${i}`,
+      name: "",
+      avatarUrl: null,
+    })),
   });
 
   it("orders by creators then distance inside one band", () => {

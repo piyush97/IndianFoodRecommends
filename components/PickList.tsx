@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cityBySlug } from "../lib/cities";
 import { directionsUrl, formatTs, sourceUrl } from "../lib/public/links";
 import type { PickCard } from "../lib/public/queries";
+import { CreatorAvatar } from "./CreatorAvatar";
 import { LidCode } from "./LidCode";
 import { SaveButton } from "./SaveButton";
 import { TrustNotes } from "./TrustNotes";
@@ -72,7 +73,11 @@ export function PickList({
                   {card.creators.map((c, j) => (
                     <span key={c.slug}>
                       {j > 0 && ", "}
-                      <Link href={`/creator/${c.slug}`} className="font-semibold underline">
+                      <Link
+                        href={`/creator/${c.slug}`}
+                        className="inline-flex items-center gap-1.5 align-middle font-semibold underline"
+                      >
+                        <CreatorAvatar name={c.name} avatarUrl={c.avatarUrl} size={20} />
                         {c.name}
                       </Link>
                     </span>

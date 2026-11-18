@@ -2,7 +2,7 @@ import { and, desc, eq, isNotNull } from "drizzle-orm";
 import { schema, type Db } from "../../db";
 import { matchDish, matchPlace, type Match } from "../matcher";
 import { normalizeName } from "../text";
-import { listUploads, type Upload } from "../youtube";
+import { channelAvatar, listUploads, type Upload } from "../youtube";
 import type { ExtractedPick } from "../llm/extract";
 
 export type IngestDeps = {
@@ -10,6 +10,7 @@ export type IngestDeps = {
   listUploads: typeof listUploads;
   extract: (input: { title: string; description: string }) => Promise<ExtractedPick[]>;
   now: () => Date;
+  channelAvatar?: typeof channelAvatar;
 };
 
 export type IngestSummary = { videos: number; picks: number; errors: number };
@@ -40,7 +41,13 @@ export async function runIngest(deps: IngestDeps): Promise<IngestSummary> {
   }
 }
 
-async function ingest({ db, listUploads, extract, now }: IngestDeps): Promise<IngestSummary> {
+async function ingest({
+  db,
+  listUploads,
+  extract,
+  now,
+  channelAvatar: avatarFor = channelAvatar,
+}: IngestDeps): Promise<IngestSummary> {
   const summary: IngestSummary = { ...ZERO };
   const [run] = await db
     .insert(schema.ingestRuns)
@@ -57,6 +64,19 @@ async function ingest({ db, listUploads, extract, now }: IngestDeps): Promise<In
       .where(and(eq(schema.creators.optedOut, false), isNotNull(schema.creators.ytChannelId)));
 
     for (const creator of creators) {
+      try {
+        const avatarUrl = await avatarFor(creator.ytChannelId!);
+        if (avatarUrl) {
+          await db
+            .update(schema.creators)
+            .set({ avatarUrl })
+            .where(eq(schema.creators.id, creator.id));
+        }
+      } catch (error) {
+        // An avatar is a nicety: never let it stop this creator's uploads.
+        console.error(`ingest: avatar for ${creator.ytChannelId} failed:`, error);
+      }
+
       const [latest] = await db
         .select({ publishedOn: schema.sources.publishedOn })
         .from(schema.sources)
