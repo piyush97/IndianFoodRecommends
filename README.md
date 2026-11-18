@@ -10,6 +10,14 @@ is the count of distinct creators who recommended the place, never payment or an
 ratings. Picks are pulled from creator uploads, checked against the video before publishing, and
 a creator can opt out.
 
+## Screenshots
+
+| Home: picks ranked by creator count | Place page: what creators ordered |
+| --- | --- |
+| ![Home page listing Delhi picks with creator avatars and counts](docs/screenshots/home.png) | ![Nand Di Hatti place page with directions and dishes creators ordered](docs/screenshots/place.png) |
+| **Creators directory** | **Mobile city page** |
+| ![Creators directory with channel avatars and pick counts](docs/screenshots/creators.png) | <img src="docs/screenshots/mobile.png" alt="Delhi city page on a phone with diet filter and list or map toggle" width="300"> |
+
 ## What is built
 
 - **Public:** home, city, dish-in-city, place, creator, neighbourhood, food walk, search
@@ -41,24 +49,8 @@ Decisions and their trade-offs: [`docs/adr/`](docs/adr/).
 
 ## Local development
 
-```bash
-pnpm install
-cp .env.example .env          # then fill the required values
-pnpm db:migrate
-pnpm db:seed
-pnpm dev
-```
-
-Two databases are needed locally: one for the app, one for tests. Tests skip cleanly when
-`DATABASE_URL_TEST` is unset.
-
-```bash
-createdb ifr_test
-DATABASE_URL_TEST=postgres://postgres:postgres@localhost:5432/ifr_test pnpm test
-```
-
-The database needs PostGIS and pg_trgm; `db/migrations/` creates both. Easiest local option is
-`postgis/postgis:17-3.5`.
+Follow the [local setup guide](CONTRIBUTING.md#setup) to start Postgres with PostGIS, seed the app,
+and optionally create a separate database for integration tests.
 
 ## Environment
 

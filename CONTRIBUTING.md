@@ -13,21 +13,27 @@ so most changes need a database to be meaningful.
 
 ## Setup
 
+Use Node.js 22 or newer (CI uses 24), pnpm 9.15.9 and Docker.
+
 ```bash
-pnpm install
+pnpm install --frozen-lockfile
 cp .env.example .env
-docker run --rm -d --name ifr-pg -p 5432:5432 \
+docker run --rm -d --name ifr-pg -p 127.0.0.1:5432:5432 \
   -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres \
   -e POSTGRES_DB=ifr postgis/postgis:17-3.5
+until docker exec ifr-pg pg_isready -h 127.0.0.1 -U postgres -d ifr; do sleep 1; done
+export DATABASE_URL=postgres://postgres:postgres@127.0.0.1:5432/ifr
 pnpm db:migrate && pnpm db:seed
 pnpm dev
 ```
 
-Tests need a second database:
+Integration tests truncate tables. In a second terminal, create a dedicated database once,
+then migrate it and run the tests.
 
 ```bash
-createdb ifr_test
-DATABASE_URL_TEST=postgres://postgres:postgres@localhost:5432/ifr_test pnpm test
+docker exec ifr-pg createdb -U postgres ifr_test
+export DATABASE_URL_TEST=postgres://postgres:postgres@127.0.0.1:5432/ifr_test
+DATABASE_URL="$DATABASE_URL_TEST" pnpm db:migrate && pnpm test
 ```
 
 Integration tests skip when `DATABASE_URL_TEST` is unset, so a bare `pnpm test` still runs the

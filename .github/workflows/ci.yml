@@ -56,8 +56,6 @@ jobs:
       REPORT_SALT: ci-only-salt
       AUTH_SECRET: ci-only-auth-secret
       AUTH_TRUST_HOST: "true"
-      # Empty until the repo secret exists; the Neon steps skip then.
-      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
     steps:
       # The migration safety check needs history to know which migrations are new in this PR.
       - uses: actions/checkout@v4
@@ -82,13 +80,18 @@ jobs:
       # Same migrations against a Neon branch of production (real rows, real
       # extensions), so a NOT NULL or type change that only breaks on data fails here.
       # The branch is deleted when the PR closes (neon-cleanup.yml).
+      # Compute presence without putting the key itself in the environment.
+      - id: neon-key
+        env:
+          NEON_KEY_PRESENT: ${{ secrets.NEON_API_KEY != '' }}
+        run: echo "has_key=$NEON_KEY_PRESENT" >> "$GITHUB_OUTPUT"
       - id: neon
-        if: github.event_name == 'pull_request' && env.NEON_API_KEY != ''
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && steps.neon-key.outputs.has_key == 'true'
         uses: neondatabase/create-branch-action@v6
         with:
           project_id: ${{ vars.NEON_PROJECT_ID }}
           branch_name: pr-${{ github.event.number }}
-          api_key: ${{ env.NEON_API_KEY }}
+          api_key: ${{ secrets.NEON_API_KEY }}
       - if: steps.neon.outcome == 'success'
         run: pnpm db:migrate
         env:
