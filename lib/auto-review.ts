@@ -51,6 +51,8 @@ const MIN_VENUE = 0.6;
 const MIN_RECOMMENDS = 0.6;
 const MIN_CITY_WHEN_UNSTATED = 0.8;
 const REUSE_MATCH_SCORE = 0.8;
+/** A hung Jev service must fail this pick rather than stall the daily run. */
+const JEV_TIMEOUT_MS = 60_000;
 /** A category or a meal, not a dish someone can order. */
 const GENERIC_DISHES = new Set([
   "street food",
@@ -116,6 +118,7 @@ export async function checkPick(
   const res = await (opts.fetchImpl ?? fetch)("https://api.typesafe.ai/v1/systemone", {
     method: "POST",
     headers: { authorization: `Bearer ${opts.apiKey}`, "content-type": "application/json" },
+    signal: AbortSignal.timeout(JEV_TIMEOUT_MS),
     body: JSON.stringify({
       model: "jev-latest",
       state: {

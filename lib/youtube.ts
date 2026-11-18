@@ -55,6 +55,9 @@ export function feedUrl(channelId: string): string {
 
 const AVATAR_HOSTS = new Set(["yt3.googleusercontent.com", "yt3.ggpht.com"]);
 
+const AVATAR_TIMEOUT_MS = 15_000;
+const FEED_TIMEOUT_MS = 30_000;
+
 function metaOgImage(html: string): string | undefined {
   for (const [tag] of html.matchAll(/<meta\b[^>]*>/gi)) {
     if (!/\bproperty\s*=\s*(["'])og:image\1/i.test(tag)) continue;
@@ -70,7 +73,10 @@ export async function channelAvatar(
   fetchImpl: YtFetch = fetch,
 ): Promise<string | undefined> {
   try {
-    const res = await fetchImpl(`https://www.youtube.com/channel/${encodeURIComponent(channelId)}`);
+    const res = await fetchImpl(
+      `https://www.youtube.com/channel/${encodeURIComponent(channelId)}`,
+      { signal: AbortSignal.timeout(AVATAR_TIMEOUT_MS) },
+    );
     if (!res.ok) return undefined;
     const url = metaOgImage(await res.text());
     if (!url) return undefined;
@@ -101,7 +107,7 @@ export async function listUploads(
   opts: { since?: Date; fetchImpl?: YtFetch } = {},
 ): Promise<Upload[]> {
   const fetchImpl = opts.fetchImpl ?? fetch;
-  const res = await fetchImpl(feedUrl(channelId));
+  const res = await fetchImpl(feedUrl(channelId), { signal: AbortSignal.timeout(FEED_TIMEOUT_MS) });
   if (!res.ok) throw new Error(`YouTube feed request failed with status ${res.status}`);
   const uploads = parseFeed(await res.text());
   const since = opts.since?.getTime();

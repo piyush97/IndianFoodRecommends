@@ -1,4 +1,4 @@
-import { afterAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { schema, type Db } from "../db";
 import { testDb, truncateAll } from "../db/test-db";
 import type { ExtractedPick } from "./llm/extract";
@@ -230,6 +230,16 @@ describe("checkPick", () => {
         cityConfidence: 0.95,
       },
     );
+  });
+
+  it("passes an abort signal to the Jev request", async () => {
+    let signal: AbortSignal | null | undefined;
+    const fetchImpl = (async (_url: string | URL | Request, init?: RequestInit) => {
+      signal = init?.signal;
+      return payload();
+    }) as unknown as typeof fetch;
+    await checkPick(video, pick, { apiKey: "k", fetchImpl });
+    expect(signal).toBeInstanceOf(AbortSignal);
   });
 
   const malformed: Array<[string, object]> = [
