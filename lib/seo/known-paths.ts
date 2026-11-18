@@ -3,7 +3,16 @@ import type { Db } from "../../db";
 import { cityBySlug } from "../cities";
 
 /** Top-level routes that are not cities. `known-paths.test.ts` fails when `app/` gains one that is missing here. */
-export const STATIC_ROUTES = ["about", "admin", "api", "creator", "list", "search", "submit"];
+export const STATIC_ROUTES = [
+  "about",
+  "admin",
+  "api",
+  "creator",
+  "creators",
+  "list",
+  "search",
+  "submit",
+];
 
 /** Slugs that have a page. A superset of what the pages show: a stale entry only means a 200 soft 404, never a wrong 404. */
 export type PathIndex = {

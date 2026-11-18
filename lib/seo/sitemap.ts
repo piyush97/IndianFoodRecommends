@@ -19,6 +19,7 @@ export async function sitemapPaths(db: Db): Promise<Entry[]> {
       where r.status = 'approved' and c.opted_out = false and p.status <> 'closed'
     )
     select '/' as path, max(at) as at from visible
+    union all select '/creators', max(at) from visible
     union all select '/about', max(at) from visible
     union all select '/submit', max(at) from visible
     union all select '/' || city, max(at) from visible group by city

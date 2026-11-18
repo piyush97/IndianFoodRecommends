@@ -462,6 +462,28 @@ export async function getPlace(db: Db, citySlug: string, placeSlug: string, now 
   };
 }
 
+/** Public creators with at least one visible pick, most picks first, then by name. */
+export async function listCreators(db: Db) {
+  const r = schema.recommendations;
+  const s = schema.sources;
+  const c = schema.creators;
+  const p = schema.places;
+  const rows = await db
+    .select({
+      slug: c.slug,
+      name: c.name,
+      avatarUrl: c.avatarUrl,
+      picks: sql<number>`count(*)::int`,
+    })
+    .from(r)
+    .innerJoin(s, eq(s.id, r.sourceId))
+    .innerJoin(c, eq(c.id, s.creatorId))
+    .innerJoin(p, eq(p.id, r.placeId))
+    .where(and(eq(r.status, "approved"), eq(c.optedOut, false), ne(p.status, "closed")))
+    .groupBy(c.slug, c.name, c.avatarUrl);
+  return rows.sort((a, b) => b.picks - a.picks || a.name.localeCompare(b.name));
+}
+
 export async function getCreator(db: Db, slug: string, dishSlug?: string, now = new Date()) {
   const [creator] = await db
     .select({
