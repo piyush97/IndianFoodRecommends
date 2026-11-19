@@ -5,6 +5,7 @@ import type { Db } from "../../db";
 import { importOsmHours } from "./osm-hours";
 
 const dialect = new PgDialect();
+const noopWait = async () => {};
 
 const row = (over: Record<string, unknown>) => ({
   id: 1,
@@ -57,7 +58,7 @@ describe("importOsmHours", () => {
 
   it("stores hours for an exact pin that matches an OSM place", async () => {
     const { db, writes } = fakeDb([row({})]);
-    const result = await importOsmHours(db, "delhi", overpass([cafe]));
+    const result = await importOsmHours(db, "delhi", overpass([cafe]), noopWait);
 
     expect(result).toEqual([{ city: "delhi", places: 1, matched: 1, changed: 1 }]);
     const [write] = hoursWrites(writes);
@@ -72,7 +73,7 @@ describe("importOsmHours", () => {
 
   it("leaves an approx pin alone even when an OSM place sits on it", async () => {
     const { db, writes } = fakeDb([row({ osmId: "approx:10" })]);
-    const result = await importOsmHours(db, "delhi", overpass([cafe]));
+    const result = await importOsmHours(db, "delhi", overpass([cafe]), noopWait);
 
     expect(result).toEqual([{ city: "delhi", places: 0, matched: 0, changed: 0 }]);
     expect(hoursWrites(writes)).toHaveLength(0);
@@ -80,7 +81,7 @@ describe("importOsmHours", () => {
 
   it("reads only exact pins when loading a city's places", async () => {
     const { db, reads } = fakeDb([row({})]);
-    await importOsmHours(db, "delhi", overpass([cafe]));
+    await importOsmHours(db, "delhi", overpass([cafe]), noopWait);
 
     const [placesQuery] = reads;
     expect(placesQuery.sql).toContain("approx:");
@@ -92,7 +93,7 @@ describe("importOsmHours", () => {
     const { db, writes } = fakeDb([
       row({ openingHours: "Mo-Su 08:00-23:00", openingWeek: stored }),
     ]);
-    await importOsmHours(db, "delhi", overpass([]));
+    await importOsmHours(db, "delhi", overpass([]), noopWait);
 
     const [write] = hoursWrites(writes);
     expect(write.params.slice(0, 2)).toEqual([null, null]);
@@ -101,7 +102,7 @@ describe("importOsmHours", () => {
   it("does not rewrite a place whose hours are unchanged", async () => {
     const week = JSON.stringify(Array.from({ length: 7 }, () => [[480, 1380]]));
     const { db, writes } = fakeDb([row({ openingHours: "Mo-Su 08:00-23:00", openingWeek: week })]);
-    const result = await importOsmHours(db, "delhi", overpass([cafe]));
+    const result = await importOsmHours(db, "delhi", overpass([cafe]), noopWait);
 
     expect(result[0]).toMatchObject({ matched: 1, changed: 0 });
     expect(hoursWrites(writes)).toHaveLength(0);
@@ -115,16 +116,61 @@ describe("importOsmHours", () => {
       vi.fn(async () => Promise.reject(new Error("network down"))),
     ]) {
       const { db, writes } = fakeDb([stored]);
-      const [result] = await importOsmHours(db, "delhi", fetchImpl);
+      const [result] = await importOsmHours(db, "delhi", fetchImpl, noopWait);
       expect(result.error).toBeTruthy();
       expect(writes).toHaveLength(0);
     }
   });
 
+  it("retries a 502 and stores hours when the next attempt succeeds", async () => {
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValueOnce(new Response("busy", { status: 502 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ elements: [cafe] }), { status: 200 }));
+    const wait = vi.fn(async (_ms: number) => {});
+    const { db, writes } = fakeDb([row({})]);
+
+    const result = await importOsmHours(db, "delhi", fetchImpl, wait);
+
+    expect(result).toEqual([{ city: "delhi", places: 1, matched: 1, changed: 1 }]);
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+    expect(wait).toHaveBeenCalledWith(30_000);
+    expect(hoursWrites(writes)).toHaveLength(1);
+  });
+
+  it("gives up after three 502 responses and leaves rows untouched", async () => {
+    const fetchImpl = vi.fn(async () => new Response("busy", { status: 502 }));
+    const wait = vi.fn(async (_ms: number) => {});
+    const { db, writes } = fakeDb([row({})]);
+
+    const [result] = await importOsmHours(db, "delhi", fetchImpl, wait);
+
+    expect(result.error).toBe("Overpass HTTP 502");
+    expect(fetchImpl).toHaveBeenCalledTimes(3);
+    expect(wait.mock.calls.map(([ms]) => ms)).toEqual([30_000, 60_000]);
+    expect(writes).toHaveLength(0);
+  });
+
+  it("does not retry a 400 response", async () => {
+    const fetchImpl = vi.fn(async () => new Response("bad", { status: 400 }));
+    const wait = vi.fn(async (_ms: number) => {});
+    const { db } = fakeDb([row({})]);
+
+    const [result] = await importOsmHours(db, "delhi", fetchImpl, wait);
+
+    expect(result.error).toBe("Overpass HTTP 400");
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    expect(wait).not.toHaveBeenCalled();
+  });
+
   it("rejects an unknown city and a missing user agent", async () => {
     const { db } = fakeDb([]);
-    await expect(importOsmHours(db, "atlantis", overpass([]))).rejects.toThrow("Unknown city");
+    await expect(importOsmHours(db, "atlantis", overpass([]), noopWait)).rejects.toThrow(
+      "Unknown city",
+    );
     vi.stubEnv("NOMINATIM_USER_AGENT", "");
-    await expect(importOsmHours(db, "delhi", overpass([]))).rejects.toThrow("NOMINATIM_USER_AGENT");
+    await expect(importOsmHours(db, "delhi", overpass([]), noopWait)).rejects.toThrow(
+      "NOMINATIM_USER_AGENT",
+    );
   });
 });
