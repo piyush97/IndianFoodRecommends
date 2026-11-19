@@ -40,7 +40,8 @@ export async function importOsmHours(
         select p.id, p.name, p.lat, p.lng, p.osm_id as "osmId", p.opening_hours as "openingHours",
           p.opening_week::text as "openingWeek"
         from places p join cities c on c.id = p.city_id
-        where c.slug = ${city.slug} and p.lat between 6 and 37 and p.lng between 68 and 98`);
+        where c.slug = ${city.slug} and p.lat between 6 and 37 and p.lng between 68 and 98
+          and p.osm_id is not null and p.osm_id not like 'approx:%'`);
       const lats = places.map((p) => p.lat);
       const lngs = places.map((p) => p.lng);
       const [s, w, n, e] = [
