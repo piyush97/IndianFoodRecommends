@@ -16,6 +16,7 @@ import {
   unique,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
+import type { Week } from "../lib/open-status";
 
 export const placeStatus = pgEnum("place_status", ["open", "closed", "moved"]);
 export const recStatus = pgEnum("rec_status", ["pending", "approved", "rejected"]);
@@ -90,6 +91,10 @@ export const places = pgTable(
     status: placeStatus("status").notNull().default("open"),
     statusChangedAt: timestamp("status_changed_at", { withTimezone: true }),
     lastVerified: date("last_verified"),
+    /** OpenStreetMap opening_hours tag, its parsed IST week (Monday first) and the day it was last checked. */
+    openingHours: text("opening_hours"),
+    openingWeek: jsonb("opening_week").$type<Week>(),
+    openingHoursChecked: date("opening_hours_checked"),
     createdAt,
   },
   (t) => [

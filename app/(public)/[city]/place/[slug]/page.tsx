@@ -24,6 +24,7 @@ import {
   zomatoUrl,
 } from "../../../../../lib/public/links";
 import { GoogleRating } from "../../../../../components/GoogleRating";
+import { OpenStatus } from "../../../../../components/OpenStatus";
 import { cachedPlace } from "../../../data";
 
 type Params = PageProps<"/[city]/place/[slug]">["params"];
@@ -148,6 +149,7 @@ async function Place({ params }: { params: Params }) {
             slug={place.slug}
           />
         </div>
+        {place.openingWeek && <OpenStatus week={place.openingWeek} />}
         {process.env.GOOGLE_MAPS_API_KEY && <GoogleRating placeSlug={place.slug} />}
         <nav aria-label={`Find ${place.name} on other apps`} className="flex flex-col gap-1">
           <span className="text-sm text-muted">Find it on</span>
