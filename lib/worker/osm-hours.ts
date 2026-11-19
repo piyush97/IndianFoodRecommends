@@ -25,7 +25,7 @@ const sameWeek = (stored: string | null, next: unknown) =>
   stored === null ? next === null : JSON.stringify(JSON.parse(stored)) === JSON.stringify(next);
 
 const RETRY_STATUSES = new Set([429, 502, 503, 504]);
-const RETRY_DELAYS = [30_000, 60_000];
+const RETRY_DELAYS = [30_000, 60_000, 120_000, 240_000];
 
 /** Sequential requests to the public Overpass service. A city whose fetch or parse fails keeps its stored hours. */
 export async function importOsmHours(
