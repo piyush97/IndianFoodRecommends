@@ -406,6 +406,11 @@ export async function getPlace(db: Db, citySlug: string, placeSlug: string, now 
   if (rows.length === 0) return null;
   const first = rows[0];
   const flags = await flaggedPlaces(db, [first.placeId], now);
+  // Kept out of visibleRows: only this page needs the schedule, and list queries should not carry it.
+  const [hours] = await db
+    .select({ openingWeek: schema.places.openingWeek })
+    .from(schema.places)
+    .where(eq(schema.places.id, first.placeId));
   const newest = new Date(Math.max(...rows.map((r) => pickedAt(r).getTime())));
 
   const creatorsPerDish = new Map<string, { slug: string; name: string; creators: Set<string> }>();
@@ -437,6 +442,7 @@ export async function getPlace(db: Db, citySlug: string, placeSlug: string, now 
       pickedOn: newest.toISOString().slice(0, 10),
       // "none" marks a lookup that found no confident match.
       googlePlaceId: first.googlePlaceId === "none" ? null : first.googlePlaceId,
+      openingWeek: hours?.openingWeek ?? null,
     },
     nearby: await nearbyCards(
       db,

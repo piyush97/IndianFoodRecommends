@@ -16,6 +16,7 @@ import { runIngest } from "../lib/worker/ingest";
 import { runEval, type Labelled } from "../lib/worker/eval";
 import { notifyRevalidate } from "../lib/revalidate-client";
 import { importOsmAreas } from "../lib/worker/osm-areas";
+import { importOsmHours } from "../lib/worker/osm-hours";
 import { refreshHeatmap, refreshWalks } from "../lib/worker/geo";
 import { recordRun } from "../lib/worker/run-log";
 import { retryUnchecked } from "../lib/worker/retry-unchecked";
@@ -40,6 +41,7 @@ async function ingest(): Promise<void> {
   await diet().catch((error) => console.error("diet:", error));
   await areas().catch((error) => console.error("areas:", error));
   await geo().catch((error) => console.error("geo:", error));
+  await osmHours().catch((error) => console.error("osm-hours:", error));
   await pruneRateLimits(db).catch((error) => console.error("prune rate limits:", error));
 }
 
@@ -154,6 +156,15 @@ async function osmAreas(): Promise<void> {
   if (result.some((r) => r.areas)) await notifyRevalidate(["public"]);
 }
 
+/** Imports opening hours from OSM. As its own command a per-city error fails the run; inside ingest it is only logged. */
+async function osmHours(): Promise<void> {
+  const alone = process.argv[2] === "osm-hours";
+  const result = await importOsmHours(db, alone ? process.argv[3] : undefined);
+  console.log(JSON.stringify({ osmHours: result }));
+  if (alone && result.some((r) => r.error)) process.exitCode = 1;
+  if (result.some((r) => r.changed)) await notifyRevalidate(["public"]);
+}
+
 const commands: Record<string, () => Promise<void>> = {
   ingest,
   eval: evaluate,
@@ -164,6 +175,7 @@ const commands: Record<string, () => Promise<void>> = {
   areas,
   "dedupe-places": dedupe,
   "osm-areas": osmAreas,
+  "osm-hours": osmHours,
 };
 
 const command = process.argv[2] ?? "ingest";
