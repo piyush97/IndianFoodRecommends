@@ -76,7 +76,9 @@ describe("importOsmHours", () => {
 
   it("clears hours when an exact pin no longer matches anything", async () => {
     const stored = JSON.stringify([[[480, 1380]]]);
-    const { db, writes } = fakeDb([row({ openingHours: "Mo-Su 08:00-23:00", openingWeek: stored })]);
+    const { db, writes } = fakeDb([
+      row({ openingHours: "Mo-Su 08:00-23:00", openingWeek: stored }),
+    ]);
     await importOsmHours(db, "delhi", overpass([]));
 
     const [write] = hoursWrites(writes);

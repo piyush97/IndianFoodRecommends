@@ -35,7 +35,10 @@ export function weekSchedule(tag: string, from: Date): Week | null {
     const queryStart = day(-1);
     const week: Week = [[], [], [], [], [], [], []];
 
-    for (const [start, end, unknown] of new OpeningHours(tag).getOpenIntervals(queryStart, day(8))) {
+    for (const [start, end, unknown] of new OpeningHours(tag).getOpenIntervals(
+      queryStart,
+      day(8),
+    )) {
       if (unknown) continue;
       let s = wallMinutes(start) - monday;
       const e = wallMinutes(end) - monday;

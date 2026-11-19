@@ -52,5 +52,7 @@ export function openStatus(week: Week, now: Date): OpenStatus {
   }
   if (closes === null) return null;
   // Open all week long (24/7): there is no closing time to show.
-  return closes - t >= MINUTES_PER_WEEK ? { open: true } : { open: true, until: formatTime(closes) };
+  return closes - t >= MINUTES_PER_WEEK
+    ? { open: true }
+    : { open: true, until: formatTime(closes) };
 }
