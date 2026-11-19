@@ -138,7 +138,7 @@ describe("importOsmHours", () => {
     expect(hoursWrites(writes)).toHaveLength(1);
   });
 
-  it("gives up after three 502 responses and leaves rows untouched", async () => {
+  it("gives up after five 502 responses and leaves rows untouched", async () => {
     const fetchImpl = vi.fn(async () => new Response("busy", { status: 502 }));
     const wait = vi.fn(async (_ms: number) => {});
     const { db, writes } = fakeDb([row({})]);
@@ -146,8 +146,8 @@ describe("importOsmHours", () => {
     const [result] = await importOsmHours(db, "delhi", fetchImpl, wait);
 
     expect(result.error).toBe("Overpass HTTP 502");
-    expect(fetchImpl).toHaveBeenCalledTimes(3);
-    expect(wait.mock.calls.map(([ms]) => ms)).toEqual([30_000, 60_000]);
+    expect(fetchImpl).toHaveBeenCalledTimes(5);
+    expect(wait.mock.calls.map(([ms]) => ms)).toEqual([30_000, 60_000, 120_000, 240_000]);
     expect(writes).toHaveLength(0);
   });
 
