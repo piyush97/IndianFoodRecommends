@@ -20,6 +20,7 @@ const row = (over: Record<string, unknown>) => ({
 /** A Db whose select returns `places` and whose transaction records every statement it runs. */
 function fakeDb(places: ReturnType<typeof row>[]) {
   const writes: { sql: string; params: unknown[] }[] = [];
+  const reads: { sql: string; params: unknown[] }[] = [];
   const tx = {
     execute: async (query: SQL) => {
       writes.push(dialect.sqlToQuery(query));
@@ -27,10 +28,13 @@ function fakeDb(places: ReturnType<typeof row>[]) {
     },
   };
   const db = {
-    execute: async () => places,
+    execute: async (query: SQL) => {
+      reads.push(dialect.sqlToQuery(query));
+      return places;
+    },
     transaction: async (run: (t: typeof tx) => Promise<void>) => run(tx),
   };
-  return { db: db as unknown as Db, writes };
+  return { db: db as unknown as Db, writes, reads };
 }
 
 const overpass = (elements: unknown[]) =>
@@ -72,6 +76,15 @@ describe("importOsmHours", () => {
 
     expect(result).toEqual([{ city: "delhi", places: 0, matched: 0, changed: 0 }]);
     expect(hoursWrites(writes)).toHaveLength(0);
+  });
+
+  it("reads only exact pins when loading a city's places", async () => {
+    const { db, reads } = fakeDb([row({})]);
+    await importOsmHours(db, "delhi", overpass([cafe]));
+
+    const [placesQuery] = reads;
+    expect(placesQuery.sql).toContain("approx:");
+    expect(placesQuery.sql).toContain("osm_id is not null");
   });
 
   it("clears hours when an exact pin no longer matches anything", async () => {
