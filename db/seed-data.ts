@@ -273,6 +273,44 @@ export const creators = [
     ytChannelId: "UCuvxfdasfGw6cEeseKwMe6g",
     igHandle: null,
   },
+  // Added 2026-11-18: IDs verified with yt-dlp (recent uploads are restaurant/street-food
+  // reviews). Hyderabad/Kolkata/Bengaluru were thin.
+  {
+    slug: "thintava-mava",
+    name: "Thintava Mava",
+    ytChannelId: "UCyFjH5qP8iyLtEXzbHaeGPg",
+    igHandle: null,
+  },
+  {
+    slug: "aakali-sanchaari",
+    name: "Aakali Sanchaari",
+    ytChannelId: "UCsFYGFBL8mqgqfQKePvpRVw",
+    igHandle: null,
+  },
+  {
+    slug: "rizwan-farooqui",
+    name: "Rizwan Farooqui",
+    ytChannelId: "UCuQSxEomqqyYjmpFCIosFNw",
+    igHandle: null,
+  },
+  {
+    slug: "indian-food-loves-you",
+    name: "Indian Food Loves You",
+    ytChannelId: "UCfMrnx4UpYI5PaWhQYtb5jQ",
+    igHandle: null,
+  },
+  {
+    slug: "indian-mukbanger",
+    name: "Indian Mukbanger",
+    ytChannelId: "UCXzOPXsOLCJQcy1LUtUaUdg",
+    igHandle: null,
+  },
+  {
+    slug: "thaja-street-food",
+    name: "Thaja Street Food",
+    ytChannelId: "UCOZkATuUq65x0pTut53Ua4Q",
+    igHandle: null,
+  },
 ];
 
 export const dishes: SeedDish[] = [
@@ -336,4 +374,39 @@ export const dishes: SeedDish[] = [
   { slug: "rasmalai", name: "Rasmalai", cuisine: "Dessert" },
   { slug: "kulfi", name: "Kulfi", cuisine: "Dessert", aliases: ["kulfi faluda", "falooda"] },
   { slug: "lassi", name: "Lassi", cuisine: "Dessert", aliases: ["sweet lassi"] },
+  { slug: "haleem", name: "Haleem", cuisine: "Hyderabadi" },
+  {
+    slug: "galouti-kebab",
+    name: "Galouti Kebab",
+    cuisine: "Awadhi",
+    aliases: ["galawati kebab"],
+  },
+  { slug: "kosha-mangsho", name: "Kosha Mangsho", cuisine: "Bengali" },
+  {
+    slug: "rosogolla",
+    name: "Rosogolla",
+    cuisine: "Dessert",
+    aliases: ["rasgulla", "rosogulla"],
+  },
+  { slug: "mishti-doi", name: "Mishti Doi", cuisine: "Dessert" },
+  { slug: "chettinad-chicken", name: "Chettinad Chicken", cuisine: "Chettinad" },
+  { slug: "kothu-parotta", name: "Kothu Parotta", cuisine: "South Indian" },
+  { slug: "pongal", name: "Pongal", cuisine: "South Indian", aliases: ["ven pongal"] },
+  { slug: "medu-vada", name: "Medu Vada", cuisine: "South Indian" },
+  { slug: "benne-dosa", name: "Benne Dosa", cuisine: "South Indian", aliases: ["butter dosa"] },
+  { slug: "bhel-puri", name: "Bhel Puri", cuisine: "Street Food", aliases: ["bhel"] },
+  { slug: "sev-puri", name: "Sev Puri", cuisine: "Street Food" },
+  { slug: "chole-kulche", name: "Chole Kulche", cuisine: "Punjabi", aliases: ["kulche chole"] },
+  { slug: "amritsari-kulcha", name: "Amritsari Kulcha", cuisine: "Punjabi" },
+  { slug: "dal-makhani", name: "Dal Makhani", cuisine: "Punjabi" },
+  { slug: "tandoori-chicken", name: "Tandoori Chicken", cuisine: "Punjabi" },
+  { slug: "paneer-tikka", name: "Paneer Tikka", cuisine: "Punjabi" },
+  {
+    slug: "dal-baati-churma",
+    name: "Dal Baati Churma",
+    cuisine: "Rajasthani",
+    aliases: ["dal baati"],
+  },
+  { slug: "laal-maas", name: "Laal Maas", cuisine: "Rajasthani" },
+  { slug: "ghewar", name: "Ghewar", cuisine: "Dessert" },
 ];
