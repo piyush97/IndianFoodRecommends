@@ -78,6 +78,8 @@ describeDb("sitemapPaths", () => {
     expect(paths).not.toContain("/delhi/closed-dish");
     expect(paths).not.toContain("/creator/closed-vlogger");
     expect(paths).not.toContain("/delhi/area/empty");
+    // Place a has two videos from one creator: not enough for the agree page.
+    expect(paths).not.toContain("/delhi/agree");
     expect(new Set(paths).size).toBe(paths.length);
   });
 

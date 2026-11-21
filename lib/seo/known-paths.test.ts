@@ -18,6 +18,7 @@ describe("isKnownPath", () => {
       "/delhi/chole-bhature",
       "/delhi/place/chache-di-hatti",
       "/delhi/area/kamla-nagar",
+      "/delhi/agree",
       "/delhi/place/chache-di-hatti/opengraph-image-1a2b3c",
       "/creator/sadi-gaddi",
       "/creator/sadi-gaddi/kit",

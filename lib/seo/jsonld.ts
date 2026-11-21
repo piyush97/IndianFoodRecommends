@@ -11,10 +11,18 @@ export function dishItemList(input: {
   path: string;
   places: { name: string; path: string }[];
 }): object {
+  return placeItemList({ ...input, name: `${input.dish} in ${input.city}` });
+}
+
+export function placeItemList(input: {
+  name: string;
+  path: string;
+  places: { name: string; path: string }[];
+}): object {
   return {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: `${input.dish} in ${input.city}`,
+    name: input.name,
     url: absoluteUrl(input.path),
     itemListElement: input.places.map((p, i) => ({
       "@type": "ListItem",

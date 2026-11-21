@@ -6,6 +6,7 @@ import { DishRow } from "../../components/DishRow";
 import { HomeNearMe } from "../../components/HomeNearMe";
 import { PickList } from "../../components/PickList";
 import { Skeleton } from "../../components/Skeleton";
+import { agreeTitle } from "../../lib/public/queries";
 import { cachedCities, cachedHome } from "./data";
 
 export default function Home() {
@@ -66,6 +67,14 @@ async function HomeLists() {
             limit={10}
             showAll
           />
+          {home.agreeCount > 0 && (
+            <Link
+              href={`/${home.city.slug}/agree`}
+              className="inline-flex min-h-11 items-center self-start font-semibold underline decoration-line underline-offset-4 hover:decoration-ink"
+            >
+              {agreeTitle(home.agreeCount, home.city.name)}
+            </Link>
+          )}
         </section>
       ))}
 

@@ -87,6 +87,9 @@ async function City({
       <Link className="btn btn-line self-start" href={`/${slug}/walks`}>
         Food walks in {data.city.name}
       </Link>
+      <Link className="btn btn-line self-start" href={`/${slug}/agree`}>
+        Places more than one creator picked in {data.city.name}
+      </Link>
       {areas.length > 0 && (
         <section className="flex flex-col gap-2">
           <h2 className="type-lid border-b-2 border-ink pb-2 text-[1.75rem]">By neighbourhood</h2>

@@ -23,6 +23,10 @@ export async function sitemapPaths(db: Db): Promise<Entry[]> {
     union all select '/about', max(at) from visible
     union all select '/submit', max(at) from visible
     union all select '/' || city, max(at) from visible group by city
+    union all select '/' || city || '/agree', max(at) from visible
+      where (city, place) in (select city, place from visible group by city, place
+        having count(distinct creator) >= 2)
+      group by city
     union all select '/' || city || '/' || dish, max(at) from visible group by city, dish
     union all select '/' || city || '/place/' || place, max(at) from visible group by city, place
     union all select '/creator/' || creator, max(at) from visible group by creator
