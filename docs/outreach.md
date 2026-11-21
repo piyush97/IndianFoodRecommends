@@ -4,7 +4,16 @@ Plain note to send a creator. Fill in the name and pick count; do not add anythi
 
 > Namaste <name>! Aapke <N> picks Indian Food Recommends par listed hain, har ek aapke video ke us moment se linked. Aapke liye ek share kit bana hai: story image, bio ke liye tracked link aur website badge. Yahan dekhiye: <SITE_URL>/creator/<slug>/kit. Koi pick hatana ho ya opt out karna ho, bas bata dijiye.
 
-The kit page has a story image download and a tracked link (`?utm_source=creator&utm_campaign=<slug>`). Umami shows visits from it under `utm_source=creator`.
+The kit page has a tracked bio link, a story image download, text for a video description (their total and top three places, straight from the DB), and a website badge with HTML and Markdown snippets in dark or light. Every link carries `utm_source=creator&utm_campaign=<slug>`; Umami shows those visits under `utm_source=creator`, and each copy fires `kit-copy` (see [metrics](metrics.md)).
+
+## Sending a kit
+
+1. Open `<SITE_URL>/creator/<slug>/kit` and check the count, the top places and the badge render. If a pick looks wrong, fix it in `/admin/review` first.
+2. Copy the note above, fill in the name and the count from the kit page, and send it on the channel the creator lists for business (YouTube About page email or Instagram DM).
+3. Fill in "contacted on" in the tracker below. Add the reply and whether they shared once you know.
+4. If they ask to opt out, set `creators.opted_out = true` for that creator (the PRD promises within 7 days); the creator page, kit and badge return 404 after the next cache refresh.
+
+The badge URL is `<SITE_URL>/creator/<slug>/badge` (`?theme=light` for the light version). It updates itself as picks are approved, so a creator never needs to re-paste it.
 
 ## Tracker
 

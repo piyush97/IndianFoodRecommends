@@ -7,7 +7,8 @@ export type TrackEvent =
   | "list-open"
   | "list-save-all"
   | "report"
-  | "share";
+  | "share"
+  | "kit-copy";
 
 declare global {
   interface Window {
