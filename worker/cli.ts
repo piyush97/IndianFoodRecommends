@@ -11,7 +11,13 @@ import { classifyVideo, gatedExtract } from "../lib/jev";
 import { readLocalities, syncAreas } from "../lib/areas";
 import { fillDiets } from "../lib/diet";
 import { extractPicks } from "../lib/llm/extract";
-import { getUpload, listArchive, listUploadsWithFallback as listUploads } from "../lib/youtube";
+import {
+  channelSubscribers,
+  getUpload,
+  searchChannels,
+  listArchive,
+  listUploadsWithFallback as listUploads,
+} from "../lib/youtube";
 import { runIngest } from "../lib/worker/ingest";
 import { runEval, type Labelled } from "../lib/worker/eval";
 import { notifyRevalidate } from "../lib/revalidate-client";
@@ -22,6 +28,7 @@ import { recordRun } from "../lib/worker/run-log";
 import { retryUnchecked } from "../lib/worker/retry-unchecked";
 import { dedupePlaces } from "../lib/worker/dedupe-places";
 import { pruneRateLimits } from "../lib/rate-limit";
+import { discoverCreators, MAX_SEARCHES_PER_RUN } from "../lib/worker/discover-creators";
 
 // With a TypeSafe key, Jev screens each video before the LLM reads it.
 function extractor() {
@@ -165,6 +172,34 @@ async function osmHours(): Promise<void> {
   if (result.some((r) => r.changed)) await notifyRevalidate(["public"]);
 }
 
+/** Finds candidate YouTube food channels per city for /admin/creators. `--city <slug>`, `--dry-run`. */
+async function discover(): Promise<void> {
+  const args = process.argv.slice(3);
+  const at = args.indexOf("--city");
+  const dryRun = args.includes("--dry-run");
+  const { searches, candidates } = await discoverCreators(
+    {
+      db,
+      search: searchChannels,
+      listUploads: (channelId) => listUploads(channelId),
+      subscribers: channelSubscribers,
+      now: () => new Date(),
+    },
+    { city: at >= 0 ? args[at + 1] : undefined, dryRun },
+  );
+  for (const c of candidates) {
+    console.log(`${c.citySlug}\t${c.score}\t${c.name}\t${c.evidence.mentions.join(", ")}`);
+  }
+  console.log(
+    JSON.stringify({
+      discoverCreators: candidates.length,
+      searches,
+      maxSearches: MAX_SEARCHES_PER_RUN,
+      dryRun,
+    }),
+  );
+}
+
 const commands: Record<string, () => Promise<void>> = {
   ingest,
   eval: evaluate,
@@ -176,6 +211,7 @@ const commands: Record<string, () => Promise<void>> = {
   "dedupe-places": dedupe,
   "osm-areas": osmAreas,
   "osm-hours": osmHours,
+  "discover-creators": discover,
 };
 
 const command = process.argv[2] ?? "ingest";

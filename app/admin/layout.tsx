@@ -51,6 +51,9 @@ async function AdminGate({ children }: { children: React.ReactNode }) {
           <Link href="/admin/places" className="min-h-11 content-center underline">
             Places
           </Link>
+          <Link href="/admin/creators" className="min-h-11 content-center underline">
+            Creators
+          </Link>
         </nav>
         <form
           action={async () => {

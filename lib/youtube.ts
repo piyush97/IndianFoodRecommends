@@ -177,3 +177,47 @@ export async function listUploadsWithFallback(
     return (await listArchive(channelId, 15)).filter((u) => u.publishedAt.getTime() >= since);
   }
 }
+
+/** Channels behind yt-dlp's `ytsearch` results: one page fetch, no API quota. */
+export async function searchChannels(
+  query: string,
+  limit: number,
+): Promise<{ channelId: string; channel: string }[]> {
+  const out = await ytDlp(
+    ["--flat-playlist", "--print", "%(.{channel_id,channel})j", `ytsearch${limit}:${query}`],
+    120_000,
+  );
+  return out
+    .split("\n")
+    .filter(Boolean)
+    .map((line) => JSON.parse(line) as { channel_id?: string; channel?: string })
+    .filter((v) => v.channel_id && v.channel)
+    .map((v) => ({ channelId: v.channel_id!, channel: v.channel! }));
+}
+
+/** Public subscriber count from the channel's videos tab, if YouTube shows one. */
+export async function channelSubscribers(channelId: string): Promise<number | undefined> {
+  const out = await ytDlp(
+    [
+      "--flat-playlist",
+      "--playlist-end",
+      "1",
+      "-J",
+      `https://www.youtube.com/channel/${encodeURIComponent(channelId)}/videos`,
+    ],
+    120_000,
+  );
+  const n = (JSON.parse(out) as { channel_follower_count?: number }).channel_follower_count;
+  return typeof n === "number" ? n : undefined;
+}
+
+async function ytDlp(args: string[], timeout: number): Promise<string> {
+  const { execFile } = await import("node:child_process");
+  const { promisify } = await import("node:util");
+  const { stdout } = await promisify(execFile)(
+    process.env.YTDLP_BIN ?? "yt-dlp",
+    ["--no-warnings", "--skip-download", ...args],
+    { maxBuffer: 16 * 1024 * 1024, timeout },
+  );
+  return stdout;
+}
