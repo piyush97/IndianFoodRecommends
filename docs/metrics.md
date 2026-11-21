@@ -77,10 +77,15 @@ All names are kebab-case. Fired from `lib/track.ts` (`track(event, data)`, a no-
 | `list-share`    | Eat list shared                                                                   | `size`                      |
 | `list-open`     | `/list?p=...` opened                                                              | `size`, `own`: `yes`, `no`  |
 | `list-save-all` | "Save all to my list" clicked on a friend's list                                  | none                        |
+| `kit-copy`      | Copy button clicked on the creator share kit (`/creator/<slug>/kit`)              | `kind`, `creator`           |
 
 `near-me` `result` values by emitter:
 
 - `HomeNearMe` (home page): `granted`, `denied`, `area`, `none-nearby`, `unavailable` (position error or timeout). `none-nearby` replaces `granted` or `area` when nothing is within range.
 - `NearMeList` (city and dish pages): `granted`, `denied`, `area` only.
+
+`kit-copy` `kind` values: `link` (bio link), `text` (description text), `html` and `markdown` (badge snippets). `creator` is the creator slug.
+
+Kit links carry `utm_source=creator&utm_campaign=<slug>`, plus `utm_medium=badge` from the badge snippets and `utm_medium=post` from the description text. The bio link has no medium. Filters > UTM Source is `creator` shows those visits.
 
 No cookies, no accounts, and no coordinates are sent with any event.

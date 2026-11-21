@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { CopyField } from "../../../../../components/CopyField";
 import { Skeleton } from "../../../../../components/Skeleton";
-import { escapeXml } from "../../../../../lib/badge";
+import { badgeTheme, escapeXml, kitShareText } from "../../../../../lib/badge";
 import { absoluteUrl } from "../../../../../lib/seo/site";
 import { cachedCreator } from "../../../data";
 
@@ -13,22 +13,30 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function KitPage({ params }: PageProps<"/creator/[slug]/kit">) {
+export default function KitPage({ params, searchParams }: PageProps<"/creator/[slug]/kit">) {
   return (
     <Suspense fallback={<Skeleton />}>
-      <Kit params={params} />
+      <Kit params={params} searchParams={searchParams} />
     </Suspense>
   );
 }
 
-async function Kit({ params }: Pick<PageProps<"/creator/[slug]/kit">, "params">) {
+async function Kit({ params, searchParams }: PageProps<"/creator/[slug]/kit">) {
   const { slug } = await params;
+  const theme = badgeTheme(String((await searchParams).theme ?? ""));
   const data = await cachedCreator(slug);
   if (!data) notFound();
   const page = absoluteUrl(`/creator/${slug}`);
-  const tracked = `${page}?utm_source=creator&utm_campaign=${slug}`;
-  const badge = absoluteUrl(`/creator/${slug}/badge`);
-  const snippet = `<a href="${page}"><img src="${badge}" alt="${escapeXml(data.creator.name)} on Indian Food Recommends" height="28"></a>`;
+  const utm = (medium?: string) =>
+    `${page}?utm_source=creator${medium ? `&utm_medium=${medium}` : ""}&utm_campaign=${slug}`;
+  const tracked = utm();
+  const badgePath = `/creator/${slug}/badge${theme === "light" ? "?theme=light" : ""}`;
+  const badge = absoluteUrl(badgePath);
+  const alt = `${data.creator.name}: ${data.total} ${data.total === 1 ? "pick" : "picks"} on Indian Food Recommends`;
+  const html = `<a href="${utm("badge")}"><img src="${badge}" alt="${escapeXml(alt)}" height="28"></a>`;
+  const markdown = `[![${alt.replace(/[[\]]/g, "")}](${badge})](${utm("badge")})`;
+  const shareText = kitShareText({ total: data.total, picks: data.picks, url: utm("post") });
+  const event = (kind: string) => ({ kind, creator: slug });
 
   return (
     <section className="flex max-w-prose flex-col gap-6">
@@ -51,8 +59,27 @@ async function Kit({ params }: Pick<PageProps<"/creator/[slug]/kit">, "params">)
         <p className="text-sm text-muted">
           Visits through this link show up as coming from creators, so you can see what it brings.
         </p>
-        <CopyField label="Tracked link" value={tracked} />
+        <CopyField label="Tracked link" value={tracked} event={event("link")} />
       </div>
+
+      {data.picks.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <h2 className="type-lid border-b-2 border-ink pb-2 text-[1.75rem]">
+            Text for a video description
+          </h2>
+          <p className="text-sm text-muted">
+            Paste it under a video or in a community post. The places are the three with the most of
+            your dishes listed.
+          </p>
+          <CopyField
+            label="Share text"
+            value={shareText}
+            rows={8}
+            button="Copy text"
+            event={event("text")}
+          />
+        </div>
+      )}
 
       {data.picks.length > 0 && (
         <div className="flex flex-col gap-2">
@@ -72,21 +99,36 @@ async function Kit({ params }: Pick<PageProps<"/creator/[slug]/kit">, "params">)
         <h2 className="type-lid border-b-2 border-ink pb-2 text-[1.75rem]">
           Badge for your website
         </h2>
+        <nav aria-label="Badge colour" className="flex flex-wrap gap-2">
+          {(["dark", "light"] as const).map((t) => (
+            <Link
+              key={t}
+              href={`/creator/${slug}/kit${t === "light" ? "?theme=light" : ""}`}
+              replace
+              scroll={false}
+              aria-current={t === theme ? "true" : undefined}
+              className={`btn ${t === theme ? "btn-ink" : "btn-line"}`}
+            >
+              {t === "light" ? "Light badge" : "Dark badge"}
+            </Link>
+          ))}
+        </nav>
         {/* eslint-disable-next-line @next/next/no-img-element -- the badge is the SVG creators embed */}
-        <img
-          src={`/creator/${slug}/badge`}
-          alt={`${data.creator.name} on Indian Food Recommends`}
-          height={28}
+        <img src={badgePath} alt={alt} className="max-w-full self-start" />
+        <CopyField
+          label="HTML to paste"
+          value={html}
+          rows={4}
+          button="Copy HTML"
+          event={event("html")}
         />
-        <label className="flex flex-col gap-1 text-sm font-medium">
-          HTML to paste
-          <textarea
-            readOnly
-            rows={4}
-            value={snippet}
-            className="field py-2 font-mono text-sm font-normal"
-          />
-        </label>
+        <CopyField
+          label="Markdown to paste"
+          value={markdown}
+          rows={3}
+          button="Copy Markdown"
+          event={event("markdown")}
+        />
       </div>
 
       <p className="text-sm text-muted">
