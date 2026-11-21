@@ -1,0 +1,9 @@
+[Unit]
+Description=Run IndianFoodRecommends creator discovery weekly, Sunday 05:00 IST
+
+[Timer]
+OnCalendar=Sun *-*-* 05:00:00 Asia/Kolkata
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -28,6 +28,21 @@ journalctl -u ifr-ingest -n 100 --no-pager
   Audit rejects: `select extracted->>'place_name', extracted->'autoReview'->>'reason' from recommendations where status='rejected';`
 - Manual run: `pnpm worker ingest`.
 
+## Creator discovery (optional, not installed)
+
+`pnpm worker discover-creators [--city <slug>] [--dry-run]` searches YouTube per city with yt-dlp
+(no API key or quota; at most `MAX_SEARCHES_PER_RUN` = 40 searches a run, logged as `searches`),
+skips channels already in `creators` (opted-out included) or already approved/rejected, scores the
+rest by known approved places named in their last 15 uploads, recency and subscribers, and upserts
+`creator_candidates`. Review them at `/admin/creators`; Approve adds a `creators` row that the next
+ingest reads. To run it weekly:
+
+```bash
+sudo systemctl link /root/Projects/IndianFoodRecommends/ops/ifr-discover.service
+sudo systemctl link /root/Projects/IndianFoodRecommends/ops/ifr-discover.timer
+sudo systemctl enable --now ifr-discover.timer
+```
+
 ## Geo data (Sprint 7)
 
 Apply migrations before deploying the new pages. Worker commands read exported environment variables;

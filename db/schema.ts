@@ -363,3 +363,24 @@ export const submissions = pgTable(
     index("submissions_status_idx").on(t.status),
   ],
 );
+
+/**
+ * YouTube channels found by `pnpm worker discover-creators`, waiting for an
+ * admin. Approving one inserts a `creators` row; ingest then reads its feed.
+ */
+export const creatorCandidates = pgTable(
+  "creator_candidates",
+  {
+    id: serial("id").primaryKey(),
+    ytChannelId: text("yt_channel_id").notNull().unique(),
+    name: text("name").notNull(),
+    citySlug: text("city_slug").notNull(),
+    score: real("score").notNull(),
+    // { queries, mentions: place names, newestUpload, subscribers }
+    evidence: jsonb("evidence").notNull(),
+    status: recStatus("status").notNull().default("pending"),
+    createdAt,
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+  },
+  (t) => [index("creator_candidates_status_idx").on(t.status)],
+);

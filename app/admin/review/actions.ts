@@ -15,6 +15,7 @@ import {
   type ApproveInput,
 } from "../../../lib/review";
 import { resolvePlace } from "../../../lib/reports-admin";
+import { approveCandidate, rejectCandidate } from "../../../lib/worker/discover-creators";
 import { parseApproveForm, parseManualForm } from "../../../lib/review-form";
 import { addMissAsAlias } from "../../../lib/search-misses";
 
@@ -150,4 +151,16 @@ export async function manualAddFormAction(form: FormData): Promise<void> {
   revalidatePath("/admin/review");
   revalidateTag("public", "max");
   redirect("/admin/review?added=1");
+}
+
+export async function approveCandidateFormAction(form: FormData): Promise<void> {
+  await requireAdmin();
+  await approveCandidate(db, Id.parse(form.get("id")));
+  revalidatePath("/admin/creators");
+}
+
+export async function rejectCandidateFormAction(form: FormData): Promise<void> {
+  await requireAdmin();
+  await rejectCandidate(db, Id.parse(form.get("id")));
+  revalidatePath("/admin/creators");
 }
