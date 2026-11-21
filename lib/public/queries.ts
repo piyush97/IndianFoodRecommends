@@ -267,7 +267,52 @@ export async function getHome(db: Db, citySlug: string, now = new Date(), diet?:
   const picks = await cityPicks(db, citySlug, now, diet);
   if (!picks) return null;
   const { ranked, ...home } = picks;
-  return { ...home, top: ranked.slice(0, 6) };
+  return { ...home, top: ranked.slice(0, 6), agreeCount: ranked.filter(isAgreed).length };
+}
+
+/** Headline for `/[city]/agree`; `n` is the live count of agreed places. */
+export function agreeTitle(n: number, city: string): string {
+  return `${n} ${city} ${n === 1 ? "place" : "places"} that more than one food creator recommends`;
+}
+
+/** A place two or more distinct creators picked. */
+export const isAgreed = (card: PickCard) => card.creators.length >= 2;
+
+export type AgreeCreator = PickCard["creators"][number] & {
+  picks: { dish: string; platform: Platform; externalId: string; tsSeconds: number | null }[];
+};
+
+/** Places in a city that 2+ distinct creators picked: most creators first, then `compareCards`. */
+export async function getAgree(db: Db, citySlug: string, now = new Date()) {
+  const city = await findCity(db, citySlug);
+  if (!city) return null;
+  const all = await visibleRows(db, {}, eq(schema.places.cityId, city.id));
+  const creatorsAt = new Map<string, Set<string>>();
+  for (const r of all)
+    creatorsAt.set(r.placeSlug, (creatorsAt.get(r.placeSlug) ?? new Set()).add(r.creatorSlug));
+  const rows = all.filter((r) => creatorsAt.get(r.placeSlug)!.size >= 2);
+  const cards = (await cardsWithFlags(db, rows, now)).sort(
+    (a, b) => b.creators.length - a.creators.length || compareCards(a, b),
+  );
+  const places = cards.map((card) => ({
+    ...card,
+    creators: card.creators.map((c): AgreeCreator => {
+      const mine = rows.filter((r) => r.placeSlug === card.placeSlug && r.creatorSlug === c.slug);
+      const picks = new Map(
+        mine.map((r) => [
+          `${r.externalId}|${r.dishName}`,
+          {
+            dish: r.dishName,
+            platform: r.platform,
+            externalId: r.externalId,
+            tsSeconds: r.tsSeconds,
+          },
+        ]),
+      );
+      return { ...c, picks: [...picks.values()] };
+    }),
+  }));
+  return { city: { slug: city.slug, name: city.name }, places };
 }
 
 export async function getCity(db: Db, citySlug: string, now = new Date(), diet?: DietFilter) {

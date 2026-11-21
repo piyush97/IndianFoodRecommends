@@ -4,6 +4,7 @@ import type { DietFilter } from "../../lib/diet";
 import { inRequestOrder, listCacheKey } from "../../lib/list-params";
 import { getArea, getSpatialPicks, listAreas, getWalks } from "../../lib/public/spatial";
 import {
+  getAgree,
   getAllCards,
   getCity,
   getCreator,
@@ -37,6 +38,13 @@ export async function cachedCity(city: string, diet?: DietFilter) {
   cacheLife("hours");
   cacheTag("public", `city:${city}`);
   return getCity(db, city, undefined, diet);
+}
+
+export async function cachedAgree(city: string) {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("public", `city:${city}`);
+  return getAgree(db, city);
 }
 
 export async function cachedDish(city: string, dish: string) {

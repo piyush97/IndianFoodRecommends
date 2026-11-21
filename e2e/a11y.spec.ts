@@ -6,6 +6,7 @@ const PAGES = [
   "/delhi",
   "/delhi/chole-bhature",
   "/delhi/place/chache-di-hatti",
+  "/delhi/agree",
   "/creator/e2e-creator",
   "/search?q=chole",
   "/search?q=zzzz",

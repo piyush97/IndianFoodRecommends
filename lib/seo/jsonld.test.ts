@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dishItemList, restaurantLd, serializeJsonLd } from "./jsonld";
+import { dishItemList, placeItemList, restaurantLd, serializeJsonLd } from "./jsonld";
 import { SITE_URL, absoluteUrl } from "./site";
 
 describe("absoluteUrl", () => {
@@ -34,6 +34,19 @@ describe("dishItemList", () => {
       { "@type": "ListItem", position: 1, url: `${SITE_URL}/delhi/place/a`, name: "A" },
       { "@type": "ListItem", position: 2, url: `${SITE_URL}/delhi/place/b`, name: "B" },
     ]);
+  });
+});
+
+describe("placeItemList", () => {
+  it("uses the given name and page url", () => {
+    const ld = placeItemList({
+      name: "2 Delhi places that more than one food creator recommends",
+      path: "/delhi/agree",
+      places: [{ name: "A", path: "/delhi/place/a" }],
+    }) as { name: string; url: string; itemListElement: { position: number }[] };
+    expect(ld.name).toBe("2 Delhi places that more than one food creator recommends");
+    expect(ld.url).toBe(`${SITE_URL}/delhi/agree`);
+    expect(ld.itemListElement[0].position).toBe(1);
   });
 });
 

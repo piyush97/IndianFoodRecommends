@@ -69,7 +69,7 @@ export function isKnownPath(segments: string[], index: PathIndex): boolean {
   if (a === "creator") return segments.length <= 3 && b !== undefined && index.creators.has(b);
   if (!cityBySlug(a)) return false;
   if (segments.length === 1) return true;
-  if (segments.length === 2) return b === "walks" || index.dishes.has(`${a}/${b}`);
+  if (segments.length === 2) return b === "walks" || b === "agree" || index.dishes.has(`${a}/${b}`);
   if (segments.length === 3 && b === "place") return index.places.has(`${a}/${c}`);
   if (segments.length === 3 && b === "area") return index.areas.has(`${a}/${c}`);
   if (segments.length === 3 && b === "walk") return index.walks?.has(`${a}/${c}`) ?? false;

@@ -106,6 +106,20 @@ test("walk pages use five exact stops and a mobile-compatible Google Maps link",
   await page.screenshot({ path: "/tmp/ifr-sprint7-walk.png", fullPage: true });
 });
 
+test("agree page shows the live count and an empty state when no place has two creators", async ({
+  page,
+}) => {
+  await page.goto("/delhi");
+  await page.getByRole("link", { name: "Places more than one creator picked in Delhi" }).click();
+  await expect(page).toHaveURL(/\/delhi\/agree$/);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "0 Delhi places that more than one food creator recommends",
+  );
+  await expect(page.getByRole("status")).toContainText(
+    "No place in Delhi has picks from two or more creators yet.",
+  );
+});
+
 test("neighbourhood page remains accessible at mobile size and 200 percent zoom", async ({
   page,
 }) => {
