@@ -1,5 +1,5 @@
 {
-  "id": "3b73bc7c-5294-4429-99e8-5558b4932a3c",
+  "id": "a6565973-6a72-4005-b7f4-8085745052ee",
   "prevId": "4516c20a-fe0b-4931-9f11-84bf2ed1efcf",
   "version": "7",
   "dialect": "postgresql",
@@ -375,23 +375,7 @@
           "notNull": false
         }
       },
-      "indexes": {
-        "creator_candidates_status_idx": {
-          "name": "creator_candidates_status_idx",
-          "columns": [
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
+      "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {

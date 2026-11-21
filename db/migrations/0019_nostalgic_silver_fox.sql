@@ -10,5 +10,3 @@ CREATE TABLE "creator_candidates" (
 	"reviewed_at" timestamp with time zone,
 	CONSTRAINT "creator_candidates_yt_channel_id_unique" UNIQUE("yt_channel_id")
 );
---> statement-breakpoint
-CREATE INDEX "creator_candidates_status_idx" ON "creator_candidates" USING btree ("status");
